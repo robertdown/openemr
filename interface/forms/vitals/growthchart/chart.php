@@ -11,18 +11,18 @@
 // The png image and pdf require following files in current directory:
 //  2-20yo_boys_BMI.png
 //  2-20yo_girls_BMI.png
-//  birth-36mos_boys_HC.png
-//  birth-36mos_girls_HC.png
+//  birth-24mos_boys_HC.png
+//  birth-24mos_girls_HC.png
 //
 // The html (css for printing) require the following files in current directory
 //  2-20yo_boys_BMI-1.png
 //  2-20yo_boys_BMI-2.png
 //  2-20yo_girls_BMI-1.png
 //  2-20yo_girls_BMI-2.png
-//  birth-36mos_boys_HC-1.png
-//  birth-36mos_boys_HC-2.png
-//  birth-36mos_girls_HC-1.png
-//  birth-36mos_girls_HC-2.png
+//  birth-24mos_boys_HC-1.png
+//  birth-24mos_boys_HC-2.png
+//  birth-24mos_girls_HC-1.png
+//  birth-24mos_girls_HC-2.png
 //  bluedot.gif
 //  redbox.gif
 //  reddot.gif
@@ -61,8 +61,8 @@ if (isset($datapoints) && $datapoints != "") {
     list($date, $height, $weight, $head_circ) = explode('-', $datapoints[0]);
     if ($date != "") { $charttype_date = $date; }
     $tmpAge = getPatientAgeInDays($patient_data['DOB'], $date);
-    // use the birth-36 chart if the age-on-date-of-vitals is 25months or younger 
-    if ($tmpAge < (365*2)+31 ) { $charttype = "birth"; }
+    // use the birth-24 chart if the age-on-date-of-vitals is 24months or younger 
+    if ($tmpAge < (365*2)) { $charttype = "birth"; }
 }
 
 //sort the datapoints
@@ -181,7 +181,7 @@ function unitsDist($dist) {
 
 
 $name_x = 650;
-$name_y = 60;
+$name_y = 50;
 $name_x1 = 1650;
 $name_y1 = 60;
 
@@ -190,55 +190,62 @@ $heightOffset = 0;
 $weightOffset = 0;
 
 if ($charttype == 'birth') {
-    // Use birth to 36 months chart 
+    // Use birth to 24 months chart 
 
-    $dot_x = 180;         //months starts here (pixel)
-    $delta_x = 17.36;     //pixels per month  - length
-    $dot_y1 = 825;        //height starts here - at 15 inches
-    $delta_y1 = 24.89;    //pixels per inch  - height
-    $dot_y2 = 1155;       //weight starts here - at 4 lbs
-    $delta_y2 = 22.09;    //pixels per pound - weight
+    $dot_x = 190;         //months starts here (pixel)
+    $delta_x = 26.13;     //pixels per month  - length
+    $dot_y1 = 768;        //height starts here - at 15 inches
+    $delta_y1 = 24.92;    //pixels per inch  - height
+    $dot_y2 = 1170;       //weight starts here - at 3 lbs
+    $delta_y2 = 22.16;    //pixels per pound - weight
 	
     $HC_dot_x = 1180;     //months starts here for Head circumference chart
-    $HC_delta_x = 17.39;  //pixels per month for Head circumference chart
+    $HC_delta_x = 26.04;  //pixels per month for Head circumference chart
     $HC_dot_y =  764;     //Head circumference starts here - at 11 inches
     $HC_delta_y = 60.00;  //calculated pixels per inch for head circumference
-
+	
+	$WT_y = 1127; //start here to draw wt and height graph at bottom of Head circumference chart
+	$WT_delta_y = 12.96;
+	$HT_x = 1187; //start here to draw wt and height graph at bottom of Head circumference chart 
+	$HT_delta_x = 24.32;
+	
     if (preg_match('/^male/i', $patient_data['sex'])) { 
-        $chart = "birth-36mos_boys_HC.png";
+        $chart = "birth-24mos_boys_HC.png";
 
         // added by BM for CSS html output
-        $chartCss1 = "birth-36mos_boys_HC-1.png";
-        $chartCss2 = "birth-36mos_boys_HC-2.png"; 
+        $chartCss1 = "birth-24mos_boys_HC-1.png";
+        $chartCss2 = "birth-24mos_boys_HC-2.png"; 
     }
     elseif (preg_match('/^female/i', $patient_data['sex'])) { 
-        $chart = "birth-36mos_girls_HC.png";
+        $chart = "birth-24mos_girls_HC.png";
 
         // added by BM for CSS html output
-        $chartCss1 = "birth-36mos_girls_HC-1.png";
-        $chartCss2 = "birth-36mos_girls_HC-2.png"; 
+        $chartCss1 = "birth-24mos_girls_HC-1.png";
+        $chartCss2 = "birth-24mos_girls_HC-2.png"; 
     }
 
     $ageOffset = 0;
     $heightOffset = 15; // Substract 15 because the graph starts at 15 inches
-    $weightOffset = 4;  // graph starts at 4 lbs
+    $weightOffset = 3;  // graph starts at 3 lbs
+	$WToffset = 0; //for wt and ht table at bottom half of HC graph
+	$HToffset = 18; // starting inch for wt and ht table at bottom half of HC graph
     
     // pixel positions and offsets for data table
-    $datatable_x = 357;
+    $datatable_x = 370;
     $datatable_age_offset = 75;
     $datatable_weight_offset = 145;
     $datatable_height_offset = 220;
     $datatable_hc_offset = 300;
-    $datatable_y = 1021;
+    $datatable_y = 1052;
     $datatable_y_increment = 17;
     
     // pixel positions and offsets for head-circ data table
-    $datatable2_x = 1375;
+    $datatable2_x = 1360;
     $datatable2_age_offset = 75;
     $datatable2_weight_offset = 145;
     $datatable2_height_offset = 210;
     $datatable2_hc_offset = 290;
-    $datatable2_y = 1092;
+    $datatable2_y = 1098;
     $datatable2_y_increment = 18;
 }	
 elseif ($charttype == "2-20") {
@@ -489,7 +496,7 @@ if ($_GET['html'] == 1) {
         // for example, a data point for a 18 month old can be excluded
         // from that patient's 2-20 yr chart
         $daysold = getPatientAgeInDays($dob, $date);
-        if ($daysold > (365*3) && $charttype == "birth") { continue; }
+        if ($daysold > (365*2) && $charttype == "birth") { continue; }
         if ($daysold < (365*2) && $charttype == "2-20") { continue; }
 
         // calculate the x-axis (Age) value
@@ -511,7 +518,12 @@ if ($_GET['html'] == 1) {
             $HC_y = $HC_dot_y - $HC_delta_y * ($head_circ - 11);
             $point = convertpoint(Array($HC_x,$HC_y));
 	    echo("<div id='" . $point[2]  . "' class='graphic' style='position: absolute; top: " . $point[1]  . "pt; left: " . $point[0] . "pt;'><img src='bluedot.gif' /></div>\n");
-        }
+            // Draw Wt and Ht graph at the bottom half
+			$WT = $WT_y - $WT_delta_y * ($weight - $WToffset);
+			$HT = $HT_x + $HT_delta_x * ($height - $HToffset);
+			$point = convertpoint(Array($HT,$WT));
+		echo("<div id='" . $point[2]  . "' class='graphic' style='position: absolute; top: " . $point[1]  . "pt; left: " . $point[0] . "pt;'><img src='reddot.gif' /></div>\n");
+		}
         else if ($charttype == "2-20") {
             // Draw BMI
             $bmi = $weight/$height/$height*703;
@@ -525,8 +537,8 @@ if ($_GET['html'] == 1) {
 
         $datestr = substr($date,0,4)."/".substr($date,4,2)."/".substr($date,6,2);
 
-        //birth to 36 mos chart has 9 rows to fill.
-        if ($count < 9 && $charttype == "birth") {
+        //birth to 24 mos chart has 8 rows to fill.
+        if ($count < 8 && $charttype == "birth") {
 	    $point = convertpoint(Array($datatable_x,$datatable_y));
 	    echo("<div id='" . $point[2]  . "' class='label' style='position: absolute; top: " . $point[1]  . "pt; left: " . $point[0] . "pt;'>" . $datestr . "</div>\n");
             $point = convertpoint(Array($datatable_x+$datatable_age_offset,$datatable_y));
@@ -625,7 +637,7 @@ foreach ($datapoints as $data) {
     // for example, a data point for a 18 month old can be excluded 
     // from that patient's 2-20 yr chart
     $daysold = getPatientAgeInDays($dob, $date);
-    if ($daysold > (365*3) && $charttype == "birth") { continue; }
+    if ($daysold > (365*2) && $charttype == "birth") { continue; }
     if ($daysold < (365*2) && $charttype == "2-20") { continue; }
 
     // calculate the x-axis (Age) value
@@ -645,6 +657,10 @@ foreach ($datapoints as $data) {
         $HC_x = $HC_dot_x + $HC_delta_x * $age; 
         $HC_y = $HC_dot_y - $HC_delta_y * ($head_circ - 11);
         imagefilledellipse($im, $HC_x, $HC_y, 10, 10, $color1);
+		// Draw Wt and Ht graph at the bottom half
+		$WT = $WT_y - $WT_delta_y * ($weight - $WToffset);
+		$HT = $HT_x + $HT_delta_x * ($height - $HToffset);
+		imagefilledellipse($im, $HT, $WT, 10, 10, $color);
     }
     else if ($charttype == "2-20") {
         // Draw BMI
@@ -658,8 +674,8 @@ foreach ($datapoints as $data) {
     
     $datestr = substr($date,0,4)."/".substr($date,4,2)."/".substr($date,6,2);
     
-    //birth to 36 mos chart has 9 rows to fill.
-    if ($count < 9 && $charttype == "birth") {
+    //birth to 24 mos chart has 8 rows to fill.
+    if ($count < 8 && $charttype == "birth") {
         imagestring($im, 2, $datatable_x, $datatable_y, $datestr, $color);
         imagestring($im, 2, ($datatable_x+$datatable_age_offset), $datatable_y, $ageinYMD, $color);
         imagestring($im, 2, ($datatable_x+$datatable_weight_offset), $datatable_y, unitsWt($weight), $color);

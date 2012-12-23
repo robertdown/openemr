@@ -431,7 +431,7 @@ function csv_clear_tmpdir() {
  * The 'datecolumn' and 'fncolumn' entries are used in csv_to_html() to filter by date 
  * or place links to files.
  * 
- * @param string $type -- default = ALL or one of batch, ibr, ebr, dpr, f997, f277, era, ack, text
+ * @param string $type -- default = ALL or one of batch, ibr, ebr, dpr, f997, f277, era, ack, ta1, text
  * @return array
  */
 function csv_parameters($type="ALL") {
@@ -535,7 +535,6 @@ function csv_dirfile_list ($type) {
 		return FALSE;
 	}
 	$params = csv_parameters($type);
-	//$search_dir = dirname(__FILE__).$params['directory'].DIRECTORY_SEPARATOR;
     $search_dir = $params['directory'].DIRECTORY_SEPARATOR;
     $typedir = basename($params['directory']);
 	$ext_re = $params['regex'];
@@ -558,6 +557,7 @@ function csv_dirfile_list ($type) {
                             if (ext == '999' || ext == '997' || $ext == 'ack') { continue; }
                         } 
                     } else {
+                        //if ($file == '.' || $file == '..') { continue; }  // . and .. are not files
 						csv_edihist_log("csv_dirfile_list: $type wrong type $file");
 					}
 				}
@@ -610,7 +610,8 @@ function csv_processed_files_list ($type) {
 		csv_edihist_log ("csv_list_processed_files: failed to access $csv_file" ); 
 		return false;
 	}	
-	//    
+	// consider array_shift($processed_files) to drop the header row (too slow)
+    // consider array_unique($processed_files) becasue files may be listed several times
 	return $processed_files;
 } // end function
 
@@ -744,7 +745,7 @@ function csv_write_record($csv_data, $file_type, $csv_type) {
 	if (!is_array($csv_data)) { return FALSE;}
 	// use CSV_RECORD class to write ibr or ebr claims data to the csv file 
 	//  csv, batch, ibr, ebr, f997, or era
-	if (! strpos("|era|f997|ibr|ebr|dpr|f277|batch|ack", $file_type) ) {	
+	if (! strpos("|era|f997|ibr|ebr|dpr|f277|batch|ta1|ack", $file_type) ) {	
 		csv_edihist_log("csv_write_record error: incorrect file type $file_type");
 		return FALSE;
 	}
@@ -1384,11 +1385,7 @@ function csv_to_html($file_type, $csv_type, $row_pct = 1, $datestart='', $dateen
 	//	
 	$csv_html = "";
 	$is_date = FALSE;
-	// debug
-	//echo "csv_to_html: $file_type $csv_type $row_pct $datestart $dateend <br />" .PHP_EOL;
-	//<td><a class='btclm' target='_blank' href='edi_history_main.php?fvbatch={$val['batch']}&btpid={$val['pid']}'>{$val['pid']}</td>
-	// <td><a class='clmstatus' target='_blank' href='edi_history_main.php?rspfile={$val['file_277']}&pidenc={$val['pid']}&rspstnum={$val['st_277']}'>{$val['status']}</td>
-				  
+	//				  
 	if (! strpos("|era|f997|ibr|ebr|dpr|f277|batch|ack|ta1", $file_type) ) {	
 		csv_edihist_log("csv_to_html error: incorrect file type $file_type");
 		$csv_html .= "csv_to_html error: incorrect file type $file_type <br />".PHP_EOL;
@@ -1404,10 +1401,8 @@ function csv_to_html($file_type, $csv_type, $row_pct = 1, $datestart='', $dateen
 	if ($file_type == "dpr") { $fncol = $params['fncolumn']; }
 	//
 	if ($csv_type == "claim") { 
-		//$fp = dirname(__FILE__).$params['claims_csv'];
         $fp = $params['claims_csv'];
 	} elseif ($csv_type == "file") {
-		//$fp = dirname(__FILE__).$params['files_csv'];
         $fp = $params['files_csv'];
 	} else {
 		csv_edihist_log("csv_to_html error: incorrect csv type $csv_type");
@@ -1422,20 +1417,6 @@ function csv_to_html($file_type, $csv_type, $row_pct = 1, $datestart='', $dateen
         $is_date = TRUE;
 		$row_pct = 1;
     }
-    /* comment datepicker format dates
-	if (preg_match('/\d{2}\/\d{2}\/\d{4}/', $datestart) && preg_match('/\d{2}\/\d{2}\/\d{4}/', $dateend) ) {
-		// we want a date range  -- need a better regex
-		// assume submit format /mm/dd/yyyy -- set in edih_view.php datepicker javascript
-		$d1 = explode( "/", $datestart);
-		$ds = $d1[2] . $d1[0] . $d1[1];
-		$d1 = explode( "/", $dateend);
-		$de = $d1[2] . $d1[0] . $d1[1];
-		$is_date = TRUE;
-		$row_pct = 1;
-		//
-	}
-     * end comment datepicker format dates 
-     */
 	//
 	$f_name	= basename($fp);
 	// open the file for read and read it into an array
@@ -1484,9 +1465,9 @@ function csv_to_html($file_type, $csv_type, $row_pct = 1, $datestart='', $dateen
 	if ($rwst < 1) { $rwst = 1; $rwct = $ln_ct; }
 	// 
 	if ($is_date) {
-		$csv_html .= "<h4>Table: $f_name &nbsp;&nbsp; Start Date: $datestart &nbsp; End Date: $dateend &nbsp;Rows: $rwct</h4>".PHP_EOL;
+		$csv_html .= "<div id='dttl'>Table: $f_name &nbsp;&nbsp; Start Date: $datestart &nbsp; End Date: $dateend &nbsp;Rows: $rwct</div>".PHP_EOL;
 	} else {
-		$csv_html .= "<h4>Table: $f_name &nbsp;&nbsp; Rows: $ln_ct &nbsp;&nbsp; Shown: $rwct</h4>".PHP_EOL;
+		$csv_html .= "<div id='dttl'>Table: $f_name &nbsp;&nbsp; Rows: $ln_ct &nbsp;&nbsp; Shown: $rwct</div>".PHP_EOL;
 	}
 	//
 	 $csv_html .= "<table id=\"csvTable\" class=\"csvDisplay\">".PHP_EOL;
@@ -1508,7 +1489,7 @@ function csv_to_html($file_type, $csv_type, $row_pct = 1, $datestart='', $dateen
 						 $csv_html .= "<td><a href='edi_history_main.php?fvkey=$dta' target='_blank'>$dta</a></td>".PHP_EOL;
 					 } elseif ($idx == 2) {
 						 $fnm = $csv_d[$i][1];
-						 $csv_html .= "<td><a href='edi_history_main.php?erafn=$fnm&trace=$dta' target='_blank'>$dta</a></td>".PHP_EOL;
+						 $csv_html .= "<td><a href='edi_history_main.php?erafn=$fnm&trace=$dta' target='_blank'>$dta</a> &nbsp;&nbsp;<a class=\"clmstatus\" target='_blank' href='edi_history_main.php?tracecheck=$dta&ckprocessed=yes'>(a)</td>".PHP_EOL;
 					 } else {
 						 $csv_html .= "<td>$dta</td>".PHP_EOL;
 					 }
@@ -1564,12 +1545,27 @@ function csv_to_html($file_type, $csv_type, $row_pct = 1, $datestart='', $dateen
 				 //
 				 $csv_html .= "</tr>".PHP_EOL;
 			 }
-		 } else {
-
+		 } elseif ($file_type == 'batch') {
+             //['batch']['file'] = array('Date', 'FileName', 'Ctn_837', 'claim_ct', 'x12_partner');
+             for ($i=$rwst; $i<$ln_ct; $i++) {
+				 $bgc = ($i % 2 == 1 ) ? 'odd' : 'even';
+                 $csv_html .= "<tr class='{$bgc}'>";
+				 foreach($csv_d[$i] as $idx=>$dta) {
+                     $fnm = $csv_d[$i][$fncol];
+                     if ($idx == $fncol) {
+						 $csv_html .= "<td><a href='edi_history_main.php?fvkey=$dta' target='_blank'>$dta</a></td>".PHP_EOL;
+                     } elseif ($idx == 2) {
+                         // batch control number
+                         $csv_html .= "<td>$dta &nbsp;&nbsp;<a class=\"clmstatus\" target=\"_blank\" href=\"edi_history_main.php?batchicn=$dta\">(r)</a></td>"; 
+                     } else {
+						 $csv_html .= "<td>$dta</td>".PHP_EOL;
+					 }
+				 }
+				 $csv_html .= "</tr>".PHP_EOL;
+             }
+         } else {
 			 // the generic case -- for 'file' type tables, the filename is in column 1, as set in the parameters array
 			 // see csv_parameters()
-			 // create header row here
-
 			 for ($i=$rwst; $i<$ln_ct; $i++) {
 				 $bgc = ($i % 2 == 1 ) ? 'odd' : 'even';
 				 $csv_html .= "<tr class='{$bgc}'>";
@@ -1587,7 +1583,6 @@ function csv_to_html($file_type, $csv_type, $row_pct = 1, $datestart='', $dateen
 		 // a 'claim' type table  $csv_type == 'claim'  there is more variation
 		 if ($file_type == 'era') {
 			 // era csv_type is claim  col 2 is pid, 3 encounter, 8 is trace
-			 //['era']['claim'] = array('PtName', 'SvcDate', 'clm01', 'Status', 'trace', 'File_835', 'claimID', 'Pmt', 'PtResp', 'Payer');
 			 //['era']['claim'] = array('PtName', 'SvcDate', 'clm01', 'Status', 'trace', 'File_835', 'claimID', 'Pmt', 'PtResp', 'Payer');
 			 $csv_html .= '<thead>'.PHP_EOL.'<tr>'.PHP_EOL;
 			 $csv_html .= '<th>Name</th><th>SvcDate</th><th>CLM01</th><th>Status</th><th>Trace</th><th>File</th><th>Payer</th>'.PHP_EOL;
@@ -1722,7 +1717,7 @@ function csv_to_html($file_type, $csv_type, $row_pct = 1, $datestart='', $dateen
 			 //
 			 //['f277']['claim'] =  array('PtName', 'SvcDate', 'clm01', 'Status', 'st_277', 'File_277', 'payer_name', 'claim_id', 'bht03_837');
 			 $csv_html .= '<thead>'.PHP_EOL.'<tr>'.PHP_EOL;
-			 $csv_html .= '<th>Name</th><th>SvcDate</th><th>CLM01</th><th>Status</th><th>File</th><th>ClaimID</th><th>Batch</th>'.PHP_EOL;
+			 $csv_html .= '<th>Name</th><th>SvcDate</th><th>CLM01</th><th>Status</th><th>File_277</th><th>ClaimID</th>'.PHP_EOL; //<th>Batch</th>
 			 $csv_html .= '</tr>'.PHP_EOL.'</thead>'.PHP_EOL.'<tbody>'.PHP_EOL;
 			 for ($i=$rwst; $i<$ln_ct; $i++) {
 				 $bgc = ($i % 2 == 1 ) ? 'odd' : 'even';
@@ -1731,7 +1726,7 @@ function csv_to_html($file_type, $csv_type, $row_pct = 1, $datestart='', $dateen
 				 $dt = substr($csv_d[$i][1], 0, 4).'-'.substr($csv_d[$i][1], 4, 2).'-'.substr($csv_d[$i][1], 6, 2);
 				 $btpid = $csv_d[$i][2];
 				 $f277file = $csv_d[$i][5];
-				 $clmid = $csv_d[$i][7]; 
+                 $clmid = $csv_d[$i][7];
 				 $bt_bht03 = $csv_d[$i][8];
 				 //$msg277 = (strlen($csv_d[$i][9])) ? $csv_d[$i][9] : '';
 				 //Name
@@ -1747,7 +1742,7 @@ function csv_to_html($file_type, $csv_type, $row_pct = 1, $datestart='', $dateen
 				 //ClaimID
 				 $csv_html .= "<td>$clmid</td>".PHP_EOL;
 				 //Batch
-				 $csv_html .= "<td title='$bt_bht03'><a target='_blank' href='edi_history_main.php?btctln=$bt_bht03'>Batch</a></td>".PHP_EOL;
+				 //$csv_html .= "<td title='$bt_bht03'><a target='_blank' href='edi_history_main.php?btctln=$bt_bht03'>Batch</a></td>".PHP_EOL;
 				 //
 				 $csv_html .= "</tr>".PHP_EOL;
 			 }

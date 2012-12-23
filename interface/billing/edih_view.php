@@ -45,7 +45,7 @@ if (!acl_check('acct', 'eob')) die(xlt("Access Not Authorized"));
     <link rel="stylesheet" href="<?php echo $web_root?>/library/dynarch_calendar.css" type="text/css" />
     
     <link rel="stylesheet" href="<?php echo $web_root?>/library/css/jquery-ui-1.8.21.custom.css" type="text/css" />
-    <link rel="stylesheet" href="<?php echo $web_root?>/library/css/jquery.dataTables.css" type="text/css" />
+    <!-- <link rel="stylesheet" href="<?php echo $web_root?>/library/css/jquery.dataTables.css" type="text/css" /> -->
     <link rel="stylesheet" href="<?php echo $web_root?>/library/css/edi_history.css" type="text/css" />
 
     <script type="text/javascript" src="<?php echo $web_root?>/library/dynarch_calendar.js"></script>
@@ -57,7 +57,7 @@ if (!acl_check('acct', 'eob')) die(xlt("Access Not Authorized"));
 <body>
 
 <!-- Begin tabs section -->
-<div id="tabs">
+<div id="tabs" style="visibility:hidden">
   <ul class="Clear">
    <li><a href="#newfiles" id="btn-newfiles"><?php echo xlt("New Files"); ?></a></li>
    <li><a href="#csvdatatables" id="btn-csvdatatables"><?php echo xlt("CSV Tables"); ?></a></li>
@@ -123,7 +123,7 @@ if (!acl_check('acct', 'eob')) die(xlt("Access Not Authorized"));
 							<?php echo xlt("Pct (%) of rows"); ?>
 						</td>
 						<td align='left'>
-							<?php echo xlt("Start Date"); ?>: &nbsp; <?php echo xlt("End Date"); ?>:
+							<?php echo xlt("Start Date"); ?>: &nbsp;&nbsp;&nbsp;&nbsp; <?php echo xlt("End Date"); ?>:
 						</td>
 						<td align='center'>
 							<?php echo xlt("Submit"); ?>
@@ -340,6 +340,7 @@ if (!acl_check('acct', 'eob')) die(xlt("Access Not Authorized"));
     $(document).ready(function() {
         // activate tab interface
         $("#tabs").tabs();
+        $("#tabs").tabs().css('visibility','visible');
         $("#tabs").tabs({
             select: function() {	
                 //Reset all these text fields to their default
@@ -348,25 +349,6 @@ if (!acl_check('acct', 'eob')) die(xlt("Access Not Authorized"));
                     });
                 }
         });
-        // datepicker options
-        // OpenEMR calendar dynarch_calendar*.js
-        //Calendar.setup({inputField:"dte1",ifFormat:"%Y-%m-%d", button:"img_master_fromdate_form_encounter_date"});
-        /*  comment out datepicker -- now using dynarch calendar
-        $(function() {
-            $( "#dte1" ).datepicker({ 
-                dateFormat: "mm/dd/yy",
-                onSelect: function(selected) {
-					$("#dte2").datepicker("option","minDate", selected)
-				}  
-            });
-            $( "#dte2" ).datepicker({
-                dateFormat: "mm/dd/yy", 
-                onSelect: function(selected) {
-					$("#dte1").datepicker("option","maxDate", selected);
-				}
-            });
-        });
-        */
 
         /*
          * functions for ajax and popups
@@ -404,110 +386,110 @@ if (!acl_check('acct', 'eob')) die(xlt("Access Not Authorized"));
                   }
                 }
             });
-        });       
-        // the process files script html output is requested and displayed, 
-        // replacing the tab panel contents 
-        // also, the 'success' event calls an array of functions
-        $('#processfiles').click(function() {
-            $.ajax({
-                type: "POST",
-                url: "edi_history_main.php", 
-                data:  $('#process_new').serialize(),
-                dataType: "html",
-                success: [ 
-                    function(data){ $("#pfresult").html(data); },
-                    bindlinks('#pfresult', 'click', '.clmstatus', 'click', '#clmstat', '<?php echo xla("Claim Status"); ?>'),
-                    bindlinks('#pfresult', 'click', '.btclm', 'click', '#batchclm', '<?php echo xla("Batch Claim"); ?>')
-                ]
-            });
-        });         
-   
-        // list files selected in the multifile upload input      
-        $('#upload_file').change(function(){
-            $('#srvvar').html('');
-            $('#pfresult').html('');
-            var fmax = $('#srvvals').data("mf");
-            var far = this.files;
-            var fct = far.length;
-            for(var i = 0; i < fct; i++) {
-                if (i == fmax) $('#pfresult').append("<p><?php echo xla("max file count reached - reload names below"); ?></p>");
-                $('#pfresult').append('file: ' + far[i].name +'<br />');
-            }            
-        });      
-        // submit files for sorting and storage -- accepted/rejected, already uploaded, etc
-        // shows a popup window (idea is to allow comparison with upload files display)
-        $('#upload_new').submit(function() {
-            if (! window.focus) return true;
-            window.open('', 'Uploads', 'height=400,width=600,left=300,top=100,menubar=yes,resizable=yes,scrollbars=yes');
-            this.target='Uploads';
-            return true;
-        });
-            
-        $('#csvClear').click(function() {
-			$("#tblshow").html('');
-		});
-		
-        $('#logClear').click(function() {
-			$("#logshow").html('');
-		});	
-		
-		$('#logArchive').click(function() {
-			$.ajax({
-                type: "GET",
-                url: "edi_history_main.php", 
-                data: { archivelog: "yes" },
-                dataType: "html",
-                success: function(data){ 
-					$("#logshow").html(''), 
-					$("#logshow").html($.trim(data)); 
-				}
-			});
-		}); 
-			
-        $('#logfile').click(function() { 
-			$.ajax({
-                type: "GET",
-                url: "edi_history_main.php", 
-                data: { showlog: "yes" },
-                dataType: "html",
-                success: function(data){ $("#logshow").html($.trim(data)); }
-			});
-		}); 
-		      
-		$('#getnotes').click(function() {
-			$('#logshow').html('');
-			$('#mynotes').html('');
-			$.ajax({
-                type:'GET',
-                url: "edi_history_main.php",
-                data: { getnotes: "yes"},
-                dataType: "text",
-                success: function(data){ 
-					$('#mynotes').html("<H4>Notes:</H4>"
-							+ "<textarea id='txtnotes',name='txtnotes',rows='10',cols='600',auotfocus='autofocus'></textarea>"
-							+ "<p></p>"
-							); 
-					// necessary to trim the data since php from script has leading newlines (UTF-8 issue)
-					$('#txtnotes').val($.trim(data));
-				}
-			});
-		});	
-		
-		$('#savenotes').click(function() {
-			var notetxt = $("#txtnotes").val();
-			$.post("edi_history_main.php", { putnotes: "yes", tnotes: notetxt },
-				function(data){ $('#mynotes').append(data); });
-		});
-		
-		$('#closenotes').click(function() { 
-			$('#mynotes').html('');
-		});
-			     
+        });   
      }); 
 /* ************ 
  *   end of document ready() jquery 
  * ************
- */
+ */        
+    // the process files script html output is requested and displayed, 
+    // replacing the tab panel contents 
+    // also, the 'success' event calls an array of functions
+    $('#processfiles').click(function() {
+        $.ajax({
+            type: "POST",
+            url: "edi_history_main.php", 
+            data:  $('#process_new').serialize(),
+            dataType: "html",
+            success: [ 
+                function(data){ $("#pfresult").html(data); },
+                bindlinks('#pfresult', 'click', '.clmstatus', 'click', '#clmstat', '<?php echo xla("Claim Status"); ?>'),
+                bindlinks('#pfresult', 'click', '.btclm', 'click', '#batchclm', '<?php echo xla("Batch Claim"); ?>')
+            ]
+        });
+    });         
+
+    // list files selected in the multifile upload input      
+    $('#upload_file').change(function(){
+        $('#srvvar').html('');
+        $('#pfresult').html('');
+        var fmax = $('#srvvals').data("mf");
+        var far = this.files;
+        var fct = far.length;
+        for(var i = 0; i < fct; i++) {
+            if (i == fmax) $('#pfresult').append("<p><?php echo xla("max file count reached - reload names below"); ?></p>");
+            $('#pfresult').append('file: ' + far[i].name +'<br />');
+        }            
+    });      
+    // submit files for sorting and storage -- accepted/rejected, already uploaded, etc
+    // shows a popup window (idea is to allow comparison with upload files display)
+    $('#upload_new').submit(function() {
+        if (! window.focus) return true;
+        window.open('', 'Uploads', 'height=400,width=600,left=300,top=100,menubar=yes,resizable=yes,scrollbars=yes');
+        this.target='Uploads';
+        return true;
+    });
+
+    $('#csvClear').click(function() {
+        $("#tblshow").html('');
+    });
+
+    $('#logClear').click(function() {
+        $("#logshow").html('');
+    });	
+
+    $('#logArchive').click(function() {
+        $.ajax({
+            type: "GET",
+            url: "edi_history_main.php", 
+            data: { archivelog: "yes" },
+            dataType: "html",
+            success: function(data){ 
+                $("#logshow").html(''), 
+                $("#logshow").html($.trim(data)); 
+            }
+        });
+    }); 
+
+    $('#logfile').click(function() { 
+        $.ajax({
+            type: "GET",
+            url: "edi_history_main.php", 
+            data: { showlog: "yes" },
+            dataType: "html",
+            success: function(data){ $("#logshow").html($.trim(data)); }
+        });
+    }); 
+
+    $('#getnotes').click(function() {
+        $('#logshow').html('');
+        $('#mynotes').html('');
+        $.ajax({
+            type:'GET',
+            url: "edi_history_main.php",
+            data: { getnotes: "yes"},
+            dataType: "text",
+            success: function(data){ 
+                $('#mynotes').html("<H4>Notes:</H4>"
+                        + "<textarea id='txtnotes',name='txtnotes',rows='10',cols='600',auotfocus='autofocus'></textarea>"
+                        + "<p></p>"
+                        ); 
+                // necessary to trim the data since php from script has leading newlines (UTF-8 issue)
+                $('#txtnotes').val($.trim(data));
+            }
+        });
+    });	
+
+    $('#savenotes').click(function() {
+        var notetxt = $("#txtnotes").val();
+        $.post("edi_history_main.php", { putnotes: "yes", tnotes: notetxt },
+            function(data){ $('#mynotes').append(data); });
+    });
+
+    $('#closenotes').click(function() { 
+        $('#mynotes').html('');
+    });
+
 /* ************ 
  * called to bind links in ajax retrieved content for dialog display
  * .on( events [, selector] [, data], handler(eventObject) )
@@ -515,6 +497,9 @@ if (!acl_check('acct', 'eob')) die(xlt("Access Not Authorized"));
     function bindlinks(dElem, dEvt, cClass, cEvt, cElem, mytitle){ 
          $(dElem).on(dEvt, cClass, cEvt, function(e) {
             e.preventDefault();
+            $(cElem).css({'max-height': 372, 'overflow-y': 'auto'});
+            $(this).parentsUntil('tr').parent().siblings().removeClass('outlinetr'); 
+            $(this).parentsUntil('tr').parent().addClass('outlinetr'); 
             $.get($(this).attr('href'), function(data){ $(cElem).html(data); })
             var statDialog = $(cElem).dialog({
                 autoOpen: false,
@@ -523,7 +508,7 @@ if (!acl_check('acct', 'eob')) die(xlt("Access Not Authorized"));
                 buttons: [{ text: "Close", click: function() { $(this).dialog("close"); } }], 
                 modal: false,
                 title: mytitle, //$(this).attr('title'),
-                height: 400,
+                height: 'auto',     //400, maxHeight does not work until resize; css fix is possible
                 width: 'auto'
             });
             statDialog.dialog('open'); 
@@ -545,17 +530,21 @@ if (!acl_check('acct', 'eob')) die(xlt("Access Not Authorized"));
 			data: $('#formcsvtables').serialize(), 
 			dataType: "html",
 			success: [ 
-				function(data){ $("#tblshow").html($.trim(data)); },
-				function(){
+				function(data){ 
+                    var tbltl = "<div class='csvcptn'>" + $(data).filter('#dttl').html() + "</div>";
+					var mytbl = "<table id='csvTable' class='csvDisplay'>" + $(data).not('#dttl').html() + "</table>";
+					$("#tblshow").html($.trim(mytbl)); 
 					$('#csvTable').dataTable({
 						DisplayLength: 10,    
 						bJQueryUI: true, 
 						bScrollInfinite: true,
 						bScrollCollapse: true,
+                        iScrollLoadGap: 20,
 						sScrollY: '240px',
 						sScrollX: '90%',
 						sScrollXInner: '100%'
 					});
+                    $("#csvTable_filter").before(tbltl);
 				},
 				bindlinks('#tblshow', 'click', '.clmstatus', 'click', '#tbclmstat', '<?php echo xla("Claim Status"); ?>'),
 				bindlinks('#tblshow', 'click', '.btclm', 'click', '#tbbatchclm', '<?php echo xla("Batch Claim"); ?>'),
@@ -571,7 +560,7 @@ if (!acl_check('acct', 'eob')) die(xlt("Access Not Authorized"));
 		var encrecord = $('#tbcsvhist').dialog({
 					buttons: [{ text: "Close", click: function() { $(this).dialog("close"); } }], 
 					modal: false,
-					title: "<?php echo xla("Encounter Record"); ?>",
+					title: "<?php echo xla("Encounter EDI Record"); ?>",
 					height: 416,
 					width: 'auto'
 				});
@@ -588,8 +577,8 @@ if (!acl_check('acct', 'eob')) die(xlt("Access Not Authorized"));
 				encrecord.dialog('open')
 			]				
 		});
-    });		
-	                    
+    });	
+
 /* ************ 
  * end of javascript block
  */             

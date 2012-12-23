@@ -30,6 +30,7 @@
 //   Dutch                          // xl('Dutch')
 //   English (Indian)               // xl('English (Indian)')
 //   English (Standard)             // xl('English (Standard)')
+//   Estonian                       // xl('Estonian')
 //   French                         // xl('French (Standard)')
 //   French                         // xl('French (Canadian)')
 //   German                         // xl('German')
@@ -88,6 +89,7 @@ $USER_SPECIFIC_GLOBALS = array('default_top_pane',
                                'gbl_pt_list_page_size',
                                'gbl_pt_list_new_window',
                                'units_of_measurement',
+                               'us_weight_format',
                                'date_display_format',
                                'time_display_format',
                                'event_color',
@@ -349,7 +351,17 @@ $GLOBALS_METADATA = array(
       '1',                              // default = Both/US
       xl('Applies to the Vitals form and Growth Chart')
     ),
-
+    
+    'us_weight_format' => array(
+        xl('Display Format for US Weights'),
+        array(
+            '1'=>xl('Show pounds as decimal value'),
+            '2'=>xl('Show pounds and ounces')
+        ),
+        '1',
+        xl('Applies to Vitals form')
+    )
+      ,
     'disable_deprecated_metrics_form' => array(
       xl('Disable Old Metric Vitals Form'),
       'bool',                           // data type
@@ -594,6 +606,13 @@ $GLOBALS_METADATA = array(
       '0',                              // default = false
       xl('This will force the Billing Widget in the Patient Summary screen to always be open.')
     ),
+      
+    'num_past_appointments_to_show' => array(
+      xl('Past Appointment Display Widget'),
+      'num',                           // data type
+      '0',                             // default = false
+      xl('A positive number will show that many past appointments on a Widget in the Patient Summary screen.')
+    ),      
 
     'activate_ccr_ccd_report' => array(
       xl('Activate CCR/CCD Reporting'),

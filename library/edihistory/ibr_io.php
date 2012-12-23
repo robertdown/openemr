@@ -72,7 +72,7 @@ function ibr_html_heading($option, $title='') {
 	//
 	//if (!is_string($title)) { $title=''; }
     $title = (is_string($title)) ? $title : '';
-    $srcdir = $GLOBALS['srcdir'];
+    //$srcdir = $GLOBALS['srcdir'];
     $webdir = $GLOBALS['webroot'];
     
 	$str_html = "<!DOCTYPE html>".PHP_EOL."<html>".PHP_EOL."<head>".PHP_EOL;
@@ -235,46 +235,52 @@ function ibr_disp_claimst() {
 		$clmid = '';
 	}
 	//
-	if ( $clmid == NULL || $clmid === FALSE || !$clmid ) {
+	if ( !$clmid && !$st02 ) {
 		$str_html .= "Invalid claim ID <br />";
 		return $str_html;
 	}
-	//
-	if (strlen($filename) >= 13 && strlen($filename) <= 14) {
-		// assume we have a bht03 number batch_icn + stnum
-		$isa13 = substr($filename, 0, 9);
-		$st02 = substr($filename, -4);
-        $btname = csv_file_by_controlnum('batch', $isa13);
-		if (!$btname) {
-			$str_html .= "Failed to identify batch file <br />";
-			return $str_html;
-		}
-		$str_html .= ibr_batch_get_st_block ($btname, $st02, $clmid);
-	} elseif (strlen($filename) == 9) {	
-		// assume we have a batch_icn
-        $btname = csv_file_by_controlnum('batch', $filename);
-		if (!$btname) {
-			$str_html .= "Failed to identify batch file <br />";
-			return $str_html;
-		}
-		$str_html .= ibr_batch_get_st_block ($btname, $st02, $clmid);
-	} elseif (!$filename || strlen($filename) <= 9) {
-		// search for file with the claim id
-		// (encounter, number, filename,)
-		$enc_ar = csv_file_with_pid_enctr($clmid, 'batch', 'ptctln');
-		if (is_array($enc_ar) && count($enc_ar) ) { 
-			foreach($enc_ar as $enc) { 			
-				$str_html .= ibr_batch_get_st_block ( $enc[2], $enc[1] );  
-			}
-		} elseif( is_string($enc_ar) && count($enc_ar) ) {
-			$str_html .= $enc_ar;
-		} else {
-			$str_html .= "Failed to find the batch file for $clmid <br />";
-		} 
-		
-	} else {
-		$str_html .= ibr_batch_get_st_block($filename, '', $clmid );  
-	}
+    // see if we have a usable filename
+    if (strpos($filename, 'batch')) {
+        // maybe we have the OpenEMR filename
+		$btname = trim($filename);
+     } elseif (strlen($filename) >= 9 && strlen($filename) < 14) {
+         // try bht03 number: batch_icn + stnum; not '0123'
+         $isa13 = substr($filename, 0, 9);
+         $st02 = (strlen($filename) == 13) ? substr($filename, -4) : '';
+         $btname = csv_file_by_controlnum('batch', $isa13);
+     } elseif (!$filename || strlen($filename) < 9) {
+         // nothing useful
+         $btname = '';
+     }
+     //
+     if ($btname) {
+         $stblk = ibr_batch_get_st_block ($btname, $st02, $clmid);
+         if ($stblk) {
+             $str_html .= $stblk;
+         } else {
+            $btname = '';
+         }
+     } 
+     if (!$btname) {
+         // search for file with the claim id
+         $enc_ar = csv_file_with_pid_enctr($clmid, 'batch', 'ptctln');
+         // (encounter, number, filename,)
+         if (is_array($enc_ar) && count($enc_ar) ) { 
+             if (count($enc_ar) > 1) {
+                 $str_html .= '<p>Found '. count($enc_ar) . ' instances</p>'.PHP_EOL;
+                 // hopefully, only _GET 277 related queries will lack the filename
+                 $str_html .= (isset($_POST['enctrbatch'])) ? '' : '<p>May not match to status response</p>'.PHP_EOL;
+             }
+             foreach($enc_ar as $enc) { 			
+				$str_html .= ibr_batch_get_st_block ( $enc[2], $enc[1] ); 
+             }
+		 } elseif( is_string($enc_ar) && count($enc_ar) ) {
+             $str_html .= $enc_ar;
+         } else {
+             $str_html .= "Failed to find the batch file for $clmid <br />";
+         } 
+     }
+
 	return $str_html;
 }
 
@@ -320,7 +326,7 @@ function ibr_disp_csvtable() {
 	//
 	$row_pct = ($rowp) ? $rowp/100 : 1;
 	if ($ds == NULL || $ds === FALSE ) { $ds = ''; }
-	if ($de == NULL) { $e = ($ds) ? date("Y/M/D", time()) : ''; } 
+	if ($de == NULL) { $de = ($ds) ? date("Y/M/D", time()) : ''; } 
 	if ($csvfile == NULL || $csvfile === FALSE ) { 
 		// here we have an error and must quit
 		$str_html= "<p>Error in CSV table name </p>".PHP_EOL; 
@@ -477,7 +483,8 @@ function ibr_disp_status_resp() {
 	$st = ''; $pe = '';
 	if (isset($_GET['pidenc']) && strlen($_GET['pidenc'])) {
 		$pe = filter_input(INPUT_GET, 'pidenc', FILTER_SANITIZE_STRING);
-	} elseif (isset($_GET['rspstnum']) && strpos($_GET['rspstnum'], '_')) {
+	} 
+    if (isset($_GET['rspstnum']) && strpos($_GET['rspstnum'], '_')) {
 		// the rspstnum is the 277 ISA13_ST02
 		$st = filter_input(INPUT_GET, 'rspstnum', FILTER_SANITIZE_STRING);
 	} 
@@ -641,8 +648,8 @@ function ibr_disp_fileText() {
 	$str_html = '';
 	//isset($_POST['fileX12']) && isset($_FILES['fileUplx12'])
 	if ( count($_FILES) && isset($_FILES['fileUplx12']) ) {	
-		$str_html = ibr_html_heading('newfiles', $bn);
 		$fn = htmlentities($_FILES['fileUplx12']['name']);
+        $str_html = ibr_html_heading('newfiles', $fn);
 		$f_array = ibr_upload_files($str_html);
 		if ( is_array($f_array) && count($f_array) ) { 
 			$str_html .= csv_filetohtml($f_array); 
@@ -658,7 +665,7 @@ function ibr_disp_fileText() {
 			$str_html = ibr_html_heading('error');
 		} elseif ($ishr && $fn) {
 			$ftxt = ibr_ebr_ebt_name($fn);
-			$str_html = ibr_html_heading('textdisplay', $bn);
+			$str_html = ibr_html_heading('textdisplay', $ftxt);
 			$str_html .= csv_filetohtml($ftxt);
 		} else {
 			$bn = basename($fn);
@@ -670,7 +677,7 @@ function ibr_disp_fileText() {
 		if ($btisa13) {
 			//$btname = ibr_batch_find_file_with_controlnum($btisa13);
             $btname = csv_file_by_controlnum('batch', $btisa13);
-			$str_html = ibr_html_heading('textdisplay', $bn);
+			$str_html = ibr_html_heading('textdisplay', $btname);
 			if ($btname) {
 				$str_html .=   csv_filetohtml($btname);
 			} else {
@@ -686,6 +693,78 @@ function ibr_disp_fileText() {
 	return $str_html;
 }
 
+/**
+ * check if the batch control number is found in the 997/999 files table
+ * 
+ * @uses csv_search_record()
+ * @return string 
+ */
+function ibr_disp_997_for_batch() {
+    $str_html = '';
+    $batch_icn = filter_input(INPUT_GET, 'batchicn', FILTER_SANITIZE_STRING);
+    if ($batch_icn) {
+        $ctln = (strlen($batch_icn) >= 9) ? substr($batch_icn, 0, 9) : trim(strval($batch_icn)); 
+        $search = array('s_val'=>$ctln, 's_col'=>3, 'r_cols'=>'all');
+        $result = csv_search_record('f997', 'file', $search, "1");
+        //
+        // should be matching row(s) from files_997.csv
+        if (is_array($result) && count($result)) {
+            $str_html .= "<p>Acknowledgement information</p>".PHP_EOL;
+            foreach($result as $rslt) {
+                $ext = substr($rslt[1], -3); 
+                //
+                $str_html .= "Date: {$rslt[0]} <br />".PHP_EOL;
+                $str_html .= "File: <a target=\"blank\" href=edi_history_main.php?fvkey={$rslt[1]}>{$rslt[1]}</a> <br />".PHP_EOL;
+                $str_html .= "Batch ICN: {$rslt[3]} <br />";
+                // error count or code in position 4
+                if ($ext == '999' || $ext == '997') {
+                    $str_html .= "Rejects: {$rslt[4]} <br />".PHP_EOL;
+                    // don't have dialog from this dialog, so don't link
+                    //$str_html .= "Rejects: <a class=\"codeval\" target=\"_blank\" href=\"edi_history_main.php?fv997={$rslt[1]}&err997={$rslt[4]}\">{$rslt[4]}</a><br />".PHP_EOL;
+                } elseif ($ext == 'ta1' || $ext == 'ack') {
+                    $str_html .= "Code: {$rslt[4]} <br />".PHP_EOL;
+                    //$str_html .= "Code: <a class=\"codeval\" target=\"_blank\" href=\"edi_history_main.php?ackfile={$rslt[1]}&ackcode={$rslt[4]}\">{$rslt[4]}</a><br />".PHP_EOL;
+                }
+            }
+        } else {
+            $str_html .= "Did not find corresponding 997/999 file for $ctln<br />".PHP_EOL;
+        }       
+    } else {
+        $str_html .= "Invalid value for ICN number<br />".PHP_EOL;
+    }
+    return $str_html; 
+}
+
+/**
+ * function to check whether an era payment has been processed and applied
+ * 
+ * @uses sqlQuery()
+ * 
+ * @return string
+ */
+function ibr_disp_is_era_processed() {
+    // 
+    $str_html = '';
+    $ckno = filter_input(INPUT_GET, 'tracecheck', FILTER_SANITIZE_STRING);
+    if ($ckno) {
+        $srchval = 'ePay - '.$ckno;
+        // reference like '%".$srchval."%'"
+        $row = sqlQuery("SELECT reference, pay_total, global_amount FROM ar_session WHERE reference = ?", array($srchval) );
+        if (!empty($row)) {
+            $str_html .= "trace {$row['reference']} total \${$row['pay_total']}";
+            if ($row['global_amount'] === '0') {
+                $str_html .= " fully allocated";
+            } else {
+                $str_html .= " ({$row['global_amount']} not allocated)";
+            }
+        } else {
+            $str_html .= "trace $ckno not posted"; 
+        }
+    } else {
+        $str_html .= "trace not valid ID";
+    }
+    return $str_html;
+}
 	
 /**
  * jQuery adds a special HTTP header for ajax requests
