@@ -1,0 +1,39 @@
+<html>
+<head>
+<title>OpenEMR Setup Tool</title>
+<link rel='stylesheet' href='interface/themes/style_radiant.css'>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <h1>Optional Site ID Selection</h1>
+            </div>
+            <div class="col-md-6">
+                <p>Most OpenEMR installations support only one site. If that is
+                true for you then ignore the rest of this text and just click Continue.</p>
+                <p>Otherwise please enter a unique Site ID here.</p>
+
+                <p>A Site ID is a short identifier with no spaces or special characters other
+                than periods or dashes. It is case-sensitive and we suggest sticking to lower
+                case letters for ease of use.</p>
+
+                <p>If each site will have its own host/domain name, then use that name as the
+                Site ID (e.g. www.example.com).</p>
+
+                <p>The site ID is used to identify which site you will log in to. If it is a
+                hostname then it is taken from the hostname in the URL. Otherwise you must
+                append <code>?site=siteid</code> to the URL used for logging in.</p>
+
+                <p>It is OK for one of the sites to have <code>default</code> as its ID. This is the ID
+                that will be used if it cannot otherwise be determined.</p>
+                <form method='post'>
+                    <input type='hidden' name='state' value='0'>
+                    Site ID: <input type='text' name='site' value='default'>
+                    <input type='submit' value='Continue'>
+                </form>
+            </div>
+            <div class="col-md-6">&nbsp;</div>
+        </div>
+    </div>
+</body></html>
