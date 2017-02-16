@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<br>
+<div class="progress">
+    <div class="progress-bar" role="progressbar" aria-valuenow="14" aria-valuemin="0" aria-valuemax="100" style="width: 14%;">
+        14%
+    </div>
+</div>
+
+<h1 class="page-header">Step {{state}} - Database</h1>
+
+<span>
+<p>NOTE: clicking on <code>Continue</code> may delete or cause damage to data on your system.
+    Before you continue please backup your data.</p></span>
+<br>
+<FORM METHOD='POST'>
+    <INPUT TYPE='HIDDEN' NAME='state' VALUE='2'>
+    <INPUT TYPE='HIDDEN' NAME='site' VALUE='{{site_id}}'>
+    <LABEL FOR='inst1'><INPUT TYPE='RADIO' ID='inst1' NAME='inst' VALUE='1' checked>Have setup create the database</label><br>
+    <LABEL FOR='inst2'><INPUT TYPE='RADIO' ID='inst2' NAME='inst' VALUE='2'>I have already created the database</label><br>
+    <br>
+    <INPUT TYPE='SUBMIT' VALUE='Continue'><br></FORM><br>
+
+{% endblock %}

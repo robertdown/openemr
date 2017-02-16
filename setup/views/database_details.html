@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block content %}
+<br>
+<div class="progress">
+    <div class="progress-bar" role="progressbar" aria-valuenow="28" aria-valuemin="0" aria-valuemax="100" style="width: 28%;">
+        28%
+    </div>
+</div>
+
+<h1 class="page-header">Step {{state}} - Database (cont.)</h1>
+
+Now you need to supply the MySQL server information and path information. detailed
+instructions on each item can be found in the <a href='documentation/install' target='_blank'>
+    <span style='text-decoration: underline;'>INSTALL</span></a> manual file.
+<br><br>
+
+<form action="" class="form-horizontal">
+    <input type='hidden' name='state' value='3'>
+    <input type='hidden' name='site' value='{{site_id}}'>
+    <input type='hidden' name='inst' value='{{inst}}'>
+
+    <div class="form-group">
+        <div class="col-sm-12">
+            <p class="lead">MySQL Server</p>
+            <hr>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="server" class="col-sm-2 control-label">Host</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="server" value="localhost" name="server">
+        </div>
+        <div class="col-sm-6 help-block">
+            <small>If you run mysql and apache/php on the same computer, then leave this as 'localhost'. if they are on separate computers, then enter the ip address of the computer running mysql.</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="port" class="col-sm-2 control-label">Port</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="port" value="3306" name="port">
+        </div>
+        <div class="col-sm-6 help-block">
+            <small>Default port is 3306</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="dbname" class="col-sm-2 control-label">Database</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="dbname" value="openemr" name="dbanme">
+        </div>
+        <div class="col-sm-6 help-block">
+            <small>Name of the MySQL database</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="login" class="col-sm-2 control-label">User</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="login" value="openemr" name="login">
+        </div>
+        <div class="col-sm-6 help-block">
+            <small>Name of the DB user. Recommend to keep this unique for safety.</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="pass" class="col-sm-2 control-label">Pass</label>
+        <div class="col-sm-4">
+            <input type="password" class="form-control" id="pass" name="pass">
+        </div>
+        <div class="col-sm-6 help-block">
+            <small>Name of the DB password.</small>
+        </div>
+    </div>
+
+    {% if inst != 2 %}
+    <div class="form-group">
+        <label for="root" class="col-sm-2 control-label">Root User</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="rootpass">
+        </div>
+        <div class="col-sm-6 help-block">
+            <small>MySQL root user</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="rootpass" class="col-sm-2 control-label">Root Pass</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="rootpass">
+        </div>
+        <div class="col-sm-6 help-block">
+            <small>MySQL root password</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="loginhost" class="col-sm-2 control-label">Hostname</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="loginhost">
+        </div>
+        <div class="col-sm-6 help-block">
+            <small>if you run apache/php and mysql on the same computer, then leave this as 'localhost'. if they are on separate computers, then enter the ip address of the computer running apache/php</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="collate" class="col-sm-2 control-label">UTF-8 Collation</label>
+        <div class="col-md-4 help-block">
+            <select name='collate' class="form-control">
+                <option value='utf8_bin'>bin</option>
+                <option value='utf8_czech_ci'>czech</option>
+                <option value='utf8_danish_ci'>danish</option>
+                <option value='utf8_esperanto_ci'>esperanto</option>
+                <option value='utf8_estonian_ci'>estonian</option>
+                <option value='utf8_general_ci' selected>general</option>
+                <option value='utf8_hungarian_ci'>hungarian</option>
+                <option value='utf8_icelandic_ci'>icelandic</option>
+                <option value='utf8_latvian_ci'>latvian</option>
+                <option value='utf8_lithuanian_ci'>lithuanian</option>
+                <option value='utf8_persian_ci'>persian</option>
+                <option value='utf8_polish_ci'>polish</option>
+                <option value='utf8_roman_ci'>roman</option>
+                <option value='utf8_romanian_ci'>romanian</option>
+                <option value='utf8_slovak_ci'>slovak</option>
+                <option value='utf8_slovenian_ci'>slovenian</option>
+                <option value='utf8_spanish2_ci'>spanish2 (traditional)</option>
+                <option value='utf8_spanish_ci'>spanish (modern)</option>
+                <option value='utf8_swedish_ci'>swedish</option>
+                <option value='utf8_turkish_ci'>turkish</option>
+                <option value='utf8_unicode_ci'>unicode (german, french, russian, armenian, greek)</option>
+                <option value=''>none (do not force utf-8)</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <small>This is the collation setting for mysql. leave as 'general' if you are not sure. if the language you are planning to use in openemr is in the menu, then you can select it. otherwise, just select 'general'</small>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="form-group">
+        <div class="col-md-12">
+            <p class="lead">OpenEMR User</p>
+            <hr>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="iuser" class="col-sm-2 control-label">Initial User</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="iuser" value="user">
+        </div>
+        <div class="col-sm-6 help-block">
+            <small>This is the login name of user that will be created for you. Limit this to one word</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="iuserpass" class="col-sm-2 control-label">Initial Pass</label>
+        <div class="col-sm-4">
+            <input type="password" class="form-control" id="iuserpass">
+        </div>
+        <div class="col-sm-6 help-block">
+            <small>This is the password for the initial user account above.</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="iufname" class="col-sm-2 control-label">Initial User's First Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="iufname" value="Administrator">
+        </div>
+        <div class="col-sm-6 help-block">
+            <small>This is the first name of the initial user.</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="iuname" class="col-sm-2 control-label">Initial User's Last Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="iuname" value="Administrator">
+        </div>
+        <div class="col-sm-6 help-block">
+            <small>This is the last name of the initial user.</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="igroup" class="col-sm-2 control-label">Initial Group</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="igroup" value="default">
+        </div>
+        <div class="col-sm-6 help-block">
+            <small>This is the group that will be created for your users; it should be the name of your practice</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-12 text-right">
+            <button type="submit" class="btn btn-large">Continue&nbsp;<i class="fa fa-chevron-right"></i></button>
+        </div>
+    </div>
+</form>
+
+    <table>
+        // include a "source" site id drop-list and a checkbox to indicate
+        // if cloning its database.  when checked, do not display initial user
+        // and group stuff below.
+        $dh = opendir($oe_sites_base);
+        if (!$dh) die("cannot read directory '$oe_sites_base'.");
+        $siteslist = array();
+        while (false !== ($sfname = readdir($dh))) {
+        if (substr($sfname, 0, 1) == '.') continue;
+        if ($sfname == 'cvs'            ) continue;
+        if ($sfname == $site_id         ) continue;
+        $sitedir = "$oe_sites_base/$sfname";
+        if (!is_dir($sitedir)               ) continue;
+        if (!is_file("$sitedir/sqlconf.php")) continue;
+        $siteslist[$sfname] = $sfname;
+        }
+        closedir($dh);
+        // if this is not the first site...
+        if (!empty($siteslist)) {
+        ksort($siteslist);
+        echo "<tr valign='top'>";
+            echo " <td class='text'>source site: </td>";
+            echo " <td class='text'><select name='source_site_id'>";
+                    foreach ($siteslist as $sfname) {
+                    echo "<option value='$sfname'";
+                    if ($sfname == 'default') echo " selected";
+                    echo ">$sfname</option>";
+                    }
+                    echo "</select></td>";
+            echo " <td class='text'>(the site directory that will be a model for the new site.)</td>";
+            echo "</tr>";
+            echo "<tr valign='top'>";
+            echo " <td class='text'>clone source database: </td>";
+            echo " <td class='text'><input type='checkbox' name='clone_database' onclick='cloneclicked()' /></td>";
+            echo " <td class='text'>(clone the source site's database instead of creating a fresh one.)</td>";
+            echo "</tr>";
+        }
+
+{% endblock %}

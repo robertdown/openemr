@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="page-header">Welcome to OpenEMR!</h1>
+
+<p>This utility will step you through the installation and configuration of OpenEMR for your practice.</p>
+
+<p>Before proceeding:</p>
+<ul>
+    <li>Be sure that you have a properly installed and configured MySQL server available, and a PHP configured webserver.</li>
+    <li>Detailed installation instructions can be found in the <a href='Documentation/INSTALL' target='_blank'><span STYLE='text-decoration: underline;'>'INSTALL'</span></a> manual file.</li>
+    <li>If you are upgrading from a previous version, do NOT use this script.  Please read the 'Upgrading' section found in the <a href='Documentation/INSTALL' target='_blank'><span STYLE='text-decoration: underline;'>'INSTALL'</span></a> manual file.</li>
+</ul>
+
+{% if checkPermission == true %}
+
+<p>Ensuring correct file and directory permissions before starting installation:</p>
+<p>Ensuring following files are world-writable...</p>
+
+<ul class="list-group">
+    {% for file in files %}
+
+        {% if file.status == true %}
+        <li class="list-group-item list-group-item-success"><i class="fa fa-check"></i>&nbsp;{{file.path}}</li>
+        {% else %}
+        <li class="list-group-item list-group-item-danger"><i class="fa fa-times"></i>&nbsp;{{file.path}}</li>
+        {% endif %}
+
+    {% endfor %}
+</ul>
+
+{% if fileErr %}}
+<p>You can't proceed until all above files are ready (world-writable).<br>
+    In linux, recommend changing file permissions with the <code>chmod 666 filename</code> command.<br>
+    Fix above file permissions and then click the 'Check Again' button to re-check files.</p>
+{% endif %}
+
+<p>Ensuring following directories are writable...</p>
+
+<ul class="list-group">
+    {% for dir in dirs %}
+        {% if dir.status == true %}
+            <li class="list-group-item list-group-item-success"><i class="fa fa-check"></i>&nbsp;{{dir.path}}</li>
+        {% else %}
+            <li class="list-group-item list-group-item-danger"><i class="fa fa-times"></i>&nbsp;{{dir.path}}</li>
+        {% endif %}
+    {% endfor %}
+</ul>
+
+{% if dirErr %}
+<p>You can't proceed until all above are writable by web server user<br>
+    In linux, recommend changing file permissions with the <code>chown -R web_server_user:web_server_user directory_name</code> command.<br>
+    Fix above file permissions and then click the 'Check Again' button to re-check files.<br/>
+{% endif %}
+
+{% endif %}
+
+{% if dirErr or fileErr %}
+<form action="" method="post">
+    <button type="submit" class="btn btn-lg"><i class="fa fa-refresh fa-inverse"></i>&nbsp;Check Again</button>
+    <input type="hidden" name="site" value="{{site_id}}">
+</form>
+{% else %}
+<br>All required files and directories have been verified. Click to continue installation.<br>
+<form action="" method="post">
+    <input type="hidden" name="state" value="1">
+    <input type="hidden" name="site" value="{{site_id}}">
+    <button type="submit" class="btn pull-right">Continue&nbsp;<i class="fa fa-chevron-right"></i></button>
+</form>
+{% endif %}
+
+<br>
+
+{% endblock %}

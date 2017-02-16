@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OpenEMR Setup Tool</title>
+    <link rel='stylesheet' href='interface/themes/style_radiant.css'>
+    <link rel="stylesheet"
+          href="public/assets/font-awesome-4-6-3/css/font-awesome.min.css">
+    <style type="text/css">
+        body {
+            background-color: #EFEFEF;
+        }
+        .holder {
+            background-color: #ffffff;
+        }
+    </style>
+    <script type="text/javascript" src="public/assets/jquery-min-1-2-1/index.js"></script>
+
+    <script language="javascript">
+        // onclick handler for "clone database" checkbox
+        function cloneClicked() {
+            var cb = document.forms[0].clone_database;
+            $('.noclone').css('display', cb.checked ? 'none' : 'block');
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12 text-center">
+            <h1>
+                <img src="/setup/views/assets/square.png" alt="" height="100" width="100">
+                Installation Guide
+            </h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2 holder">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+</body></html>
