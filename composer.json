@@ -24,7 +24,12 @@
         "doctrine/common": "2.5.0",
         "doctrine/couchdb": "1.0-beta2",
         "doctrine/orm": "2.5.5",
-        "twig/twig": "^1.31"
+        "twig/twig": "^1.31",
+        "symfony/form": "^3.2",
+        "symfony/twig-bridge": "^3.2",
+        "symfony/validator": "^3.2",
+        "symfony/http-foundation": "^3.2",
+        "symfony/translation": "^3.2"
 
     },
     "require-dev": {
@@ -55,7 +60,8 @@
             "common\\http\\": "common/http",
             "entities\\": "entities",
             "services\\": "services",
-            "repositories\\": "repositories"
+            "repositories\\": "repositories",
+            "OpenEMR\\Setup\\": "setup/"
         }
     },
     "config": {
