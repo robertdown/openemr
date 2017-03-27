@@ -3,6 +3,7 @@
  * Installation script.
  *
  * Copyright (C) 2016 Roberto Vasquez <robertogagliotta@gmail.com>
+ * Copyright (C) 2017 Robert Down <robertdown@live.com>
  *
  * LICENSE: This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,26 +17,66 @@
  * along with this program. If not, see <http://opensource.org/Licenses/gpl-license.php>;.
  *
  * @package OpenEMR
+ * @subpackage Installation
+ * @author Robert Down <robertdown@live.com>
  * @author Roberto Vasquez <robertogagliotta@gmail.com>
  * @author Scott Wakefield <scott@npclinics.com.au>
  * @link http://www.open-emr.org
  *
 **/
 
-// Checks if the server's PHP version is compatible with OpenEMR:
-require_once(dirname(__FILE__) . "/common/compatibility/checker.php");
-
-$response = Checker::checkPhpVersion();
-if ($response !== true) {
-  die($response);
-}
-
 $COMMAND_LINE = php_sapi_name() == 'cli';
-require_once (dirname(__FILE__) . '/library/authentication/password_hashing.php');
+require_once 'vendor/autoload.php';
+require_once dirname(__FILE__) . '/library/authentication/password_hashing.php';
 require_once dirname(__FILE__) . '/library/classes/Installer.class.php';
 
+error_reporting(E_ALL);
+ini_set('display_errors', 'on');
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Form\Forms;
+use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
+use OpenEMR\Setup\Form\DatabaseSetupType;
+use OpenEMR\Setup\Entity\DatabaseSetup;
+use Symfony\Bridge\Twig\Extension\FormExtension;
+use Symfony\Bridge\Twig\Form\TwigRenderer;
+use Symfony\Bridge\Twig\Form\TwigRendererEngine;
+use Symfony\Bridge\Twig\Extension\TranslationExtension;
+use Symfony\Component\Translation\Translator;
+
+$request = Request::createFromGlobals();
+$formFactory = Forms::createFormFactoryBuilder()
+    ->addExtension(new HttpFoundationExtension())
+    ->getFormFactory();
+
+// the Twig file that holds all the default markup for rendering forms
+// this file comes with TwigBridge
+$defaultFormTheme = 'bootstrap_3_horizontal_layout.html.twig';
+
+$vendorDir = realpath('./vendor');
+// the path to TwigBridge library so Twig can locate the
+// form_div_layout.html.twig file
+$appVariableReflection = new \ReflectionClass('\Symfony\Bridge\Twig\AppVariable');
+$vendorTwigBridgeDir = dirname($appVariableReflection->getFileName());
+// the path to your other templates
+$viewsDir = realpath('./setup/views');
+
+$loader = new Twig_Loader_Filesystem(array($viewsDir, $vendorTwigBridgeDir . '/Resources/views/Form'));
+$twig = new Twig_Environment($loader, array('debug' => true));
+$formEngine = new TwigRendererEngine(array($defaultFormTheme), $twig);
+
+$twig->addRuntimeLoader(new \Twig_FactoryRuntimeLoader(array(
+    TwigRenderer::class => function () use ($formEngine) {
+        return new TwigRenderer($formEngine);
+    },
+)));
+
+$twig->addExtension(new FormExtension());
+$twig->addExtension(new TranslationExtension(new Translator('en')));
+$twig->addExtension(new Twig_Extension_Debug());
+
 //turn off PHP compatibility warnings
-ini_set("session.bug_compat_warn","off");
+ini_set("session.bug_compat_warn", "off");
 
 $state = isset($_POST["state"]) ? ($_POST["state"]) : '';
 
@@ -44,50 +85,28 @@ $ippf_specific = false;
 
 // If this script was invoked with no site ID, then ask for one.
 if (!$COMMAND_LINE && empty($_REQUEST['site'])) {
-  echo "<html>\n";
-  echo "<head>\n";
-  echo "<title>OpenEMR Setup Tool</title>\n";
-  echo "<link rel='stylesheet' href='interface/themes/style_blue.css'>\n";
-  echo "</head>\n";
-  echo "<body>\n";
-  echo "<p><b>Optional Site ID Selection</b></p>\n";
-  echo "<p>Most OpenEMR installations support only one site.  If that is " .
-    "true for you then ignore the rest of this text and just click Continue.</p>\n";
-  echo "<p>Otherwise please enter a unique Site ID here.</p>\n";
-  echo "<p>A Site ID is a short identifier with no spaces or special " .
-    "characters other than periods or dashes. It is case-sensitive and we " .
-    "suggest sticking to lower case letters for ease of use.</p>\n";
-  echo "<p>If each site will have its own host/domain name, then use that " .
-    "name as the Site ID (e.g. www.example.com).</p>\n";
-  echo "<p>The site ID is used to identify which site you will log in to. " .
-    "If it is a hostname then it is taken from the hostname in the URL. " .
-    "Otherwise you must append \"?site=<i>siteid</i>\" to the URL used for " .
-    "logging in.</p>\n";
-  echo "<p>It is OK for one of the sites to have \"default\" as its ID. This " .
-    "is the ID that will be used if it cannot otherwise be determined.</p>\n";
-  echo "<form method='post'><input type='hidden' name='state' value='0'>" .
-    "Site ID: <input type='text' name='site' value='default'>&nbsp;" .
-    "<input type='submit' value='Continue'><br></form><br>\n";
-  echo "</body></html>\n";
-  exit();
+    echo $twig->render('site_id.html');
+    exit();
 }
 
 // Support "?site=siteid" in the URL, otherwise assume "default".
 $site_id = 'default';
 if (!$COMMAND_LINE && !empty($_REQUEST['site'])) {
-  $site_id = trim($_REQUEST['site']);
+    $site_id = trim($_REQUEST['site']);
 }
 
 // Die if site ID is empty or has invalid characters.
-if (empty($site_id) || preg_match('/[^A-Za-z0-9\\-.]/', $site_id))
-  die("Site ID '".htmlspecialchars($site_id,ENT_NOQUOTES)."' contains invalid characters.");
+if (empty($site_id) || preg_match('/[^A-Za-z0-9\\-.]/', $site_id)) {
+    die("Site ID '".htmlspecialchars($site_id,ENT_NOQUOTES)."' contains invalid characters.");
+}
 
 //If having problems with file and directory permission
 // checking, then can be manually disabled here.
-$checkPermissions = True;
+$checkPermissions = true;
 
-$installer = new Installer( $_REQUEST );
+$installer = new Installer($_REQUEST);
 global $OE_SITE_DIR; // The Installer sets this
+global $OE_SITES_BASE;
 
 $docsDirectory = "$OE_SITE_DIR/documents";
 $billingDirectory = "$OE_SITE_DIR/edi";
@@ -124,7 +143,7 @@ else if ($state > 3) {
 <HTML>
 <HEAD>
 <TITLE>OpenEMR Setup Tool</TITLE>
-<LINK REL=STYLESHEET HREF="interface/themes/style_sky_blue.css">
+<LINK REL=STYLESHEET HREF="interface/themes/style_radiant.css">
 <link rel="shortcut icon" href="public/images/favicon.ico" />
 
 <style>
@@ -133,76 +152,76 @@ table.phpset { border-collapse:collapse;   }
 table.phpset td, table.phpset th { font-size:9pt; border:1px solid gray; padding:2px; }
 </style>
 
-<script type="text/javascript" src="public/assets/jquery-min-1-2-1/index.js"></script>
+<?php
 
-<script language="javascript">
-// onclick handler for "clone database" checkbox
-function cloneClicked() {
- var cb = document.forms[0].clone_database;
- $('.noclone').css('display', cb.checked ? 'none' : 'block');
+$preInstallVars = array();
+
+// Create all the template keys
+$errorKeys = array('globals', 'xml', 'mysql');
+
+// Ensure the error key gets initiated to false
+$errors = array();
+foreach ($errorKeys as $e) {
+    $errors[$e] = false;
 }
-</script>
 
-</HEAD>
-<BODY>
+if (ini_get('register_globals') == false) {
+    $errors['globals'] = true;
+}
 
-<span class="title">OpenEMR Setup</span>
-<br><br>
-<span class="text">
-<?php
- if (strtolower(ini_get('register_globals')) != 'off' && (bool) ini_get('register_globals')) {
-  echo "It appears that you have register_globals enabled in your php.ini\n" .
-   "configuration file.  This causes unacceptable security risks.  You must\n" .
-   "turn it off before continuing with installation.\n";
-  exit(1);
- }
+if (!extension_loaded("xml")) {
+    $errors['xml'] = true;
+}
 
- if(!extension_loaded("xml")) {
-   echo "Error: PHP XML extension missing. To continue, install PHP XML extension, then restart web server.";
-   exit(1);
- }
- if( !(extension_loaded("mysql") || extension_loaded("mysqlnd") || extension_loaded("mysqli"))   ) {
-   echo "Error: PHP MySQL extension missing. To continue, install and enable MySQL extension, then restart web server.";
-   exit(1);
- }
- if( !(extension_loaded("mbstring") )   ) {
-   echo "Error: PHP mb_string extension missing. To continue, install and enable mb_string extension, then restart web server.";
-   exit(1);
- }
+if (!(extension_loaded("mysql") || extension_loaded("mysqlnd") || extension_loaded("mysqli"))) {
+    $errors['mysql'] = true;
+}
+
+if (!(extension_loaded("mbstring"))) {
+    $errors['mbstring'] = true;
+}
+
+foreach ($errors as $k => $v) {
+//    $errors[$k] = true;
+}
+
+$preInstallVars['errors'] = $errors;
+
+if (count($preInstallVars['errors']) > 0) {
+//    echo $twig->render('pre_install_check.html', $preInstallVars);
+}
 ?>
 
-<?php
- if ($state == 7) {
-?>
+<?php if ($state == 7): ?>
 
-<p>Congratulations! OpenEMR is now installed.</p>
+    <p>Congratulations! OpenEMR is now installed.</p>
 
-<ul>
- <li>Access controls (php-GACL) are installed for fine-grained security, and can be administered in
-     OpenEMR's admin->acl menu.</li>
- <li>Reviewing <?php echo $OE_SITE_DIR; ?>/config.php is a good idea. This file
-     contains some settings that you may want to change.</li>
- <li>There's much information and many extra tools bundled within the OpenEMR installation directory.
-     Please refer to openemr/Documentation. Many forms and other useful scripts can be found at openemr/contrib.</li>
- <li>To ensure a consistent look and feel throughout the application,
-     <a href='http://www.mozilla.org/products/firefox/'>Firefox</a> and <a href="https://www.google.com/chrome/browser/desktop/index.html">Chrome</a> are recommended. The OpenEMR development team exclusively tests with modern versions of these browsers.</li>
- <li>The OpenEMR project home page, documentation, and forums can be found at <a href = "http://www.open-emr.org" target="_blank">http://www.open-emr.org</a></li>
- <li>We pursue grants to help fund the future development of OpenEMR.  To apply for these grants, we need to estimate how many times this program is installed and how many practices are evaluating or using this software.  It would be awesome if you would email us at <a href="mailto:president@oemr.org">president@oemr.org</a> if you have installed this software. The more details about your plans with this software, the better, but even just sending us an email stating you just installed it is very helpful.</li>
-</ul>
-<p>
-We recommend you print these instructions for future reference.
-</p>
-<?php if (empty($installer->clone_database)) {
-  echo "<p><b>The initial OpenEMR user is '".$installer->iuser."' and the password is '".$installer->iuserpass."'</b></p>";
-  echo "<p>If you edited the PHP or Apache configuration files during this installation process, then we recommend you restart your Apache server before following below OpenEMR link.</p>";
-} ?>
-<p>
- <a href='./?site=<?php echo $site_id; ?>'>Click here to start using OpenEMR. </a>
-</p>
+    <ul>
+     <li>Access controls (php-GACL) are installed for fine-grained security, and can be administered in
+         OpenEMR's admin->acl menu.</li>
+     <li>Reviewing <?php echo $OE_SITE_DIR; ?>/config.php is a good idea. This file
+         contains some settings that you may want to change.</li>
+     <li>There's much information and many extra tools bundled within the OpenEMR installation directory.
+         Please refer to openemr/Documentation. Many forms and other useful scripts can be found at openemr/contrib.</li>
+     <li>To ensure a consistent look and feel through out the application using
+         <a href='http://www.mozilla.org/products/firefox/'>Firefox</a> is recommended.</li>
+     <li>The OpenEMR project home page, documentation, and forums can be found at <a href = "http://www.open-emr.org" target="_blank">http://www.open-emr.org</a></li>
+     <li>We pursue grants to help fund the future development of OpenEMR.  To apply for these grants, we need to estimate how many times this program is installed and how many practices are evaluating or using this software.  It would be awesome if you would email us at <a href="mailto:president@oemr.org">president@oemr.org</a> if you have installed this software. The more details about your plans with this software, the better, but even just sending us an email stating you just installed it is very helpful.</li>
+    </ul>
+    <p>
+    We recommend you print these instructions for future reference.
+    </p>
+    <?php if (empty($installer->clone_database)) {
+      echo "<p><b>The initial OpenEMR user is '".$installer->iuser."' and the password is '".$installer->iuserpass."'</b></p>";
+      echo "<p>If you edited the PHP or Apache configuration files during this installation process, then we recommend you restart your Apache server before following below OpenEMR link.</p>";
+    } ?>
+    <p>
+     <a href='./?site=<?php echo $site_id; ?>'>Click here to start using OpenEMR. </a>
+    </p>
 
-<?php
-  exit();
- }
+    <?php
+      exit();
+endif;
 ?>
 
 <?php
@@ -211,160 +230,123 @@ $inst = isset($_POST["inst"]) ? ($_POST["inst"]) : '';
 
 
 if (($config == 1) && ($state < 4)) {
-  echo "OpenEMR has already been installed.  If you wish to force re-installation, then edit $installer->conffile (change the 'config' variable to 0), and re-run this script.<br>\n";
-}
-else {
-  switch ($state) {
+    echo "OpenEMR has already been installed.  If you wish to force re-installation,
+    then edit $installer->conffile (change the 'config' variable to 0), and re-run this
+    script.<br>\n";
+} else {
+    switch ($state) {
 
-  case 1:
-    echo "<b>Step $state</b><br><br>\n";
-    echo "Now I need to know whether you want me to create the database on my own or if you have already created the database for me to use.  For me to create the database, you will need to supply the MySQL root password.\n
-<span class='title'> <br />NOTE: clicking on \"Continue\" may delete or cause damage to data on your system. Before you continue please backup your data.</span>
-<br><br>\n
-<FORM METHOD='POST'>\n
-<INPUT TYPE='HIDDEN' NAME='state' VALUE='2'>\n
-<INPUT TYPE='HIDDEN' NAME='site' VALUE='$site_id'>\n
-<LABEL FOR='inst1'><INPUT TYPE='RADIO' ID='inst1' NAME='inst' VALUE='1' checked>Have setup create the database</label><br>\n
-<LABEL FOR='inst2'><INPUT TYPE='RADIO' ID='inst2' NAME='inst' VALUE='2'>I have already created the database</label><br>\n
-<br>\n
-<INPUT TYPE='SUBMIT' VALUE='Continue'><br></FORM><br>\n";
-    break;
+        case 1:
+            echo $twig->render(
+                "database.html", array(
+                    'state' => $state,
+                    'site_id' => $site_id
+                )
+            );
+            break;
 
-  case 2:
-    echo "<b>Step $state</b><br><br>\n";
-    echo "Now you need to supply the MySQL server information and path information. Detailed instructions on each item can be found in the <a href='Documentation/INSTALL' target='_blank'><span STYLE='text-decoration: underline;'>'INSTALL'</span></a> manual file.
-<br><br>\n
-<FORM METHOD='POST'>
-<INPUT TYPE='HIDDEN' NAME='state' VALUE='3'>
-<INPUT TYPE='HIDDEN' NAME='site' VALUE='$site_id'>\n
-<INPUT TYPE='HIDDEN' NAME='inst' VALUE='$inst'>
-<TABLE>\n
-<TR VALIGN='TOP'><TD COLSPAN=2><font color='red'>MYSQL SERVER:</font></TD></TR>
-<TR VALIGN='TOP'><TD><span class='text'>Server Host: </span></TD><TD><INPUT TYPE='TEXT' VALUE='localhost' NAME='server' SIZE='30'></TD><TD><span class='text'>(If you run MySQL and Apache/PHP on the same computer, then leave this as 'localhost'. If they are on separate computers, then enter the IP address of the computer running MySQL.)</span><br></TD></TR>
-<TR VALIGN='TOP'><TD><span class='text'>Server Port: </span></TD><TD><INPUT TYPE='TEXT' VALUE='3306' NAME='port' SIZE='30'></TD><TD><span class='text'>(This is the MySQL port. The default port for MySQL is 3306.)</span><br></TD></TR>
-<TR VALIGN='TOP'><TD><span class='text'>Database Name: </span></TD><TD><INPUT TYPE='TEXT' VALUE='openemr' NAME='dbname' SIZE='30'></TD><TD><span class='text'>(This is the name of the OpenEMR database in MySQL - 'openemr' is the recommended)</span><br></TD></TR>
-<TR VALIGN='TOP'><TD><span class='text'>Login Name: </span></TD><TD><INPUT TYPE='TEXT' VALUE='openemr' NAME='login' SIZE='30'></TD><TD><span class='text'>(This is the name of the OpenEMR login name in MySQL - 'openemr' is the recommended)</span><br></TD></TR>
-<TR VALIGN='TOP'><TD><span class='text'>Password: </span></TD><TD><INPUT TYPE='PASSWORD' VALUE='' NAME='pass' SIZE='30'></TD><TD><span class='text'>(This is the Login Password for when PHP accesses MySQL - it should be at least 8 characters long and composed of both numbers and letters)</span><br></TD></TR>\n";
-    if ($inst != 2) {
-      echo "<TR VALIGN='TOP'><TD><span class='text'>Name for Root Account: </span></TD><TD><INPUT TYPE='TEXT' VALUE='root' NAME='root' SIZE='30'></TD><TD><span class='text'>(This is name for MySQL root account. For localhost, it is usually ok to leave it 'root'.)</span><br></TD></TR>
-<TR VALIGN='TOP'><TD><span class='text'>Root Pass: </span></TD><TD><INPUT TYPE='PASSWORD' VALUE='' NAME='rootpass' SIZE='30'></TD><TD><span class='text'>(This is your MySQL root password. For localhost, it is usually ok to leave it blank.)</span><br></TD></TR>\n";
-      echo "<TR VALIGN='TOP'><TD><span class='text'>User Hostname: </span></TD><TD><INPUT TYPE='TEXT' VALUE='localhost' NAME='loginhost' SIZE='30'></TD><TD><span class='text'>(If you run Apache/PHP and MySQL on the same computer, then leave this as 'localhost'. If they are on separate computers, then enter the IP address of the computer running Apache/PHP.)</span><br></TD></TR>";
-      echo "<TR VALIGN='TOP'><TD><span class='text'>UTF-8 Collation: </span></TD><TD colspan='2'>" .
-  "<select name='collate'>" .
-  "<option value='utf8_bin'          >Bin</option>" .
-  "<option value='utf8_czech_ci'     >Czech</option>" .
-  "<option value='utf8_danish_ci'    >Danish</option>" .
-  "<option value='utf8_esperanto_ci' >Esperanto</option>" .
-  "<option value='utf8_estonian_ci'  >Estonian</option>" .
-  "<option value='utf8_general_ci' selected>General</option>" .
-  "<option value='utf8_hungarian_ci' >Hungarian</option>" .
-  "<option value='utf8_icelandic_ci' >Icelandic</option>" .
-  "<option value='utf8_latvian_ci'   >Latvian</option>" .
-  "<option value='utf8_lithuanian_ci'>Lithuanian</option>" .
-  "<option value='utf8_persian_ci'   >Persian</option>" .
-  "<option value='utf8_polish_ci'    >Polish</option>" .
-  "<option value='utf8_roman_ci'     >Roman</option>" .
-  "<option value='utf8_romanian_ci'  >Romanian</option>" .
-  "<option value='utf8_slovak_ci'    >Slovak</option>" .
-  "<option value='utf8_slovenian_ci' >Slovenian</option>" .
-  "<option value='utf8_spanish2_ci'  >Spanish2 (Traditional)</option>" .
-  "<option value='utf8_spanish_ci'   >Spanish (Modern)</option>" .
-  "<option value='utf8_swedish_ci'   >Swedish</option>" .
-  "<option value='utf8_turkish_ci'   >Turkish</option>" .
-  "<option value='utf8_unicode_ci'   >Unicode (German, French, Russian, Armenian, Greek)</option>" .
-  "<option value=''                  >None (Do not force UTF-8)</option>" .
-  "</select>" .
-  "</TD></TR><TR VALIGN='TOP'><TD>&nbsp;</TD><TD colspan='2'><span class='text'>(This is the collation setting for mysql. Leave as 'General' if you are not sure. If the language you are planning to use in OpenEMR is in the menu, then you can select it. Otherwise, just select 'General'.)</span><br></TD></TR>";
-}
-    echo "<TR VALIGN='TOP'><TD>&nbsp;</TD></TR>";
+        case 2:
+            // include a "source" site id drop-list and a checkbox to indicate
+            // if cloning its database. when checked, do not display initial user
+            // and group stuff below.
+            $dh = opendir($OE_SITES_BASE);
+            if (!$dh) {
+                die("cannot read directory '$OE_SITES_BASE'.");
+            }
+            $dbDetailsViewVars = array('site_id' => $site_id);
+            $siteslist = array();
+            while (false !== ($sfname = readdir($dh))) {
+                if (substr($sfname, 0, 1) == '.') {
+                    continue;
+                }
+                if ($sfname == 'cvs' || $sfname == $site_id) {
+                    continue;
+                }
+                $sitedir = $OE_SITES_BASE . "/" . $sfname;
+                if (!is_dir($sitedir)) {
+                    continue;
+                }
+                if (!is_file("$sitedir/sqlconf.php")) {
+                    continue;
+                }
+                $siteslist[$sfname] = $sfname;
+                closedir($dh);
+                // if this is not the first site...
+                if (!empty($siteslist)) {
+                    ksort($siteslist);
+                    $dbDetailsViewVars['sitesList'] = $siteslist;
+                }
+            }
 
-    // Include a "source" site ID drop-list and a checkbox to indicate
-    // if cloning its database.  When checked, do not display initial user
-    // and group stuff below.
-    $dh = opendir($OE_SITES_BASE);
-    if (!$dh) die("Cannot read directory '$OE_SITES_BASE'.");
-    $siteslist = array();
-    while (false !== ($sfname = readdir($dh))) {
-      if (substr($sfname, 0, 1) == '.') continue;
-      if ($sfname == 'CVS'            ) continue;
-      if ($sfname == $site_id         ) continue;
-      $sitedir = "$OE_SITES_BASE/$sfname";
-      if (!is_dir($sitedir)               ) continue;
-      if (!is_file("$sitedir/sqlconf.php")) continue;
-      $siteslist[$sfname] = $sfname;
-    }
-    closedir($dh);
-    // If this is not the first site...
-    if (!empty($siteslist)) {
-      ksort($siteslist);
-      echo "<tr valign='top'>\n";
-      echo " <td class='text'>Source Site: </td>\n";
-      echo " <td class='text'><select name='source_site_id'>";
-      foreach ($siteslist as $sfname) {
-	echo "<option value='$sfname'";
-	if ($sfname == 'default') echo " selected";
-	echo ">$sfname</option>";
-      }
-      echo "</select></td>\n";
-      echo " <td class='text'>(The site directory that will be a model for the new site.)</td>\n";
-      echo "</tr>\n";
-      echo "<tr valign='top'>\n";
-      echo " <td class='text'>Clone Source Database: </td>\n";
-      echo " <td class='text'><input type='checkbox' name='clone_database' onclick='cloneClicked()' /></td>\n";
-      echo " <td class='text'>(Clone the source site's database instead of creating a fresh one.)</td>\n";
-      echo "</tr>\n";
-    }
+            $form = $formFactory->createBuilder(DatabaseSetupType::class, new DatabaseSetup())->getForm();
+            $dbDetailsViewVars['form'] = $form->createView();
+            echo $twig->render("database_details.html", $dbDetailsViewVars);
+            break;
 
-    echo "<TR VALIGN='TOP' class='noclone'><TD COLSPAN=2><font color='red'>OPENEMR USER:</font></TD></TR>";
-    echo "<TR VALIGN='TOP' class='noclone'><TD><span class='text'>Initial User:</span></TD><TD><INPUT SIZE='30' TYPE='TEXT' NAME='iuser' VALUE='admin'></TD><TD><span class='text'>(This is the login name of user that will be created for you. Limit this to one word.)</span></TD></TR>
-<TR VALIGN='TOP' class='noclone'><TD><span class='text'>Initial User Password:</span></TD><TD><INPUT SIZE='30' TYPE='PASSWORD' NAME='iuserpass' VALUE=''></TD><TD><span class='text'>(This is the password for the initial user account above.)</span></TD></TR>
-<TR VALIGN='TOP' class='noclone'><TD><span class='text'>Initial User's First Name:</span></TD><TD><INPUT SIZE='30' TYPE='TEXT' NAME='iufname' VALUE='Administrator'></TD><TD><span class='text'>(This is the First name of the 'initial user'.)</span></TD></TR>
-<TR VALIGN='TOP' class='noclone'><TD><span class='text'>Initial User's Last Name:</span></TD><TD><INPUT SIZE='30' TYPE='TEXT' NAME='iuname' VALUE='Administrator'></TD><TD><span class='text'>(This is the Last name of the 'initial user'.)</span></TD></TR>
-<TR VALIGN='TOP' class='noclone'><TD><span class='text'>Initial Group:</span></TD><TD><INPUT SIZE='30' TYPE='TEXT' NAME='igroup' VALUE='Default'></TD><TD><span class='text'>(This is the group that will be created for your users.  This should be the name of your practice.)</span></TD></TR>
-";
-    echo "<TR VALIGN='TOP'><TD>&nbsp;</TD></TR>";
+        case 3:
 
-    echo "</TABLE>
-<br>
-<INPUT TYPE='SUBMIT' VALUE='Continue'><br></FORM><br>";
-    break;
+            $defaults = array(
+                'host'   => 'localhost',
+                'port'   => '3306',
+                'dbname' => 'openemr',
+                'login'  => 'openemr',
+                'pass'   => 'openemr',
+            );
 
-  case 3:
+            $databaseEntity = new DatabaseSetup();
+            $form = $formFactory->createBuilder(DatabaseSetupType::class, $databaseEntity)->getForm();
 
-    // Form Validation
-    //   (applicable if not cloning from another database)
+            $form->handleRequest($request);
 
-    $pass_step2_validation = TRUE;
-    $error_step2_message   = "ERROR at ";
+            if ($form->isSubmitted() && $form->isValid()) {
+                $data = $form->getData();
+                echo "<pre>";
+                var_dump($data);
+            } else {
+                $errors = $form->getErrors();
 
-    if ( ! $installer->char_is_valid($_REQUEST['server'])) {
-       $pass_step2_validation = FALSE;
-       $error_step2_message .=  "Database Server Host, ";
-    }
+                echo "<pre>";
+                foreach ($errors as $error) {
+                    echo $error->getMessage();
+                }
+            }
+            die('here past the data check points');
+            // Form Validation
+            //   (applicable if not cloning from another database)
 
-    if ( ! $installer->char_is_valid($_REQUEST['port']))  {
-        $pass_step2_validation = FALSE;
-        $error_step2_message .=  "Database Server Port, ";
-    }
-    if ( ! $installer->char_is_valid($_REQUEST['dbname']))  {
-        $pass_step2_validation = FALSE;
-        $error_step2_message .= "Database Name, ";
-    }
-    if ( ! $installer->char_is_valid($_REQUEST['login']))  {
-        $pass_step2_validation = FALSE;
-        $error_step2_message .= "Database Login Name, ";
-    }
-    if ( ! $installer->char_is_valid($_REQUEST['pass']))  {
-        $pass_step2_validation = FALSE;
-        $error_step2_message .= "Database Login Password, ";
-    }
-    if (!$pass_step2_validation) {
-       die($error_step2_message);
-     }
+            $pass_step2_validation = true;
+            $error_step2_message   = "ERROR at ";
+
+
+
+            if (! $installer->char_is_valid($_REQUEST['server'])) {
+            $pass_step2_validation = false;
+            $error_step2_message .=  "Database Server Host, ";
+            }
+
+            if (! $installer->char_is_valid($_REQUEST['port'])) {
+                $pass_step2_validation = false;
+                $error_step2_message .=  "Database Server Port, ";
+            }
+            if (! $installer->char_is_valid($_REQUEST['dbname'])) {
+                $pass_step2_validation = false;
+                $error_step2_message .= "Database Name, ";
+            }
+            if (! $installer->char_is_valid($_REQUEST['login'])) {
+                $pass_step2_validation = false;
+                $error_step2_message .= "Database Login Name, ";
+            }
+            if (! $installer->char_is_valid($_REQUEST['pass'])) {
+                $pass_step2_validation = false;
+                $error_step2_message .= "Database Login Password, ";
+            }
+            if (!$pass_step2_validation) {
+                die($error_step2_message);
+            }
 
 
     if (empty($installer->clone_database)) {
-      if ( ! $installer->login_is_valid() ) {
+      if (! $installer->login_is_valid() ) {
         echo "ERROR. Please pick a proper 'Login Name'.<br>\n";
         echo "Click Back in browser to re-enter.<br>\n";
         break;
@@ -669,72 +651,49 @@ break;
 
 	case 0:
 	default:
-echo "<p>Welcome to OpenEMR.  This utility will step you through the installation and configuration of OpenEMR for your practice.</p>\n";
-echo "<ul><li>Before proceeding, be sure that you have a properly installed and configured MySQL server available, and a PHP configured webserver.</li>\n";
+	    $welcomeVars = array('site_id' => $site_id);
 
-echo "<li>Detailed installation instructions can be found in the <a href='Documentation/INSTALL' target='_blank'><span STYLE='text-decoration: underline;'>'INSTALL'</span></a> manual file.</li>\n";
+        if ($checkPermissions == true) {
+            $welcomeVars['checkPermission'] = true;
+            $writableError = false;
+            $fileList = array();
+            foreach ($writableFileList as $tmpFile) {
+                $fileListTmp['path'] = realpath($tmpFile);
+                $fileListTmp['status'] = (is_writable($tmpFile)) ? true : false;
+                array_push($fileList, $fileListTmp);
+                $writableError = ($fileListTmp['status'] == false) ? true : $writableError;
+            }
 
-Echo "<li>If you are upgrading from a previous version, do NOT use this script.  Please read the 'Upgrading' section found in the <a href='Documentation/INSTALL' target='_blank'><span STYLE='text-decoration: underline;'>'INSTALL'</span></a> manual file.</li></ul>";
+            $welcomeVars['fileErr'] = $writableError;
 
-if ($checkPermissions) {
-	echo "<p>We will now ensure correct file and directory permissions before starting installation:</p>\n";
-	echo "<FONT COLOR='green'>Ensuring following files are world-writable...</FONT><br>\n";
-	$errorWritable = 0;
-	foreach ($writableFileList as $tempFile) {
-		if (is_writable($tempFile)) {
-	        	echo "'".realpath($tempFile)."' file is <FONT COLOR='green'><b>ready</b></FONT>.<br>\n";
-		}
-		else {
-	        	echo "<p><FONT COLOR='red'>UNABLE</FONT> to open file '".realpath($tempFile)."' for writing.<br>\n";
-	        	echo "(configure file permissions; see below for further instructions)</p>\n";
-	        	$errorWritable = 1;
-		}
-	}
-	if ($errorWritable) {
-		echo "<p><FONT COLOR='red'>You can't proceed until all above files are ready (world-writable).</FONT><br>\n";
-		echo "In linux, recommend changing file permissions with the 'chmod 666 filename' command.<br>\n";
-		echo "Fix above file permissions and then click the 'Check Again' button to re-check files.<br>\n";
-    echo "<FORM METHOD='POST'><INPUT TYPE='SUBMIT' VALUE='Check Again'></p>" .
-      "<INPUT TYPE='HIDDEN' NAME='site' VALUE='$site_id'></FORM><br>\n";
-		break;
-	}
+            if ($writableError) {
+                break;
+            }
+            $writableError = false;
 
-	echo "<br><FONT COLOR='green'>Ensuring following directories have proper permissions...</FONT><br>\n";
-	$errorWritable = 0;
-	foreach ($writableDirList as $tempDir) {
-		if (is_writable($tempDir)) {
-	        	echo "'".realpath($tempDir)."' directory is <FONT COLOR='green'><b>ready</b></FONT>.<br>\n";
-		}
-		else {
-		        echo "<p><FONT COLOR='red'>UNABLE</FONT> to open directory '".realpath($tempDir)."' for writing by web server.<br>\n";
-		       	echo "(configure directory permissions; see below for further instructions)</p>\n";
-	 	   	$errorWritable = 1;
-		}
-	}
-	if ($errorWritable) {
-		echo "<p><FONT COLOR='red'>You can't proceed until all directories are ready.</FONT><br>\n";
-		echo "In linux, recommend changing owners of these directories to the web server. For example, in many linux OS's the web server user is 'apache', 'nobody', or 'www-data'. So if 'apache' were the web server user name, could use the command 'chown -R apache:apache directory_name' command.<br>\n";
-	        echo "Fix above directory permissions and then click the 'Check Again' button to re-check directories.<br>\n";
-    echo "<FORM METHOD='POST'><INPUT TYPE='SUBMIT' VALUE='Check Again'></p>" .
-      "<INPUT TYPE='HIDDEN' NAME='site' VALUE='$site_id'></FORM><br>\n";
-		break;
-	}
+            $dirList = array();
+            foreach ($writableDirList as $tempDir) {
+                $dirListTmp['path'] = realpath($tempDir);
+                $dirListTmp['status'] = (is_writable($tempDir)) ? true : false;
+                array_push($dirList, $dirListTmp);
+                $writableError = ($dirListTmp['status'] == false) ? true : $writableError;
+            }
 
-	echo "<br>All required files and directories have been verified. Click to continue installation.<br>\n";
-}
-else {
-	echo "<br>Click to continue installation.<br>\n";
-}
+            $welcomeVars['dirErr'] = $writableError;
 
-echo "<FORM METHOD='POST'><INPUT TYPE='HIDDEN' NAME='state' VALUE='1'>" .
-  "<INPUT TYPE='HIDDEN' NAME='site' VALUE='$site_id'>" .
-  "<INPUT TYPE='SUBMIT' VALUE='Continue'><br></FORM><br>";
+            $welcomeVars['dirs'] = $dirList;
+            $welcomeVars['files'] = $fileList;
 
-}
+            if ($writableError) {
+                echo $twig->render('welcome.html', $welcomeVars);
+                break;
+            }
+
+            echo $twig->render('welcome.html', $welcomeVars);
+        }
+        else {
+            echo "<br>Click to continue installation.<br>\n";
+        }
+    }
 }
 ?>
-
-</span>
-
-</BODY>
-</HTML>

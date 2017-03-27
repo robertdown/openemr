@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+{{ form_start(form) }}
+    {{ form_widget(form) }}
+{{ form_end(form) }}
+
 <br>
 <div class="progress">
     <div class="progress-bar" role="progressbar" aria-valuenow="28" aria-valuemin="0" aria-valuemax="100" style="width: 28%;">
@@ -12,10 +17,10 @@
 
 Now you need to supply the MySQL server information and path information. detailed
 instructions on each item can be found in the <a href='documentation/install' target='_blank'>
-    <span style='text-decoration: underline;'>INSTALL</span></a> manual file.
+<span style='text-decoration: underline;'>INSTALL</span></a> manual file.
 <br><br>
 
-<form action="" class="form-horizontal">
+<form action="" method="post" class="form-horizontal">
     <input type='hidden' name='state' value='3'>
     <input type='hidden' name='site' value='{{site_id}}'>
     <input type='hidden' name='inst' value='{{inst}}'>
@@ -200,48 +205,34 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
+        <label for="" class="col-sm-2 control-label">Source Site</label>
+        <div class="col-sm-4">
+            <select name="" id="" class="form-control">
+                {% for site in sitesList %}
+                <option>{{site}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-sm-6 help-block">
+            <small>The site directory that will be a model for the new site</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-10 col-sm-offset-2">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="clone_database" onclick="cloneClicked()">
+                    Clone the source site's database instead of creating a fresh one
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
         <div class="col-sm-12 text-right">
             <button type="submit" class="btn btn-large">Continue&nbsp;<i class="fa fa-chevron-right"></i></button>
         </div>
     </div>
 </form>
-
-    <table>
-        // include a "source" site id drop-list and a checkbox to indicate
-        // if cloning its database.  when checked, do not display initial user
-        // and group stuff below.
-        $dh = opendir($oe_sites_base);
-        if (!$dh) die("cannot read directory '$oe_sites_base'.");
-        $siteslist = array();
-        while (false !== ($sfname = readdir($dh))) {
-        if (substr($sfname, 0, 1) == '.') continue;
-        if ($sfname == 'cvs'            ) continue;
-        if ($sfname == $site_id         ) continue;
-        $sitedir = "$oe_sites_base/$sfname";
-        if (!is_dir($sitedir)               ) continue;
-        if (!is_file("$sitedir/sqlconf.php")) continue;
-        $siteslist[$sfname] = $sfname;
-        }
-        closedir($dh);
-        // if this is not the first site...
-        if (!empty($siteslist)) {
-        ksort($siteslist);
-        echo "<tr valign='top'>";
-            echo " <td class='text'>source site: </td>";
-            echo " <td class='text'><select name='source_site_id'>";
-                    foreach ($siteslist as $sfname) {
-                    echo "<option value='$sfname'";
-                    if ($sfname == 'default') echo " selected";
-                    echo ">$sfname</option>";
-                    }
-                    echo "</select></td>";
-            echo " <td class='text'>(the site directory that will be a model for the new site.)</td>";
-            echo "</tr>";
-            echo "<tr valign='top'>";
-            echo " <td class='text'>clone source database: </td>";
-            echo " <td class='text'><input type='checkbox' name='clone_database' onclick='cloneclicked()' /></td>";
-            echo " <td class='text'>(clone the source site's database instead of creating a fresh one.)</td>";
-            echo "</tr>";
-        }
-
 {% endblock %}
