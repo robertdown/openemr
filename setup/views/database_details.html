@@ -2,10 +2,6 @@
 
 {% block content %}
 
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-{{ form_end(form) }}
-
 <br>
 <div class="progress">
     <div class="progress-bar" role="progressbar" aria-valuenow="28" aria-valuemin="0" aria-valuemax="100" style="width: 28%;">
@@ -17,10 +13,10 @@
 
 Now you need to supply the MySQL server information and path information. detailed
 instructions on each item can be found in the <a href='documentation/install' target='_blank'>
+<br>
 <span style='text-decoration: underline;'>INSTALL</span></a> manual file.
-<br><br>
 
-<form action="" method="post" class="form-horizontal">
+{{ form_start(form) }}
     <input type='hidden' name='state' value='3'>
     <input type='hidden' name='site' value='{{site_id}}'>
     <input type='hidden' name='inst' value='{{inst}}'>
@@ -33,9 +29,9 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
-        <label for="server" class="col-sm-2 control-label">Host</label>
+        {{ form_label(form.host) }}
         <div class="col-sm-4">
-            <input type="text" class="form-control" id="server" value="localhost" name="server">
+            {{ form_widget(form.host) }}
         </div>
         <div class="col-sm-6 help-block">
             <small>If you run mysql and apache/php on the same computer, then leave this as 'localhost'. if they are on separate computers, then enter the ip address of the computer running mysql.</small>
@@ -43,9 +39,9 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
-        <label for="port" class="col-sm-2 control-label">Port</label>
+        {{ form_label(form.port) }}
         <div class="col-sm-4">
-            <input type="text" class="form-control" id="port" value="3306" name="port">
+            {{ form_widget(form.port) }}
         </div>
         <div class="col-sm-6 help-block">
             <small>Default port is 3306</small>
@@ -53,9 +49,9 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
-        <label for="dbname" class="col-sm-2 control-label">Database</label>
+        {{ form_label(form.dbname) }}
         <div class="col-sm-4">
-            <input type="text" class="form-control" id="dbname" value="openemr" name="dbanme">
+            {{ form_widget(form.dbname) }}
         </div>
         <div class="col-sm-6 help-block">
             <small>Name of the MySQL database</small>
@@ -63,9 +59,9 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
-        <label for="login" class="col-sm-2 control-label">User</label>
+        {{ form_label(form.login) }}
         <div class="col-sm-4">
-            <input type="text" class="form-control" id="login" value="openemr" name="login">
+            {{ form_widget(form.login) }}
         </div>
         <div class="col-sm-6 help-block">
             <small>Name of the DB user. Recommend to keep this unique for safety.</small>
@@ -73,9 +69,9 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
-        <label for="pass" class="col-sm-2 control-label">Pass</label>
+        {{ form_label(form.pass) }}
         <div class="col-sm-4">
-            <input type="password" class="form-control" id="pass" name="pass">
+            {{ form_widget(form.pass) }}
         </div>
         <div class="col-sm-6 help-block">
             <small>Name of the DB password.</small>
@@ -84,9 +80,9 @@ instructions on each item can be found in the <a href='documentation/install' ta
 
     {% if inst != 2 %}
     <div class="form-group">
-        <label for="root" class="col-sm-2 control-label">Root User</label>
+        {{ form_label(form.rootuser) }}
         <div class="col-sm-4">
-            <input type="text" class="form-control" id="rootpass">
+            {{ form_widget(form.rootuser) }}
         </div>
         <div class="col-sm-6 help-block">
             <small>MySQL root user</small>
@@ -94,9 +90,9 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
-        <label for="rootpass" class="col-sm-2 control-label">Root Pass</label>
+        {{ form_label(form.rootpass) }}
         <div class="col-sm-4">
-            <input type="text" class="form-control" id="rootpass">
+            {{ form_widget(form.rootpass) }}
         </div>
         <div class="col-sm-6 help-block">
             <small>MySQL root password</small>
@@ -104,9 +100,9 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
-        <label for="loginhost" class="col-sm-2 control-label">Hostname</label>
+        {{ form_label(form.loginhost) }}
         <div class="col-sm-4">
-            <input type="text" class="form-control" id="loginhost">
+            {{ form_widget(form.loginhost) }}
         </div>
         <div class="col-sm-6 help-block">
             <small>if you run apache/php and mysql on the same computer, then leave this as 'localhost'. if they are on separate computers, then enter the ip address of the computer running apache/php</small>
@@ -114,32 +110,9 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
-        <label for="collate" class="col-sm-2 control-label">UTF-8 Collation</label>
+        {{ form_label(form.collate) }}
         <div class="col-md-4 help-block">
-            <select name='collate' class="form-control">
-                <option value='utf8_bin'>bin</option>
-                <option value='utf8_czech_ci'>czech</option>
-                <option value='utf8_danish_ci'>danish</option>
-                <option value='utf8_esperanto_ci'>esperanto</option>
-                <option value='utf8_estonian_ci'>estonian</option>
-                <option value='utf8_general_ci' selected>general</option>
-                <option value='utf8_hungarian_ci'>hungarian</option>
-                <option value='utf8_icelandic_ci'>icelandic</option>
-                <option value='utf8_latvian_ci'>latvian</option>
-                <option value='utf8_lithuanian_ci'>lithuanian</option>
-                <option value='utf8_persian_ci'>persian</option>
-                <option value='utf8_polish_ci'>polish</option>
-                <option value='utf8_roman_ci'>roman</option>
-                <option value='utf8_romanian_ci'>romanian</option>
-                <option value='utf8_slovak_ci'>slovak</option>
-                <option value='utf8_slovenian_ci'>slovenian</option>
-                <option value='utf8_spanish2_ci'>spanish2 (traditional)</option>
-                <option value='utf8_spanish_ci'>spanish (modern)</option>
-                <option value='utf8_swedish_ci'>swedish</option>
-                <option value='utf8_turkish_ci'>turkish</option>
-                <option value='utf8_unicode_ci'>unicode (german, french, russian, armenian, greek)</option>
-                <option value=''>none (do not force utf-8)</option>
-            </select>
+            {{ form_widget(form.collate) }}
         </div>
         <div class="col-md-6">
             <small>This is the collation setting for mysql. leave as 'general' if you are not sure. if the language you are planning to use in openemr is in the menu, then you can select it. otherwise, just select 'general'</small>
@@ -155,9 +128,9 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
-        <label for="iuser" class="col-sm-2 control-label">Initial User</label>
+        {{ form_label(form.user) }}
         <div class="col-sm-4">
-            <input type="text" class="form-control" id="iuser" value="user">
+            {{ form_widget(form.user) }}
         </div>
         <div class="col-sm-6 help-block">
             <small>This is the login name of user that will be created for you. Limit this to one word</small>
@@ -165,9 +138,9 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
-        <label for="iuserpass" class="col-sm-2 control-label">Initial Pass</label>
+        {{ form_label(form.iuserpass) }}
         <div class="col-sm-4">
-            <input type="password" class="form-control" id="iuserpass">
+            {{ form_widget(form.iuserpass) }}
         </div>
         <div class="col-sm-6 help-block">
             <small>This is the password for the initial user account above.</small>
@@ -175,9 +148,9 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
-        <label for="iufname" class="col-sm-2 control-label">Initial User's First Name</label>
+        {{ form_label(form.iufname) }}
         <div class="col-sm-4">
-            <input type="text" class="form-control" id="iufname" value="Administrator">
+            {{ form_widget(form.iufname) }}
         </div>
         <div class="col-sm-6 help-block">
             <small>This is the first name of the initial user.</small>
@@ -185,9 +158,9 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
-        <label for="iuname" class="col-sm-2 control-label">Initial User's Last Name</label>
+        {{ form_label(form.iuname) }}
         <div class="col-sm-4">
-            <input type="text" class="form-control" id="iuname" value="Administrator">
+            {{ form_widget(form.iuname) }}
         </div>
         <div class="col-sm-6 help-block">
             <small>This is the last name of the initial user.</small>
@@ -195,9 +168,9 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
-        <label for="igroup" class="col-sm-2 control-label">Initial Group</label>
+        {{ form_label(form.igroup) }}
         <div class="col-sm-4">
-            <input type="text" class="form-control" id="igroup" value="default">
+            {{ form_widget(form.igroup) }}
         </div>
         <div class="col-sm-6 help-block">
             <small>This is the group that will be created for your users; it should be the name of your practice</small>
@@ -205,7 +178,7 @@ instructions on each item can be found in the <a href='documentation/install' ta
     </div>
 
     <div class="form-group">
-        <label for="" class="col-sm-2 control-label">Source Site</label>
+        {{ form_label(form.source) }}
         <div class="col-sm-4">
             <select name="" id="" class="form-control">
                 {% for site in sitesList %}
@@ -220,19 +193,15 @@ instructions on each item can be found in the <a href='documentation/install' ta
 
     <div class="form-group">
         <div class="col-sm-10 col-sm-offset-2">
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" name="clone_database" onclick="cloneClicked()">
-                    Clone the source site's database instead of creating a fresh one
-                </label>
-            </div>
+            {{ form_widget(form.clone_database) }}
         </div>
     </div>
 
     <div class="form-group">
         <div class="col-sm-12 text-right">
+            {{ form_widget(form.submit) }}
             <button type="submit" class="btn btn-large">Continue&nbsp;<i class="fa fa-chevron-right"></i></button>
         </div>
     </div>
-</form>
+{{ form_end(form) }}
 {% endblock %}
