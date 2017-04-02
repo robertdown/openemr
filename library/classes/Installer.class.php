@@ -1,65 +1,86 @@
 <?php
-/* Copyright © 2010 by Andrew Moore */
-/* Licensing information appears at the end of this file. */
+/**
+ * Class Installer
+ *
+ * LICENSE: This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * This program is distributed in the hope that it will be usefull,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY OF FITNESS FOR A PARTICULAR PURPOSE, See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the CNU General Public License
+ * along with this program. If not, see <http://opensource.org/Licenses/gpl-license.php>;.
+ *
+ * @package OpenEMR
+ * @subpackage Installation
+ * @author Andrew Moore
+ * @author Robert Down <robertdown@live.com>
+ * @copyright Copyright (c) 2010 Andrw More
+ *
+ */
+
+namespace OpenEMR\Setup;
 
 class Installer
 {
 
-  public function __construct( $cgi_variables )
-  {
-    // Installation variables
-    // For a good explanation of these variables, see documentation in
-    //   the contrib/util/installScripts/InstallerAuto.php file.
-    $this->iuser                    = isset($cgi_variables['iuser']) ? ($cgi_variables['iuser']) : '';
-    $this->iuserpass                = isset($cgi_variables['iuserpass']) ? ($cgi_variables['iuserpass']) : '';
-    $this->iuname                   = isset($cgi_variables['iuname']) ? ($cgi_variables['iuname']) : '';
-    $this->iufname                  = isset($cgi_variables['iufname']) ? ($cgi_variables['iufname']) : '';
-    $this->igroup                   = isset($cgi_variables['igroup']) ? ($cgi_variables['igroup']) : '';
-    $this->server                   = isset($cgi_variables['server']) ? ($cgi_variables['server']) : ''; // mysql server (usually localhost)
-    $this->loginhost                = isset($cgi_variables['loginhost']) ? ($cgi_variables['loginhost']) : ''; // php/apache server (usually localhost)
-    $this->port                     = isset($cgi_variables['port']) ? ($cgi_variables['port']): '';
-    $this->root                     = isset($cgi_variables['root']) ? ($cgi_variables['root']) : '';
-    $this->rootpass                 = isset($cgi_variables['rootpass']) ? ($cgi_variables['rootpass']) : '';
-    $this->login                    = isset($cgi_variables['login']) ? ($cgi_variables['login']) : '';
-    $this->pass                     = isset($cgi_variables['pass']) ? ($cgi_variables['pass']) : '';
-    $this->dbname                   = isset($cgi_variables['dbname']) ? ($cgi_variables['dbname']) : '';
-    $this->collate                  = isset($cgi_variables['collate']) ? ($cgi_variables['collate']) : '';
-    $this->site                     = isset($cgi_variables['site']) ? ($cgi_variables['site']) : '';
-    $this->source_site_id           = isset($cgi_variables['source_site_id']) ? ($cgi_variables['source_site_id']) : '';
-    $this->clone_database           = isset($cgi_variables['clone_database']) ? ($cgi_variables['clone_database']) : '';
-    $this->no_root_db_access        = isset($cgi_variables['no_root_db_access']) ? ($cgi_variables['no_root_db_access']) : ''; // no root access to database. user/privileges pre-configured
-    $this->development_translations = isset($cgi_variables['development_translations']) ? ($cgi_variables['development_translations']) : '';
-    // Make this true for IPPF.
-    $this->ippf_specific = false;
+    public function __construct(array $defaults)
+    {
+        // Installation variables
+        // For a good explanation of these variables, see documentation in
+        //   the contrib/util/installScripts/InstallerAuto.php file.
+        $this->iuser = isset($defaults['iuser']) ? ($defaults['iuser']) : '';
+        $this->iuserpass = isset($defaults['iuserpass']) ? ($defaults['iuserpass']) : '';
+        $this->iuname = isset($defaults['iuname']) ? ($defaults['iuname']) : '';
+        $this->iufname = isset($defaults['iufname']) ? ($defaults['iufname']) : '';
+        $this->igroup = isset($defaults['igroup']) ? ($defaults['igroup']) : '';
+        $this->server = isset($defaults['server']) ? ($defaults['server']) : ''; // mysql server (usually localhost)
+        $this->loginhost = isset($defaults['loginhost']) ? ($defaults['loginhost']) : ''; // php/apache server (usually localhost)
+        $this->port = isset($defaults['port']) ? ($defaults['port']) : '';
+        $this->root = isset($defaults['root']) ? ($defaults['root']) : '';
+        $this->rootpass = isset($defaults['rootpass']) ? ($defaults['rootpass']) : '';
+        $this->login = isset($defaults['login']) ? ($defaults['login']) : '';
+        $this->pass = isset($defaults['pass']) ? ($defaults['pass']) : '';
+        $this->dbname = isset($defaults['dbname']) ? ($defaults['dbname']) : '';
+        $this->collate = isset($defaults['collate']) ? ($defaults['collate']) : '';
+        $this->site = isset($defaults['site']) ? ($defaults['site']) : '';
+        $this->source_site_id = isset($defaults['source_site_id']) ? ($defaults['source_site_id']) : '';
+        $this->clone_database = isset($defaults['clone_database']) ? ($defaults['clone_database']) : '';
+        $this->no_root_db_access = isset($defaults['no_root_db_access']) ? ($defaults['no_root_db_access']) : ''; // no root access to database. user/privileges pre-configured
+        $this->development_translations = isset($defaults['development_translations']) ? ($defaults['development_translations']) : '';
+        // Make this true for IPPF.
+        $this->ippf_specific = false;
 
-    // Record name of sql access file
-    $GLOBALS['OE_SITES_BASE'] = dirname(__FILE__) . '/../../sites';
-    $GLOBALS['OE_SITE_DIR'] = $GLOBALS['OE_SITES_BASE'] . '/' . $this->site;
-    $this->conffile  =  $GLOBALS['OE_SITE_DIR'] . '/sqlconf.php';
+        // Record name of sql access file
+        $GLOBALS['OE_SITES_BASE'] = dirname(__FILE__) . '/../../sites';
+        $GLOBALS['OE_SITE_DIR'] = $GLOBALS['OE_SITES_BASE'] . '/' . $this->site;
+        $this->conffile = $GLOBALS['OE_SITE_DIR'] . '/sqlconf.php';
 
-    // Record names of sql table files
-    $this->main_sql = dirname(__FILE__) . '/../../sql/database.sql';
-    $this->translation_sql = dirname(__FILE__) . '/../../contrib/util/language_translations/currentLanguage_utf8.sql';
-    $this->devel_translation_sql = "http://opensourceemr.com/cvs/languageTranslations_utf8.sql";
-    $this->ippf_sql = dirname(__FILE__) . "/../../sql/ippf_layout.sql";
-    $this->icd9 = dirname(__FILE__) . "/../../sql/icd9.sql";
-    $this->cvx = dirname(__FILE__) . "/../../sql/cvx_codes.sql";
-    $this->additional_users = dirname(__FILE__) . "/../../sql/official_additional_users.sql";
+        // Record names of sql table files
+        $this->main_sql = dirname(__FILE__) . '/../../sql/database.sql';
+        $this->translation_sql = dirname(__FILE__) . '/../../contrib/util/language_translations/currentLanguage_utf8.sql';
+        $this->devel_translation_sql = "http://opensourceemr.com/cvs/languageTranslations_utf8.sql";
+        $this->ippf_sql = dirname(__FILE__) . "/../../sql/ippf_layout.sql";
+        $this->icd9 = dirname(__FILE__) . "/../../sql/icd9.sql";
+        $this->cvx = dirname(__FILE__) . "/../../sql/cvx_codes.sql";
+        $this->additional_users = dirname(__FILE__) . "/../../sql/official_additional_users.sql";
 
-    // Record name of php-gacl installation files
-    $this->gaclSetupScript1 = dirname(__FILE__) . "/../../gacl/setup.php";
-    $this->gaclSetupScript2 = dirname(__FILE__) . "/../../acl_setup.php";
+        // Record name of php-gacl installation files
+        $this->gaclSetupScript1 = dirname(__FILE__) . "/../../gacl/setup.php";
+        $this->gaclSetupScript2 = dirname(__FILE__) . "/../../acl_setup.php";
 
-    // Prepare the dumpfile list
-    $this->initialize_dumpfile_list();
+        // Prepare the dumpfile list
+        $this->initialize_dumpfile_list();
 
-    // Entities to hold error and debug messages
-    $this->error_message = '';
-    $this->debug_message = '';
+        // Entities to hold error and debug messages
+        $this->error_message = '';
+        $this->debug_message = '';
 
-    // Entity to hold sql connection
-    $this->dbh = false;
-  }
+        // Entity to hold sql connection
+        $this->dbh = false;
+    }
 
   public function login_is_valid()
   {
@@ -638,17 +659,3 @@ $config = 1; /////////////
   }
 
 }
-
-/*
-This file is free software: you can redistribute it and/or modify it under the
-terms of the GNU General Public License as publish by the Free Software
-Foundation.
-
-This file is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE.  See the GNU Gneral Public License for more details.
-
-You should have received a copy of the GNU General Public Licence along with
-this file.  If not see <http://www.gnu.org/licenses/>.
-*/
-?>

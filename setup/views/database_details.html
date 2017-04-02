@@ -16,7 +16,7 @@ instructions on each item can be found in the <a href='documentation/install' ta
 <br>
 <span style='text-decoration: underline;'>INSTALL</span></a> manual file.
 
-{{ form_start(form) }}
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
     <input type='hidden' name='state' value='3'>
     <input type='hidden' name='site' value='{{site_id}}'>
     <input type='hidden' name='inst' value='{{inst}}'>

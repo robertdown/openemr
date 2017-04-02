@@ -23,7 +23,7 @@
  * @author Scott Wakefield <scott@npclinics.com.au>
  * @link http://www.open-emr.org
  *
-**/
+ **/
 
 $COMMAND_LINE = php_sapi_name() == 'cli';
 require_once 'vendor/autoload.php';
@@ -36,13 +36,14 @@ ini_set('display_errors', 'on');
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Form\Forms;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
-use OpenEMR\Setup\Form\DatabaseSetupType;
-use OpenEMR\Setup\Entity\DatabaseSetup;
+use Symfony\Component\Translation\Translator;
 use Symfony\Bridge\Twig\Extension\FormExtension;
 use Symfony\Bridge\Twig\Form\TwigRenderer;
 use Symfony\Bridge\Twig\Form\TwigRendererEngine;
 use Symfony\Bridge\Twig\Extension\TranslationExtension;
-use Symfony\Component\Translation\Translator;
+use OpenEMR\Setup\Form\DatabaseSetupType;
+use OpenEMR\Setup\Entity\DatabaseSetup;
+use OpenEMR\Setup\Installer;
 
 $request = Request::createFromGlobals();
 $formFactory = Forms::createFormFactoryBuilder()
@@ -84,20 +85,17 @@ $state = isset($_POST["state"]) ? ($_POST["state"]) : '';
 $ippf_specific = false;
 
 // If this script was invoked with no site ID, then ask for one.
-if (!$COMMAND_LINE && empty($_REQUEST['site'])) {
+if (!$COMMAND_LINE && $request->get('site') == NULL) {
     echo $twig->render('site_id.html');
     exit();
-}
-
-// Support "?site=siteid" in the URL, otherwise assume "default".
-$site_id = 'default';
-if (!$COMMAND_LINE && !empty($_REQUEST['site'])) {
-    $site_id = trim($_REQUEST['site']);
+} else {
+    $site_id = trim($request->get('site', 'default'));
 }
 
 // Die if site ID is empty or has invalid characters.
 if (empty($site_id) || preg_match('/[^A-Za-z0-9\\-.]/', $site_id)) {
-    die("Site ID '".htmlspecialchars($site_id,ENT_NOQUOTES)."' contains invalid characters.");
+    // @todo Add in template view to handle this
+    die("Site ID '" . htmlspecialchars($site_id, ENT_NOQUOTES) . "' contains invalid characters.");
 }
 
 //If having problems with file and directory permission
@@ -112,47 +110,32 @@ $docsDirectory = "$OE_SITE_DIR/documents";
 $billingDirectory = "$OE_SITE_DIR/edi";
 $billingDirectory2 = "$OE_SITE_DIR/era";
 $lettersDirectory = "$OE_SITE_DIR/letter_templates";
-$gaclWritableDirectory = dirname(__FILE__)."/gacl/admin/templates_c";
-$requiredDirectory1 = dirname(__FILE__)."/interface/main/calendar/modules/PostCalendar/pntemplates/compiled";
-$requiredDirectory2 = dirname(__FILE__)."/interface/main/calendar/modules/PostCalendar/pntemplates/cache";
+$gaclWritableDirectory = dirname(__FILE__) . "/gacl/admin/templates_c";
+$requiredDirectory1 = dirname(__FILE__) . "/interface/main/calendar/modules/PostCalendar/pntemplates/compiled";
+$requiredDirectory2 = dirname(__FILE__) . "/interface/main/calendar/modules/PostCalendar/pntemplates/cache";
 
-$zendModuleConfigFile = dirname(__FILE__)."/interface/modules/zend_modules/config/application.config.php";
+$zendModuleConfigFile = dirname(__FILE__) . "/interface/modules/zend_modules/config/application.config.php";
 
 //These are files and dir checked before install for
 // correct permissions.
 if (is_dir($OE_SITE_DIR)) {
-  $writableFileList = array($installer->conffile,$zendModuleConfigFile);
-  $writableDirList = array($docsDirectory, $billingDirectory, $billingDirectory2, $lettersDirectory, $gaclWritableDirectory, $requiredDirectory1, $requiredDirectory2);
-}
-else {
-  $writableFileList = array();
-  $writableDirList = array($OE_SITES_BASE, $gaclWritableDirectory, $requiredDirectory1, $requiredDirectory2);
+    $writableFileList = array($installer->conffile, $zendModuleConfigFile);
+    $writableDirList = array($docsDirectory, $billingDirectory, $billingDirectory2, $lettersDirectory,
+        $gaclWritableDirectory, $requiredDirectory1, $requiredDirectory2);
+} else {
+    $writableFileList = array();
+    $writableDirList = array($OE_SITES_BASE, $gaclWritableDirectory, $requiredDirectory1, $requiredDirectory2);
 }
 
 // Include the sqlconf file if it exists yet.
 $config = 0;
 if (file_exists($OE_SITE_DIR)) {
-  include_once($installer->conffile);
+    include_once($installer->conffile);
+} else if ($state > 3) {
+    // State 3 should have created the site directory if it is missing.
+    // @todo Create view
+    die("Internal error, site directory is missing.");
 }
-else if ($state > 3) {
-  // State 3 should have created the site directory if it is missing.
-  die("Internal error, site directory is missing.");
-}
-
-?>
-<HTML>
-<HEAD>
-<TITLE>OpenEMR Setup Tool</TITLE>
-<LINK REL=STYLESHEET HREF="interface/themes/style_radiant.css">
-<link rel="shortcut icon" href="public/images/favicon.ico" />
-
-<style>
-.noclone { }
-table.phpset { border-collapse:collapse;   }
-table.phpset td, table.phpset th { font-size:9pt; border:1px solid gray; padding:2px; }
-</style>
-
-<?php
 
 $preInstallVars = array();
 
@@ -161,11 +144,8 @@ $errorKeys = array('globals', 'xml', 'mysql');
 
 // Ensure the error key gets initiated to false
 $errors = array();
-foreach ($errorKeys as $e) {
-    $errors[$e] = false;
-}
 
-if (ini_get('register_globals') == false) {
+if (ini_get('register_globals') == true) {
     $errors['globals'] = true;
 }
 
@@ -181,50 +161,17 @@ if (!(extension_loaded("mbstring"))) {
     $errors['mbstring'] = true;
 }
 
-foreach ($errors as $k => $v) {
-//    $errors[$k] = true;
-}
-
 $preInstallVars['errors'] = $errors;
 
 if (count($preInstallVars['errors']) > 0) {
-//    echo $twig->render('pre_install_check.html', $preInstallVars);
+    echo $twig->render('pre_install_check.html', $preInstallVars);
+    exit();
 }
-?>
 
-<?php if ($state == 7): ?>
-
-    <p>Congratulations! OpenEMR is now installed.</p>
-
-    <ul>
-     <li>Access controls (php-GACL) are installed for fine-grained security, and can be administered in
-         OpenEMR's admin->acl menu.</li>
-     <li>Reviewing <?php echo $OE_SITE_DIR; ?>/config.php is a good idea. This file
-         contains some settings that you may want to change.</li>
-     <li>There's much information and many extra tools bundled within the OpenEMR installation directory.
-         Please refer to openemr/Documentation. Many forms and other useful scripts can be found at openemr/contrib.</li>
-     <li>To ensure a consistent look and feel through out the application using
-         <a href='http://www.mozilla.org/products/firefox/'>Firefox</a> is recommended.</li>
-     <li>The OpenEMR project home page, documentation, and forums can be found at <a href = "http://www.open-emr.org" target="_blank">http://www.open-emr.org</a></li>
-     <li>We pursue grants to help fund the future development of OpenEMR.  To apply for these grants, we need to estimate how many times this program is installed and how many practices are evaluating or using this software.  It would be awesome if you would email us at <a href="mailto:president@oemr.org">president@oemr.org</a> if you have installed this software. The more details about your plans with this software, the better, but even just sending us an email stating you just installed it is very helpful.</li>
-    </ul>
-    <p>
-    We recommend you print these instructions for future reference.
-    </p>
-    <?php if (empty($installer->clone_database)) {
-      echo "<p><b>The initial OpenEMR user is '".$installer->iuser."' and the password is '".$installer->iuserpass."'</b></p>";
-      echo "<p>If you edited the PHP or Apache configuration files during this installation process, then we recommend you restart your Apache server before following below OpenEMR link.</p>";
-    } ?>
-    <p>
-     <a href='./?site=<?php echo $site_id; ?>'>Click here to start using OpenEMR. </a>
-    </p>
-
-    <?php
-      exit();
+if ($state == 7):
+    // @todo Display finish.html
+    die("Finished");
 endif;
-?>
-
-<?php
 
 $inst = isset($_POST["inst"]) ? ($_POST["inst"]) : '';
 
@@ -286,11 +233,11 @@ if (($config == 1) && ($state < 4)) {
         case 3:
 
             $defaults = array(
-                'host'   => 'localhost',
-                'port'   => '3306',
+                'host' => 'localhost',
+                'port' => '3306',
                 'dbname' => 'openemr',
-                'login'  => 'openemr',
-                'pass'   => 'openemr',
+                'login' => 'openemr',
+                'pass' => 'openemr',
             );
 
             $databaseEntity = new DatabaseSetup();
@@ -301,11 +248,13 @@ if (($config == 1) && ($state < 4)) {
             if ($form->isSubmitted() && $form->isValid()) {
                 $data = $form->getData();
                 echo "<pre>";
+                echo "Is valid";
                 var_dump($data);
             } else {
                 $errors = $form->getErrors();
 
                 echo "<pre>";
+                echo "Is not valid";
                 foreach ($errors as $error) {
                     echo $error->getMessage();
                 }
@@ -315,28 +264,27 @@ if (($config == 1) && ($state < 4)) {
             //   (applicable if not cloning from another database)
 
             $pass_step2_validation = true;
-            $error_step2_message   = "ERROR at ";
+            $error_step2_message = "ERROR at ";
 
 
-
-            if (! $installer->char_is_valid($_REQUEST['server'])) {
-            $pass_step2_validation = false;
-            $error_step2_message .=  "Database Server Host, ";
-            }
-
-            if (! $installer->char_is_valid($_REQUEST['port'])) {
+            if (!$installer->char_is_valid($_REQUEST['server'])) {
                 $pass_step2_validation = false;
-                $error_step2_message .=  "Database Server Port, ";
+                $error_step2_message .= "Database Server Host, ";
             }
-            if (! $installer->char_is_valid($_REQUEST['dbname'])) {
+
+            if (!$installer->char_is_valid($_REQUEST['port'])) {
+                $pass_step2_validation = false;
+                $error_step2_message .= "Database Server Port, ";
+            }
+            if (!$installer->char_is_valid($_REQUEST['dbname'])) {
                 $pass_step2_validation = false;
                 $error_step2_message .= "Database Name, ";
             }
-            if (! $installer->char_is_valid($_REQUEST['login'])) {
+            if (!$installer->char_is_valid($_REQUEST['login'])) {
                 $pass_step2_validation = false;
                 $error_step2_message .= "Database Login Name, ";
             }
-            if (! $installer->char_is_valid($_REQUEST['pass'])) {
+            if (!$installer->char_is_valid($_REQUEST['pass'])) {
                 $pass_step2_validation = false;
                 $error_step2_message .= "Database Login Password, ";
             }
@@ -345,187 +293,179 @@ if (($config == 1) && ($state < 4)) {
             }
 
 
-    if (empty($installer->clone_database)) {
-      if (! $installer->login_is_valid() ) {
-        echo "ERROR. Please pick a proper 'Login Name'.<br>\n";
-        echo "Click Back in browser to re-enter.<br>\n";
-        break;
-      }
-      if ( ! $installer->iuser_is_valid() ) {
-        echo "ERROR. The 'Initial User' field can only contain one word and no spaces.<br>\n";
-        echo "Click Back in browser to re-enter.<br>\n";
-        break;
-      }
-      if ( ! $installer->user_password_is_valid() ) {
-        echo "ERROR. Please pick a proper 'Initial User Password'.<br>\n";
-        echo "Click Back in browser to re-enter.<br>\n";
-        break;
-      }
-    }
-    if ( ! $installer->password_is_valid() ) {
-      echo "ERROR. Please pick a proper 'Password'.<br>\n";
-      echo "Click Back in browser to re-enter.<br>\n";
-      break;
-    }
+            if (empty($installer->clone_database)) {
+                if (!$installer->login_is_valid()) {
+                    echo "ERROR. Please pick a proper 'Login Name'.<br>\n";
+                    echo "Click Back in browser to re-enter.<br>\n";
+                    break;
+                }
+                if (!$installer->iuser_is_valid()) {
+                    echo "ERROR. The 'Initial User' field can only contain one word and no spaces.<br>\n";
+                    echo "Click Back in browser to re-enter.<br>\n";
+                    break;
+                }
+                if (!$installer->user_password_is_valid()) {
+                    echo "ERROR. Please pick a proper 'Initial User Password'.<br>\n";
+                    echo "Click Back in browser to re-enter.<br>\n";
+                    break;
+                }
+            }
+            if (!$installer->password_is_valid()) {
+                echo "ERROR. Please pick a proper 'Password'.<br>\n";
+                echo "Click Back in browser to re-enter.<br>\n";
+                break;
+            }
 
-    echo "<b>Step $state</b><br><br>\n";
-    echo "Configuring OpenEMR...<br><br>\n";
+            echo "<b>Step $state</b><br><br>\n";
+            echo "Configuring OpenEMR...<br><br>\n";
 
-    // Skip below if database shell has already been created.
-    if ($inst != 2) {
+            // Skip below if database shell has already been created.
+            if ($inst != 2) {
 
-      echo "Connecting to MySQL Server...\n";
-      flush();
-      if ( ! $installer->root_database_connection() ) {
-	echo "ERROR.  Check your login credentials.\n";
-	echo $installer->error_message;
-	break;
-      }
-      else {
-	echo "OK.<br>\n";
-        flush();
-      }
-    }
+                echo "Connecting to MySQL Server...\n";
+                flush();
+                if (!$installer->root_database_connection()) {
+                    echo "ERROR.  Check your login credentials.\n";
+                    echo $installer->error_message;
+                    break;
+                } else {
+                    echo "OK.<br>\n";
+                    flush();
+                }
+            }
 
-    // Only pertinent if cloning another installation database
-    if ( ! empty($installer->clone_database)) {
+            // Only pertinent if cloning another installation database
+            if (!empty($installer->clone_database)) {
 
-      echo "Dumping source database...";
-      flush();
-      if ( ! $installer->create_dumpfiles() ) {
-        echo $installer->error_message;
-        break;
-      }
-      else {
-        echo " OK.<br>\n";
-        flush();
-      }
-    }
+                echo "Dumping source database...";
+                flush();
+                if (!$installer->create_dumpfiles()) {
+                    echo $installer->error_message;
+                    break;
+                } else {
+                    echo " OK.<br>\n";
+                    flush();
+                }
+            }
 
-    // Only pertinent if mirroring another installation directory
-    if ( ! empty($installer->source_site_id)) {
+            // Only pertinent if mirroring another installation directory
+            if (!empty($installer->source_site_id)) {
 
-      echo "Creating site directory...";
-      if ( ! $installer->create_site_directory() ) {
-        echo $installer->error_message;
-        break;
-      }
-      else {
-        echo "OK.<BR>";
-        flush();
-      }
-    }
+                echo "Creating site directory...";
+                if (!$installer->create_site_directory()) {
+                    echo $installer->error_message;
+                    break;
+                } else {
+                    echo "OK.<BR>";
+                    flush();
+                }
+            }
 
-    // Skip below if database shell has already been created.
-    if ($inst != 2) {
-      echo "Creating database...\n";
-      flush();
-      if ( ! $installer->create_database() ) {
-        echo "ERROR.  Check your login credentials.\n";
-        echo $installer->error_message;
-        break;
-      } else {
-        echo "OK.<br>\n";
-        flush();
-      }
+            // Skip below if database shell has already been created.
+            if ($inst != 2) {
+                echo "Creating database...\n";
+                flush();
+                if (!$installer->create_database()) {
+                    echo "ERROR.  Check your login credentials.\n";
+                    echo $installer->error_message;
+                    break;
+                } else {
+                    echo "OK.<br>\n";
+                    flush();
+                }
 
-      echo "Creating user with permissions for database...\n";
-      flush();
-      if ( ! $installer->grant_privileges() ) {
-	echo "ERROR when granting privileges to the specified user.\n";
-	echo $installer->error_message;
-	break;
-      } else {
-	echo "OK.<br>\n";
-        flush();
-      }
+                echo "Creating user with permissions for database...\n";
+                flush();
+                if (!$installer->grant_privileges()) {
+                    echo "ERROR when granting privileges to the specified user.\n";
+                    echo $installer->error_message;
+                    break;
+                } else {
+                    echo "OK.<br>\n";
+                    flush();
+                }
 
-      echo "Reconnecting as new user...\n";
-      flush();
-      $installer->disconnect();
-    } else {
+                echo "Reconnecting as new user...\n";
+                flush();
+                $installer->disconnect();
+            } else {
 
-      echo "Connecting to MySQL Server...\n";
-    }
-    if ( ! $installer->user_database_connection() ) {
-      echo "ERROR.  Check your login credentials.\n";
-      echo $installer->error_message;
-      break;
-    }
-    else {
-      echo "OK.<br>\n";
-      flush();
-    }
+                echo "Connecting to MySQL Server...\n";
+            }
+            if (!$installer->user_database_connection()) {
+                echo "ERROR.  Check your login credentials.\n";
+                echo $installer->error_message;
+                break;
+            } else {
+                echo "OK.<br>\n";
+                flush();
+            }
 
-    // Load the database files
-    $dump_results = $installer->load_dumpfiles();
-    if ( ! $dump_results ) {
-      echo $installer->error_message;
-      break;
-    } else {
-      echo $dump_results;
-      flush();
-    }
+            // Load the database files
+            $dump_results = $installer->load_dumpfiles();
+            if (!$dump_results) {
+                echo $installer->error_message;
+                break;
+            } else {
+                echo $dump_results;
+                flush();
+            }
 
-    echo "Writing SQL configuration...\n";
-    flush();
-    if ( ! $installer->write_configuration_file() ) {
-      echo $installer->error_message;
-      break;
-    }
-    else {
-      echo "OK.<br>\n";
-      flush();
-    }
+            echo "Writing SQL configuration...\n";
+            flush();
+            if (!$installer->write_configuration_file()) {
+                echo $installer->error_message;
+                break;
+            } else {
+                echo "OK.<br>\n";
+                flush();
+            }
 
-    // Only pertinent if not cloning another installation database
-    if (empty($installer->clone_database)) {
+            // Only pertinent if not cloning another installation database
+            if (empty($installer->clone_database)) {
 
-      echo "Setting version indicators...\n";
-      flush();
-      if ( ! $installer->add_version_info() ) {
-        echo "ERROR.\n";
-        echo $installer->error_message;;
-        break;
-      }
-      else {
-        echo "OK<br>\n";
-        flush();
-      }
+                echo "Setting version indicators...\n";
+                flush();
+                if (!$installer->add_version_info()) {
+                    echo "ERROR.\n";
+                    echo $installer->error_message;;
+                    break;
+                } else {
+                    echo "OK<br>\n";
+                    flush();
+                }
 
-      echo "Writing global configuration defaults...\n";
-      flush();
-      if ( ! $installer->insert_globals() ) {
-        echo "ERROR.\n";
-        echo $installer->error_message;;
-        break;
-      }
-      else {
-        echo "OK<br>\n";
-        flush();
-      }
+                echo "Writing global configuration defaults...\n";
+                flush();
+                if (!$installer->insert_globals()) {
+                    echo "ERROR.\n";
+                    echo $installer->error_message;;
+                    break;
+                } else {
+                    echo "OK<br>\n";
+                    flush();
+                }
 
-      echo "Adding Initial User...\n";
-      flush();
-      if ( ! $installer->add_initial_user() ) {
-        echo $installer->error_message;
-        break;
-      }
-      echo "OK<br>\n";
-      flush();
-    }
+                echo "Adding Initial User...\n";
+                flush();
+                if (!$installer->add_initial_user()) {
+                    echo $installer->error_message;
+                    break;
+                }
+                echo "OK<br>\n";
+                flush();
+            }
 
-    if ( ! empty($installer->clone_database) ) {
-      // Database was cloned, skip ACL setup.
-      echo "Click 'continue' for further instructions.";
-      $next_state = 7;
-    }
-    else {
-      echo "\n<br>Next step will install and configure access controls (php-GACL).<br>\n";
-      $next_state = 4;
-    }
+            if (!empty($installer->clone_database)) {
+                // Database was cloned, skip ACL setup.
+                echo "Click 'continue' for further instructions.";
+                $next_state = 7;
+            } else {
+                echo "\n<br>Next step will install and configure access controls (php-GACL).<br>\n";
+                $next_state = 4;
+            }
 
-    echo "
+            echo "
 <FORM METHOD='POST'>\n
 <INPUT TYPE='HIDDEN' NAME='state' VALUE='$next_state'>
 <INPUT TYPE='HIDDEN' NAME='site' VALUE='$site_id'>\n
@@ -537,26 +477,26 @@ if (($config == 1) && ($state < 4)) {
 <br>\n
 <INPUT TYPE='SUBMIT' VALUE='Continue'><br></FORM><br>\n";
 
-    break;
-  case 4:
-    echo "<b>Step $state</b><br><br>\n";
-    echo "Installing and Configuring Access Controls (php-GACL)...<br><br>";
+            break;
 
-    if ( ! $installer->install_gacl() ) {
-      echo $installer->error_message;
-      break;
-    }
-    else {
-      // display the status information for gacl setup
-      echo $installer->debug_message;
-    }
+        case 4:
+            echo "<b>Step $state</b><br><br>\n";
+            echo "Installing and Configuring Access Controls (php-GACL)...<br><br>";
 
-    echo "Gave the '$installer->iuser' user (password is '$installer->iuserpass') administrator access.<br><br>";
+            if (!$installer->install_gacl()) {
+                echo $installer->error_message;
+                break;
+            } else {
+                // display the status information for gacl setup
+                echo $installer->debug_message;
+            }
 
-    echo "Done installing and configuring access controls (php-GACL).<br>";
-    echo "Next step will configure PHP.";
+            echo "Gave the '$installer->iuser' user (password is '$installer->iuserpass') administrator access.<br><br>";
 
-    echo "<br><FORM METHOD='POST'>\n
+            echo "Done installing and configuring access controls (php-GACL).<br>";
+            echo "Next step will configure PHP.";
+
+            echo "<br><FORM METHOD='POST'>\n
 <INPUT TYPE='HIDDEN' NAME='state' VALUE='5'>\n
 <INPUT TYPE='HIDDEN' NAME='site' VALUE='$site_id'>\n
 <INPUT TYPE='HIDDEN' NAME='iuser' VALUE='$installer->iuser'>\n
@@ -564,44 +504,44 @@ if (($config == 1) && ($state < 4)) {
 <br>\n
 <INPUT TYPE='SUBMIT' VALUE='Continue'><br></FORM><br>\n";
 
-    break;
+            break;
 
-  case 5:
-    echo "<b>Step $state</b><br><br>\n";
-    echo "Configuration of PHP...<br><br>\n";
-    echo "We recommend making the following changes to your PHP installation, which can normally be done by editing the php.ini configuration file:\n";
-    echo "<ul>";
-    $gotFileFlag = 0;
-    if (version_compare(PHP_VERSION, '5.2.4', '>=')) {
-      $phpINIfile = php_ini_loaded_file();
-      if ($phpINIfile) {
-        echo "<li><font color='green'>Your php.ini file can be found at ".$phpINIfile."</font></li>\n";
-        $gotFileFlag = 1;
-      }
-    }
-echo "<li>","To ensure proper functioning of OpenEMR you must make sure that PHP settings include:";
-echo "<table class='phpset'><tr><th>Setting</th><th>Required value</th><th>Current value</th></tr>";
-echo "<tr><td>short_open_tag  </td><td>Off</td><td>", ini_get('short_open_tag')?'On':'Off',   "</td></tr>\n";
-echo "<tr><td>display_errors  </td><td>Off</td><td>", ini_get('display_errors')?'On':'Off',   "</td></tr>\n";
-echo "<tr><td>register_globals   </td><td>Off</td><td>", ini_get('register_globals')?'On':'Off', "</td></tr>\n";
-echo "<tr><td>max_input_vars     </td><td>at least 3000</td><td>", ini_get('max_input_vars'), "</td></tr>\n";
-echo "<tr><td>max_execution_time </td><td>at least 60</td><td>", ini_get('max_execution_time'), "</td></tr>\n";
-echo "<tr><td>max_input_time     </td><td>at least 90</td><td>", ini_get('max_input_time'), "</td></tr>\n";
-echo "<tr><td>post_max_size      </td><td>at least 30M</td><td>", ini_get('post_max_size'), "</td></tr>\n";
-echo "<tr><td>memory_limit       </td><td>at least 128M</td><td>", ini_get('memory_limit'), "</td></tr>\n";
-echo "</table>";
-echo "</li>";
+        case 5:
+            echo "<b>Step $state</b><br><br>\n";
+            echo "Configuration of PHP...<br><br>\n";
+            echo "We recommend making the following changes to your PHP installation, which can normally be done by editing the php.ini configuration file:\n";
+            echo "<ul>";
+            $gotFileFlag = 0;
+            if (version_compare(PHP_VERSION, '5.2.4', '>=')) {
+                $phpINIfile = php_ini_loaded_file();
+                if ($phpINIfile) {
+                    echo "<li><font color='green'>Your php.ini file can be found at " . $phpINIfile . "</font></li>\n";
+                    $gotFileFlag = 1;
+                }
+            }
+            echo "<li>", "To ensure proper functioning of OpenEMR you must make sure that PHP settings include:";
+            echo "<table class='phpset'><tr><th>Setting</th><th>Required value</th><th>Current value</th></tr>";
+            echo "<tr><td>short_open_tag  </td><td>Off</td><td>", ini_get('short_open_tag') ? 'On' : 'Off', "</td></tr>\n";
+            echo "<tr><td>display_errors  </td><td>Off</td><td>", ini_get('display_errors') ? 'On' : 'Off', "</td></tr>\n";
+            echo "<tr><td>register_globals   </td><td>Off</td><td>", ini_get('register_globals') ? 'On' : 'Off', "</td></tr>\n";
+            echo "<tr><td>max_input_vars     </td><td>at least 3000</td><td>", ini_get('max_input_vars'), "</td></tr>\n";
+            echo "<tr><td>max_execution_time </td><td>at least 60</td><td>", ini_get('max_execution_time'), "</td></tr>\n";
+            echo "<tr><td>max_input_time     </td><td>at least 90</td><td>", ini_get('max_input_time'), "</td></tr>\n";
+            echo "<tr><td>post_max_size      </td><td>at least 30M</td><td>", ini_get('post_max_size'), "</td></tr>\n";
+            echo "<tr><td>memory_limit       </td><td>at least 128M</td><td>", ini_get('memory_limit'), "</td></tr>\n";
+            echo "</table>";
+            echo "</li>";
 
-echo "<li>In order to take full advantage of the patient documents capability you must make sure that settings in php.ini file include \"file_uploads = On\", that \"upload_max_filesize\" is appropriate for your use and that \"upload_tmp_dir\" is set to a correct value that will work on your system.</li>\n";
-if (!$gotFileFlag) {
-    echo "<li>If you are having difficulty finding your php.ini file, then refer to the <a href='Documentation/INSTALL' target='_blank'><span STYLE='text-decoration: underline;'>'INSTALL'</span></a> manual for suggestions.</li>\n";
-}
-echo "</ul>";
+            echo "<li>In order to take full advantage of the patient documents capability you must make sure that settings in php.ini file include \"file_uploads = On\", that \"upload_max_filesize\" is appropriate for your use and that \"upload_tmp_dir\" is set to a correct value that will work on your system.</li>\n";
+            if (!$gotFileFlag) {
+                echo "<li>If you are having difficulty finding your php.ini file, then refer to the <a href='Documentation/INSTALL' target='_blank'><span STYLE='text-decoration: underline;'>'INSTALL'</span></a> manual for suggestions.</li>\n";
+            }
+            echo "</ul>";
 
-echo "<br>We recommend you print these instructions for future reference.<br><br>";
-echo "Next step will configure Apache web server.";
+            echo "<br>We recommend you print these instructions for future reference.<br><br>";
+            echo "Next step will configure Apache web server.";
 
-echo "<br><FORM METHOD='POST'>\n
+            echo "<br><FORM METHOD='POST'>\n
 <INPUT TYPE='HIDDEN' NAME='state' VALUE='6'>\n
 <INPUT TYPE='HIDDEN' NAME='site' VALUE='$site_id'>\n
 <INPUT TYPE='HIDDEN' NAME='iuser' VALUE='$installer->iuser'>\n
@@ -609,37 +549,37 @@ echo "<br><FORM METHOD='POST'>\n
 <br>\n
 <INPUT TYPE='SUBMIT' VALUE='Continue'><br></FORM><br>\n";
 
-break;
+            break;
 
-       case 6:
-echo "<b>Step $state</b><br><br>\n";
-echo "Configuration of Apache web server...<br><br>\n";
-echo "The \"".preg_replace("/${site_id}/","*",realpath($docsDirectory))."\", \"".preg_replace("/${site_id}/","*",realpath($billingDirectory))."\" and \"".preg_replace("/${site_id}/","*",realpath($billingDirectory2))."\" directories contain patient information, and
+        case 6:
+            echo "<b>Step $state</b><br><br>\n";
+            echo "Configuration of Apache web server...<br><br>\n";
+            echo "The \"" . preg_replace("/${site_id}/", "*", realpath($docsDirectory)) . "\", \"" . preg_replace("/${site_id}/", "*", realpath($billingDirectory)) . "\" and \"" . preg_replace("/${site_id}/", "*", realpath($billingDirectory2)) . "\" directories contain patient information, and
 it is important to secure these directories. Additionally, some settings are required for the Zend Framework to work in OpenEMR. This can be done by pasting the below to end of your apache configuration file:<br>
-&nbsp;&nbsp;&lt;Directory \"".realpath(dirname(__FILE__))."\"&gt;<br>
+&nbsp;&nbsp;&lt;Directory \"" . realpath(dirname(__FILE__)) . "\"&gt;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AllowOverride FileInfo<br>
 &nbsp;&nbsp;&lt;/Directory&gt;<br>
-&nbsp;&nbsp;&lt;Directory \"".realpath(dirname(__FILE__))."/sites\"&gt;<br>
+&nbsp;&nbsp;&lt;Directory \"" . realpath(dirname(__FILE__)) . "/sites\"&gt;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AllowOverride None<br>
 &nbsp;&nbsp;&lt;/Directory&gt;<br>
-&nbsp;&nbsp;&lt;Directory \"".preg_replace("/${site_id}/","*",realpath($docsDirectory))."\"&gt;<br>
+&nbsp;&nbsp;&lt;Directory \"" . preg_replace("/${site_id}/", "*", realpath($docsDirectory)) . "\"&gt;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;order deny,allow<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Deny from all<br>
 &nbsp;&nbsp;&lt;/Directory&gt;<br>
-&nbsp;&nbsp;&lt;Directory \"".preg_replace("/${site_id}/","*",realpath($billingDirectory))."\"&gt;<br>
+&nbsp;&nbsp;&lt;Directory \"" . preg_replace("/${site_id}/", "*", realpath($billingDirectory)) . "\"&gt;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;order deny,allow<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Deny from all<br>
 &nbsp;&nbsp;&lt;/Directory&gt;<br>
-&nbsp;&nbsp;&lt;Directory \"".preg_replace("/${site_id}/","*",realpath($billingDirectory2))."\"&gt;<br>
+&nbsp;&nbsp;&lt;Directory \"" . preg_replace("/${site_id}/", "*", realpath($billingDirectory2)) . "\"&gt;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;order deny,allow<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Deny from all<br>
 &nbsp;&nbsp;&lt;/Directory&gt;<br><br>";
 
-echo "If you are having difficulty finding your apache configuration file, then refer to the <a href='Documentation/INSTALL' target='_blank'><span STYLE='text-decoration: underline;'>'INSTALL'</span></a> manual for suggestions.<br><br>\n";
-echo "<br>We recommend you print these instructions for future reference.<br><br>";
-echo "Click 'continue' for further instructions.";
+            echo "If you are having difficulty finding your apache configuration file, then refer to the <a href='Documentation/INSTALL' target='_blank'><span STYLE='text-decoration: underline;'>'INSTALL'</span></a> manual for suggestions.<br><br>\n";
+            echo "<br>We recommend you print these instructions for future reference.<br><br>";
+            echo "Click 'continue' for further instructions.";
 
-echo "<br><FORM METHOD='POST'>\n
+            echo "<br><FORM METHOD='POST'>\n
 <INPUT TYPE='HIDDEN' NAME='state' VALUE='7'>\n
 <INPUT TYPE='HIDDEN' NAME='site' VALUE='$site_id'>\n
 <INPUT TYPE='HIDDEN' NAME='iuser' VALUE='$installer->iuser'>\n
@@ -647,53 +587,54 @@ echo "<br><FORM METHOD='POST'>\n
 <br>\n
 <INPUT TYPE='SUBMIT' VALUE='Continue'><br></FORM><br>\n";
 
-break;
+            break;
 
-	case 0:
-	default:
-	    $welcomeVars = array('site_id' => $site_id);
+        case 0:
+        default:
+            $welcomeVars = array('site_id' => $site_id);
 
-        if ($checkPermissions == true) {
-            $welcomeVars['checkPermission'] = true;
-            $writableError = false;
-            $fileList = array();
-            foreach ($writableFileList as $tmpFile) {
-                $fileListTmp['path'] = realpath($tmpFile);
-                $fileListTmp['status'] = (is_writable($tmpFile)) ? true : false;
-                array_push($fileList, $fileListTmp);
-                $writableError = ($fileListTmp['status'] == false) ? true : $writableError;
-            }
+            if ($checkPermissions == true) {
+                $welcomeVars['checkPermission'] = true;
+                $writableError = false;
+                $fileList = array();
 
-            $welcomeVars['fileErr'] = $writableError;
+                foreach ($writableFileList as $tmpFile) {
+                    $fileListTmp['path'] = realpath($tmpFile);
+                    $fileListTmp['status'] = (is_writable($tmpFile)) ? true : false;
+                    array_push($fileList, $fileListTmp);
+                    $writableError = ($fileListTmp['status'] == false) ? true : $writableError;
+                }
 
-            if ($writableError) {
-                break;
-            }
-            $writableError = false;
+                // @todo Seems to break if a file is not writable
+                $welcomeVars['fileErr'] = $writableError;
 
-            $dirList = array();
-            foreach ($writableDirList as $tempDir) {
-                $dirListTmp['path'] = realpath($tempDir);
-                $dirListTmp['status'] = (is_writable($tempDir)) ? true : false;
-                array_push($dirList, $dirListTmp);
-                $writableError = ($dirListTmp['status'] == false) ? true : $writableError;
-            }
+                if ($writableError) {
+                    break;
+                }
+                $writableError = false;
 
-            $welcomeVars['dirErr'] = $writableError;
+                $dirList = array();
+                foreach ($writableDirList as $tempDir) {
+                    $dirListTmp['path'] = realpath($tempDir);
+                    $dirListTmp['status'] = (is_writable($tempDir)) ? true : false;
+                    array_push($dirList, $dirListTmp);
+                    $writableError = ($dirListTmp['status'] == false) ? true : $writableError;
+                }
 
-            $welcomeVars['dirs'] = $dirList;
-            $welcomeVars['files'] = $fileList;
+                $welcomeVars['dirErr'] = $writableError;
 
-            if ($writableError) {
+                $welcomeVars['dirs'] = $dirList;
+                $welcomeVars['files'] = $fileList;
+
+                if ($writableError) {
+                    echo $twig->render('welcome.html', $welcomeVars);
+                    break;
+                }
+
                 echo $twig->render('welcome.html', $welcomeVars);
-                break;
+            } else {
+                echo "<br>Click to continue installation.<br>\n";
             }
-
-            echo $twig->render('welcome.html', $welcomeVars);
-        }
-        else {
-            echo "<br>Click to continue installation.<br>\n";
-        }
     }
 }
 ?>

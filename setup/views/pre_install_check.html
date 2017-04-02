@@ -2,8 +2,9 @@
 
 {% block content %}
 
+    <div class="clearfix"></div>
     {% if errors.globals == true %}
-    <div class="alert alert-danger">
+    <div class="alert alert-danger" role="alert">
         <i class="fa fa-danger"></i> It appears that you have register_globals enabled in your php.ini configuration
     file. This causes unacceptable security risks. You must turn it off before
     continuing with installation.
@@ -12,19 +13,19 @@
 
     {% if errors.xml == true %}
 
-    <div class="alert alert-danger">
+    <div class="alert alert-danger" role="alert">
         PHP XML extension missing. To continue, install PHP XML extension, then restart web server.
     </div>
     {% endif %}
 
     {% if errors.mysql == true %}
-    <div class="alert alert-danger">
+    <div class="alert alert-danger" role="alert">
         PHP MySQL extension missing. To continue, install and enable MySQL extension, then restart web server.
     </div>
     {% endif %}
 
     {% if errors.mbstring == true %}
-    <div class="alert alert-danger">
+    <div class="alert alert-danger" role="alert">
         PHP mb_string extension missing. To continue, install and enable mb_string extension, then restart web server.
     </div>
     {% endif %}

@@ -28,6 +28,10 @@
 
 namespace OpenEMR\Setup\Entity;
 
+use Symfony\Component\Validator\Mapping\ClassMetadata;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Type;
+
 
 class DatabaseSetup
 {
@@ -39,36 +43,43 @@ class DatabaseSetup
 
     /**
      * @var int
+     * @Assert\NotBlank()
      */
     protected $port;
 
     /**
      * @var string
+     * @Assert\NotBlank()
      */
     protected $dbName;
 
     /**
      * @var string
+     * @Assert\NotBlank()
      */
     protected $login;
 
     /**
      * @var string
+     * @Assert\NotBlank()
      */
     protected $pass;
 
     /**
      * @var string
+     * @Assert\NotBlank()
      */
     protected $rootUser;
 
     /**
      * @var string
+     * @Assert\NotBlank()
      */
     protected $rootPass;
 
     /**
      * @var string
+     * @Assert\NotBlank()
      */
     protected $loginHost;
 
@@ -79,26 +90,31 @@ class DatabaseSetup
 
     /**
      * @var string
+     * @Assert\NotBlank()
      */
     protected $user;
 
     /**
      * @var string
+     * @Assert\NotBlank()
      */
     protected $iUserPass;
 
     /**
      * @var string
+     * @Assert\NotBlank()
      */
     protected $iUFname;
 
     /**
      * @var string
+     * @Assert\NotBlank()
      */
     protected $iUName;
 
     /**
      * @var string
+     * @Assert\NotBlank()
      */
     protected $iGroup;
 
@@ -366,5 +382,12 @@ class DatabaseSetup
     public function setCloneDatabase($cloneDatabase)
     {
         $this->cloneDatabase = $cloneDatabase;
+    }
+
+    public static function loadValidatorMetadata(ClassMetadata $metadata)
+    {
+        $metadata->addPropertyConstraint('host', new NotBlank());
+
+        $metadata->addPropertyConstraint('pass', new NotBlank());
     }
 }
