@@ -29,7 +29,8 @@
         "symfony/twig-bridge": "^3.2",
         "symfony/validator": "^3.2",
         "symfony/http-foundation": "^3.2",
-        "symfony/translation": "^3.2"
+        "symfony/translation": "^3.2",
+        "symfony/filesystem": "^3.2"
 
     },
     "require-dev": {
@@ -61,7 +62,8 @@
             "entities\\": "entities",
             "services\\": "services",
             "repositories\\": "repositories",
-            "OpenEMR\\Setup\\": "setup/"
+            "OpenEMR\\Setup\\": "setup/",
+            "OpenEMR\\Setup\\Installer\\": "library/classes/"
         }
     },
     "config": {

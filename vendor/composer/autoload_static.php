@@ -65,6 +65,7 @@ class ComposerStaticInit22ddb69348c7ed922c96325249cef3d0
             'Symfony\\Component\\Inflector\\' => 28,
             'Symfony\\Component\\HttpFoundation\\' => 33,
             'Symfony\\Component\\Form\\' => 23,
+            'Symfony\\Component\\Filesystem\\' => 29,
             'Symfony\\Component\\EventDispatcher\\' => 34,
             'Symfony\\Component\\Debug\\' => 24,
             'Symfony\\Component\\Console\\' => 26,
@@ -172,6 +173,10 @@ class ComposerStaticInit22ddb69348c7ed922c96325249cef3d0
         'Symfony\\Component\\Form\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/form',
+        ),
+        'Symfony\\Component\\Filesystem\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/filesystem',
         ),
         'Symfony\\Component\\EventDispatcher\\' => 
         array (
