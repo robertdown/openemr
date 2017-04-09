@@ -36,7 +36,6 @@
     "commit": "b9bc07fe5e8d35cbede7bad4a3f95c863a5f7cce"
   },
   "_source": "https://github.com/asyraf9/bootstrap-sidebar.git",
-  "_target": "^0.2.2",
-  "_originalSource": "bootstrap-sidebar",
-  "_direct": true
+  "_target": "0.2.2",
+  "_originalSource": "bootstrap-sidebar"
 }
