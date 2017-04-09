@@ -183,7 +183,7 @@ if ($result3['provider']) {   // Use provider in case there is an ins record w/ 
 <script type="text/javascript" src="<?php echo $GLOBALS['assets_static_relative']; ?>/bootstrap-sidebar/dist/js/sidebar.js"></script>
 <script type="text/javascript" src="../../../library/js/common.js"></script>
 <script type="text/javascript" src="../../../library/js/fancybox/jquery.fancybox-1.2.6.js"></script>
-<script type="text/javascript" language="JavaScript">
+<script type="text/javascript">
 
  var mypcc = '<?php echo htmlspecialchars($GLOBALS['phone_country_code'],ENT_QUOTES); ?>';
  //////////
@@ -222,10 +222,6 @@ function sendimage(pid, what) {
   '_blank', 500, 400);
  return false;
 }
-
-</script>
-
-<script type="text/javascript">
 
 function toggleIndicator(target,div) {
 
@@ -677,9 +673,7 @@ $(window).load(function() {
             </div>
 <?php
 endif; // $thisauth
-?>
 
-<?php
 // Get the document ID of the patient ID card if access to it is wanted here.
 $idcard_doc_id = false;
 if ($GLOBALS['patient_id_category_name']) {
