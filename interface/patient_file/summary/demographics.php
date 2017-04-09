@@ -172,6 +172,7 @@ if ($result3['provider']) {   // Use provider in case there is an ins record w/ 
 <link rel="stylesheet" href="<?php echo $GLOBALS['assets_static_relative'];?>/bootstrap-3-3-4/dist/css/bootstrap.css" type="text/css">
 <link rel="stylesheet" href="<?php echo $css_header;?>" type="text/css">
 <link rel="stylesheet" href="<?php echo $GLOBALS['assets_static_relative'];?>/bootstrap-sidebar-0-2-2/dist/css/sidebar.css" type="text/css">
+<link rel="stylesheet" href="<?php echo $GLOBALS['assets_static_relative'];?>/font-awesome-4-6-3/css/font-awesome.css" type="text/css">
 <link rel="stylesheet" type="text/css" href="../../../library/js/fancybox/jquery.fancybox-1.2.6.css" media="screen" />
 <style type="text/css">@import url(../../../library/dynarch_calendar.css);</style>
 <script type="text/javascript" src="../../../library/textformat.js"></script>
@@ -180,6 +181,8 @@ if ($result3['provider']) {   // Use provider in case there is an ins record w/ 
 <script type="text/javascript" src="../../../library/dynarch_calendar_setup.js"></script>
 <script type="text/javascript" src="../../../library/dialog.js?v=<?php echo $v_js_includes; ?>"></script>
 <script type="text/javascript" src="<?php echo $GLOBALS['assets_static_relative']; ?>/jquery-min-1-6-4/index.js"></script>
+<script type="text/javascript" src="<?php echo $GLOBALS['assets_static_relative']; ?>/jquery-min-1-9-1/index.js"></script>
+<script type="text/javascript" src="<?php echo $GLOBALS['assets_static_relative']; ?>/bootstrap-3-3-4/dist/js/bootstrap.js"></script>
 <script type="text/javascript" src="<?php echo $GLOBALS['assets_static_relative']; ?>/bootstrap-sidebar-0-2-2/dist/js/sidebar.js"></script>
 <script type="text/javascript" src="../../../library/js/common.js"></script>
 <script type="text/javascript" src="../../../library/js/fancybox/jquery.fancybox-1.2.6.js"></script>
@@ -475,23 +478,25 @@ $(window).load(function() {
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container-fluid">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#patient-context-bar" aria-expanded="false">
+                <span class="sr-only"><?php echo xl("Toggle navigation"); ?></span>
+                <i class="fa fa-bars"></i>
+            </button>
+            <button type="button" class="navbar-toggle hidden-md hidden-lg" data-toggle="sidebar" data-target=".sidebar">
+                <span class="sr-only"><?php echo xl("Toggle navigation"); ?></span>
+                <i class="fa fa-bars"></i>
             </button>
             <a class="navbar-brand" href="#"><?php echo htmlspecialchars(getPatientName($pid),ENT_NOQUOTES); ?></a>
         </div>
         <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <div class="collapse navbar-collapse" id="patient-context-bar">
 
         </div><!-- /.navbar-collapse -->
     </div>
 </nav>
 <div class="container-fluid" style="margin-top:0">
 <div class="row">
-    <div class="col-xs-7 col-sm-3 col-md-2 sidebar sidebar-left sidebar-md-show">
+    <div class="col-xs-7 col-sm-3 col-md-2 sidebar sidebar-left sidebar-animate sidebar-md-show">
         <ul class="nav navbar-stacked">
             <?php
             if($GLOBALS['erx_enable']): ?>
