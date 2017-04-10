@@ -61,6 +61,10 @@ class ComposerStaticInit22ddb69348c7ed922c96325249cef3d0
         array (
             'Psr\\Log\\' => 8,
         ),
+        'O' => 
+        array (
+            'OpenEMR\\ViewHelper\\' => 19,
+        ),
         'I' => 
         array (
             'Illuminate\\Support\\' => 19,
@@ -131,6 +135,10 @@ class ComposerStaticInit22ddb69348c7ed922c96325249cef3d0
         'Psr\\Log\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+        ),
+        'OpenEMR\\ViewHelper\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/library/ViewHelper',
         ),
         'Illuminate\\Support\\' => 
         array (
@@ -1291,6 +1299,7 @@ class ComposerStaticInit22ddb69348c7ed922c96325249cef3d0
         'NumberToText' => __DIR__ . '/../..' . '/library/classes/NumberToText.class.php',
         'OFX' => __DIR__ . '/../..' . '/library/classes/OFX.class.php',
         'ORDataObject' => __DIR__ . '/../..' . '/library/classes/ORDataObject.class.php',
+        'OpenEMR\\ViewHelper\\ViewHelper' => __DIR__ . '/../..' . '/library/ViewHelper/ViewHelper.php',
         'PDF_Label' => __DIR__ . '/../..' . '/library/classes/PDF_Label.php',
         'PHPMailer' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.phpmailer.php',
         'PHPMailerOAuth' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.phpmaileroauth.php',
@@ -3616,7 +3625,7 @@ class ComposerStaticInit22ddb69348c7ed922c96325249cef3d0
         'eFPDF' => __DIR__ . '/../..' . '/library/classes/PDF_Label.php',
         'entities\\ONote' => __DIR__ . '/../..' . '/entities/ONote.php',
         'entities\\ProductRegistration' => __DIR__ . '/../..' . '/entities/product_registration.php',
-        'entities\\User' => __DIR__ . '/../..' . '/entities/User.php',
+        'entities\\User' => __DIR__ . '/../..' . '/entities/user.php',
         'entities\\Version' => __DIR__ . '/../..' . '/entities/Version.php',
         'html2text' => __DIR__ . '/../..' . '/library/classes/html2text.class.php',
         'ntlm_sasl_client_class' => __DIR__ . '/..' . '/phpmailer/phpmailer/extras/ntlm_sasl_client.php',

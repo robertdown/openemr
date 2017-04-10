@@ -54,7 +54,8 @@
             "common\\http\\": "common/http",
             "entities\\": "entities",
             "services\\": "services",
-            "repositories\\": "repositories"
+            "repositories\\": "repositories",
+            "OpenEMR\\ViewHelper\\": "library/ViewHelper"
         }
     },
     "config": {

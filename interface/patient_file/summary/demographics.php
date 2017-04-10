@@ -39,6 +39,9 @@ $fake_register_globals=false;
  require_once("$srcdir/group.inc");
  ////////////
  require_once(dirname(__FILE__)."/../../../library/appointments.inc.php");
+ require_once "../../../vendor/autoload.php";
+
+use OpenEMR\ViewHelper\ViewHelper;
 
   if (isset($_GET['set_pid'])) {
   include_once("$srcdir/pid.inc");
@@ -676,17 +679,86 @@ $(window).load(function() {
                 </div>
                 <div class="col-md-6">&nbsp;</div>
             </div>
-<?php
-endif; // $thisauth
+        <?php
+        endif; // $thisauth
 
-// Get the document ID of the patient ID card if access to it is wanted here.
-$idcard_doc_id = false;
-if ($GLOBALS['patient_id_category_name']) {
-  $idcard_doc_id = get_document_by_catg($pid, $GLOBALS['patient_id_category_name']);
-}
+        // Get the document ID of the patient ID card if access to it is wanted here.
+        $idcard_doc_id = false;
+        if ($GLOBALS['patient_id_category_name']) {
+          $idcard_doc_id = get_document_by_catg($pid, $GLOBALS['patient_id_category_name']);
+        }
+        ?>
+        <div class="container-fluid" style="margin-top: 0;">
+            <div class="row">
+                <div class="col-md-8">
+                    <?php
+                    echo ViewHelper::expander(array(
+                        'label' => 'Billing',
+                        'id' => 'billingTest',
+                        'button' => array(
+                            'link' => 'testing',
+                            'linkMethod' => 'anchor',
+                        ),
+                        'auth' => true));
+                    ?>
+                    <?php /** <a class="" role="button" data-toggle="collapse" href="#billing" aria-expanded="true" aria-controls="collapseExample">
+                        <?php echo xl("Billing"); ?>
+                    </a>
+                    <div class="collapse in" id="billing">
+                        <div class="well">*/; ?>
+                            <?php
+                            //PATIENT BALANCE,INS BALANCE naina@capminds.com
+                            $patientbalance = get_patient_balance($pid, false);
+                            //Debit the patient balance from insurance balance
+                            $insurancebalance = get_patient_balance($pid, true) - $patientbalance;
+                            $totalbalance=$patientbalance + $insurancebalance;
 
-?>
-
+                            // Show current balance and billing note, if any. ?>
+                            <table class="table">
+                                <tr>
+                                    <td><?php echo xlt('Patient Balance Due');?></td>
+                                    <td><?php echo text(oeFormatMoney($patientbalance));?></td>
+                                </tr>
+                                <tr>
+                                    <td><?php echo xlt('Insurance Balance Due');?></td>
+                                    <td><?php echo text(oeFormatMoney($insurancebalance));?></td>
+                                </tr>
+                                <tr>
+                                    <td><?php echo xlt('Total Balance Due');?></td>
+                                    <td><?php echo text(oeFormatMoney($totalbalance));?></td>
+                                </tr>
+                                <?php if (!empty($result['billing_note'])): ?>
+                                    <tr>
+                                        <td><?php echo xlt('Billing Note');?></td>
+                                        <td><?php echo text($result['billing_note']);?></td>
+                                    </tr>
+                                    <?php
+                                endif;
+                                if ($result3['provider']): // Use provider in case there is an ins record w/ unassigned insco
+                                    ?>
+                                    <tr>
+                                        <td><?php xlt('Primary Insurance');?></td>
+                                        <td><?php echo text($insco_name);?></td>
+                                    </tr>
+                                    <?php if ($result3['copay'] > 0): ?>
+                                    <tr>
+                                        <td><?php xlt('Copay');?></td>
+                                        <td><?php echo text($result3['copay']);?></td>
+                                    </tr>
+                                <?php endif; ?>
+                                    <tr>
+                                        <td><?php xlt('Effective Date');?></td>
+                                        <td><?php echo text(oeFormatShortDate($result3['effdate']));?></td>
+                                    </tr>
+                                <?php endif;?>
+                            </table>
+                    <?php echo ViewHelper::expander(array(), true); ?>
+                </div>
+                <div class="col-md-4">
+                    Right side
+                </div>
+            </div>
+        </div>
 <div style='margin-top:10px' class="main"> <!-- start main content div -->
     <table border="0" cellspacing="0" cellpadding="0" width="100%">
         <tr>
