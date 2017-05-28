@@ -37,11 +37,12 @@ function invalue($name) {
 ?>
 <html>
 <head>
-<script type="text/javascript" src="<?php echo $webroot ?>/interface/main/tabs/js/include_opener.js"></script>
 <title><?php echo $ppid ? xlt('Edit') : xlt('Add New') ?> <?php echo xlt('Procedure Provider'); ?></title>
-<link rel="stylesheet" href='<?php echo $css_header ?>' type='text/css'>
-<script type="text/javascript" src="<?php echo $GLOBALS['assets_static_relative']; ?>/jquery-min-1-3-2/index.js"></script>
-
+<?php
+use OpenEMR\Core\Header;
+echo Header::setupHeader();
+?>
+<script type="text/javascript" src="<?php echo $webroot ?>/interface/main/tabs/js/include_opener.js"></script>
 <style>
 td { font-size:10pt; }
 
@@ -56,10 +57,6 @@ td { font-size:10pt; }
  font-weight:bold;
 }
 </style>
-
-<script language="JavaScript">
-</script>
-
 </head>
 
 <body class="body_top">
@@ -131,8 +128,6 @@ while ($org_row = sqlFetchArray($org_res)) {
 ?>
 
 <form method='post' name='theform' action='procedure_provider_edit.php?ppid=<?php echo attr($ppid) ?>'>
-<center>
-
 <table border='0' width='100%'>
 
  <tr>
@@ -289,19 +284,14 @@ foreach(array(
 </table>
 
 <br />
-
-<input type='submit' name='form_save' value='<?php echo xla('Save'); ?>' />
-
-<?php if ($ppid) { ?>
-&nbsp;
-<input type='submit' name='form_delete' value='<?php echo xla('Delete'); ?>' style='color:red' />
-<?php } ?>
-
-&nbsp;
-<input type='button' value='<?php echo xla('Cancel'); ?>' onclick='window.close()' />
+<div class="btn-group">
+    <button type="submit" name="form_save" class="btn btn-default btn-save"><?php xl("Save", "e");?></button>
+    <?php if ($ppid) { ?>
+        <button type="submit" name="form_delete" class="btn btn-link btn-delete"><?php xl("Delete", "e");?></button>
+    <?php } ?>
+    <button type="submit" class="btn btn-link btn-cancel" onclick="window.close()"><?php xl("Cancel", "e");?></button>
+</div>
 </p>
-
-</center>
 </form>
 </body>
 </html>
