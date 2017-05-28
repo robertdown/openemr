@@ -32,11 +32,11 @@ class Header
      * Helper to do more than one thing to a header, currently only includes assets
      *
      * @var array|string $assets Asset(s) to include
-     * @return void
+     * @return string
      */
     static public function setupHeader($assets = [])
     {
-        echo self::includeAsset($assets);
+        return self::includeAsset($assets);
     }
 
     /**
@@ -73,7 +73,7 @@ class Header
         }
 
         // @TODO Hard coded the path to the config file, not good RD 2017-05-27
-        $map = self::readConfigFile("{$GLOBALS['webroot']}/config/config.yaml");
+        $map = self::readConfigFile("{$GLOBALS['config_dir']}/config.yaml");
 
         $scripts = [];
         $links = [];

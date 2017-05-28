@@ -4,6 +4,7 @@
 require_once(dirname(__FILE__) . "/../common/compatibility/Checker.php");
 
 use OpenEMR\Checker;
+use OpenEMR\Core\Header;
 use Dotenv\Dotenv;
 
 $response = Checker::checkPhpVersion();
@@ -168,6 +169,7 @@ $GLOBALS['images_static_absolute'] = "$webserver_root/public/images";
 $GLOBALS['vendor_dir'] = "$webserver_root/vendor";
 $GLOBALS['fonts_dir'] = "{$web_root}/public/fonts";
 $GLOBALS['template_dir'] = $GLOBALS['fileroot'] . "/templates/";
+$GLOBALS['config_dir'] = "{$GLOBALS['fileroot']}/config";
 $GLOBALS['incdir'] = $include_root;
 // Location of the login screen file
 $GLOBALS['login_screen'] = $GLOBALS['rootdir'] . "/login_screen.php";
@@ -222,7 +224,7 @@ $twigOptions = [
     'debug' => false,
 ];
 
-$twigLoader = new Twig_Loader_Filesystem();
+$twigLoader = new Twig_Loader_Filesystem($GLOBALS['template_dir']);
 $twigEnv = new Twig_Environment($twigLoader, $twigOptions);
 
 if (array_key_exists('debug', $twigOptions) && $twigOptions['debug'] == true) {
@@ -234,6 +236,9 @@ $twigEnv->addGlobal('rootdir', $GLOBALS['rootdir']);
 $twigEnv->addFilter(new Twig_SimpleFilter('translate', function ($string) {
     return xl($string);
 }));
+$twigEnv->addFunction(new Twig_SimpleFunction('includeAsset', function ($asset = array()) {
+    return Header::setupHeader($asset);
+}), ['is_safe' => ['all']]);
 
 /** Twig_Loader */
 $GLOBALS['twigLoader'] = $twigLoader;
