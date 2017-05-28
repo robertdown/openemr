@@ -24,10 +24,6 @@ require_once("../globals.php");
 require_once("$srcdir/acl.inc");
 require_once("$srcdir/options.inc.php");
 
-$popup = empty($_GET['popup']) ? 0 : 1;
-
-//$form_name = trim($_POST['form_name']);
-
 $sql = "SELECT pp.* FROM procedure_providers AS pp ORDER BY pp.name";
 $result = sqlStatement($sql);
 $providers = [];

@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    {{ includeAsset()|raw }}
-
     <title>{{ 'Procedure Providers'|translate }}</title>
-
-    {% if popup %}
-    <script type="text/javascript" src="../../library/topdialog.js"></script>
-    {% endif %}
-
+    {{ includeAsset()|raw }}
     <script type="text/javascript">
-        {% if popup %}
-        {# require restoreSession #}
-        {% endif %}
-
         $(document).ready(function () {
-            $("table").on("click", "tr", function(){
+            $("tbody").on("click", "tr", function(){
+                top.restoreSession();
+                var ppid = $(this).data('ppid');
+                dlgopen('procedure_provider_edit.php?ppid=' + ppid, '_blank', 700, 550);
+            });
+
+            $("#add").on("click", function(){
+                top.restoreSession();
                 dlgopen('procedure_provider_edit.php?ppid=0', '_blank', 700, 550);
             });
+
+            $("#refresh").on("click", function () {
+                document.forms[0].submit();
+            })
         });
 
         // Callback from popups to refresh this display.
@@ -25,23 +26,8 @@
             // location.reload();
             document.forms[0].submit();
         }
-
-        // Process click to pop up the add window.
-        function doedclick_add() {
-            top.restoreSession();
-            dlgopen('procedure_provider_edit.php?ppid=0', '_blank', 700, 550);
-        }
-
-        // Process click to pop up the edit window.
-        function doedclick_edit(ppid) {
-            top.restoreSession();
-            dlgopen('procedure_provider_edit.php?ppid=' + ppid, '_blank', 700, 550);
-        }
-
     </script>
-
 </head>
-
 <body class="body_top">
 <div class="container">
     <div class="row">
@@ -52,7 +38,7 @@
                 </div>
                 <div class="btn-group">
                     <button type="button" name="form_search" class="btn btn-default btn-refresh" onclick="refreshme()">{{ 'Refresh'|translate }}</button>
-                    <button type="button" class="btn btn-default btn-add" onclick="doedclick_add()">{{ 'Add New'|translate }}</button>
+                    <button type="button" class="btn btn-default btn-add" id="add">{{ 'Add New'|translate }}</button>
                 </div>
 
                 <table class="table table-striped table-hover">
@@ -65,7 +51,7 @@
                     </thead>
                     <tbody>
                     {% for p in providers %}
-                    <tr title="{{ 'Edit'|translate|e('html_attr') }} {{ p.name|e('html_attr') }}">
+                    <tr title="{{ 'Edit'|translate|e('html_attr') }} {{ p.name|e('html_attr') }}" data-ppid="{{ p.ppid|e('html_attr') }}">
                         <td>{{ p.name }}</td>
                         <td>{{ p.npi }}</td>
                         <td>{{ p.protocol }}</td>
@@ -73,6 +59,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
+            </form>
         </div>
     </div>
 </body>
