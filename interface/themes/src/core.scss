@@ -1,0 +1,7 @@
+// This is the core styling. It contains no rules for design, it is used
+// as a base to include elements that are required regardless of the theme in
+// use. As an example, styling to insert a checkmark on save buttons happen here
+
+input[type=button]#create::before {
+    content: "TEST";
+}

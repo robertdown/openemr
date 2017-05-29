@@ -7,7 +7,7 @@ var gulp = require('gulp'), 
 var config = {
  sassPath: './interface/themes/src',
  bowerDir: './public/assets' ,
-    outputPath: './interface/themes/src',
+    outputPath: './interface/themes/dist',
 };
 
 gulp.task('bower', function() { 
