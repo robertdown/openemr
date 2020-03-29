@@ -102,6 +102,8 @@ services:
     - ../../..:/var/www/localhost/htdocs/openemr
     environment:
       EMPTY: "yes"
+      DEVELOPER_TOOLS: "yes"
+      GITHUB_COMPOSER_TOKEN: c313de1ed5a00eb6ff9309559ec9ad01fcc553f0
   openemr-7-3-311:
     restart: always
     image: openemr/openemr:flex-3.11
@@ -380,9 +382,6 @@ services:
     volumes:
     - ../../..:/usr/share/nginx/html/openemr
     - ./dockers/dev-php-fpm-7-3-redis/php.ini:/usr/local/etc/php/php.ini:ro
-  redis:
-    restart: always
-    image: redis
   dev-php-fpm-7-4-redis:
     restart: always
     image: openemr/dev-php-fpm:7.4-redis
