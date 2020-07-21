@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Facilities.
  *
@@ -63,14 +64,14 @@ if (isset($_POST["mode"]) && $_POST["mode"] == "facility" && $_POST["newmode"] !
         "info" => trim(isset($_POST["info"]) ? $_POST["info"] : '')
     );
 
-    $insert_id = $facilityService->insert($newFacility);
+    $insert_id = $facilityService->insertFacility($newFacility);
     exit(); // sjp 12/20/17 for ajax save
 }
 
 /*      Editing existing facility                   */
 if (isset($_POST["mode"]) && $_POST["mode"] == "facility" && $_POST["newmode"] == "admin_facility") {
     $newFacility = array(
-        "fid" => trim(isset($_POST["fid"]) ? $_POST["fid"] : ''),
+        "id" => trim(isset($_POST["fid"]) ? $_POST["fid"] : ''),
         "name" => trim(isset($_POST["facility"]) ? $_POST["facility"] : ''),
         "phone" => trim(isset($_POST["phone"]) ? $_POST["phone"] : ''),
         "fax" => trim(isset($_POST["fax"]) ? $_POST["fax"] : ''),
@@ -104,7 +105,7 @@ if (isset($_POST["mode"]) && $_POST["mode"] == "facility" && $_POST["newmode"] =
         "info" => trim(isset($_POST["info"]) ? $_POST["info"] : '')
     );
 
-    $facilityService->update($newFacility);
+    $facilityService->updateFacility($newFacility);
 
     // Update facility name for all users with this facility.
     // This is necassary because some provider based code uses facility name for lookups instead of facility id.
@@ -122,7 +123,7 @@ if (isset($_POST["mode"]) && $_POST["mode"] == "facility" && $_POST["newmode"] =
 
     <?php Header::setupHeader(['common']); ?>
 
-<script type="text/javascript">
+<script>
 
 function refreshme() {
     top.restoreSession();
@@ -160,10 +161,10 @@ $(function () {
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
-            <div class="page-header clearfix">
-                <h2 class="clearfix"><?php echo xlt("Facilities") ; ?></h2>
-            </div>
-            <a href="facilities_add.php" class="addfac_modal btn btn-secondary btn-add"><?php echo xlt('Add Facility');?></a>
+                <div class="clearfix">
+                    <h2 class="clearfix"><?php echo xlt("Facilities") ; ?></h2>
+                </div>
+                <a href="facilities_add.php" class="addfac_modal btn btn-secondary btn-add"><?php echo xlt('Add Facility');?></a>
             </div>
         </div>
         <br />
@@ -182,7 +183,7 @@ $(function () {
                         <tbody>
                             <?php
                             $fres = 0;
-                            $fres = $facilityService->getAll();
+                            $fres = $facilityService->getAllFacility();
                             if ($fres) {
                                 $result2 = array();
                                 for ($iter3 = 0; $iter3 < sizeof($fres); $iter3++) {
@@ -190,49 +191,49 @@ $(function () {
                                 }
 
                                 foreach ($result2 as $iter3) {
-                                    $varstreet="";//these are assigned conditionally below,blank assignment is done so that old values doesn't get propagated to next level.
-                                    $varcity="";
-                                    $varstate="";
-                                    $varmstreet="";
-                                    $varmcity="";
-                                    $varmstate="";
-                                    $varstreet=$iter3["street"];
-                                    if ($iter3["street"]!="") {
-                                        $varstreet=$iter3["street"].",";
+                                    $varstreet = "";//these are assigned conditionally below,blank assignment is done so that old values doesn't get propagated to next level.
+                                    $varcity = "";
+                                    $varstate = "";
+                                    $varmstreet = "";
+                                    $varmcity = "";
+                                    $varmstate = "";
+                                    $varstreet = $iter3["street"];
+                                    if ($iter3["street"] != "") {
+                                        $varstreet = $iter3["street"] . ",";
                                     }
 
-                                    if ($iter3["city"]!="") {
-                                        $varcity=$iter3["city"].",";
+                                    if ($iter3["city"] != "") {
+                                        $varcity = $iter3["city"] . ",";
                                     }
 
-                                    if ($iter3["state"]!="") {
-                                        $varstate=$iter3["state"].",";
+                                    if ($iter3["state"] != "") {
+                                        $varstate = $iter3["state"] . ",";
                                     }
 
-                                    $varmstreet=$iter3["mail_street"];
-                                    if ($iter3["mail_street"] !="") {
-                                        $varmstreet=$iter3["mail_street"].",";
+                                    $varmstreet = $iter3["mail_street"];
+                                    if ($iter3["mail_street"] != "") {
+                                        $varmstreet = $iter3["mail_street"] . ",";
                                     }
 
-                                    if ($iter3["mail_city"]!="") {
-                                        $varmcity=$iter3["mail_city"].",";
+                                    if ($iter3["mail_city"] != "") {
+                                        $varmcity = $iter3["mail_city"] . ",";
                                     }
 
-                                    if ($iter3["mail_state"]!="") {
-                                        $varmstate=$iter3["mail_state"].",";
+                                    if ($iter3["mail_state"] != "") {
+                                        $varmstate = $iter3["mail_state"] . ",";
                                     }
                                     ?>
                             <tr height="22">
                                  <td valign="top" class="text"><strong><a href="facility_admin.php?fid=<?php echo attr_url($iter3["id"]); ?>" class="medium_modal"><span><?php echo xlt($iter3["name"]);?></span></a></strong>&nbsp;</td>
-                                 <td valign="top" class="text"><?php echo text($varstreet.$varcity.$varstate.$iter3["country_code"]." ".$iter3["postal_code"]); ?>&nbsp;</td>
-                                 <td valign="top" class="text"><?php echo text($varmstreet.$varmcity.$varmstate.$iter3['mail_zip']); ?></td>
+                                 <td valign="top" class="text"><?php echo text($varstreet . $varcity . $varstate . $iter3["country_code"] . " " . $iter3["postal_code"]); ?>&nbsp;</td>
+                                 <td valign="top" class="text"><?php echo text($varmstreet . $varmcity . $varmstate . $iter3['mail_zip']); ?></td>
                                  <td><?php echo text($iter3["phone"]);?>&nbsp;</td>
                             </tr>
                                     <?php
                                 }
                             }
 
-                            if (count($result2)<=0) {?>
+                            if (count($result2) <= 0) {?>
                             <tr height="25">
                                 <td colspan="3" class="text-center font-weight-bold"> <?php echo xlt("Currently there are no facilities."); ?></td>
                             </tr>

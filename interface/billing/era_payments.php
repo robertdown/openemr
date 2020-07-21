@@ -1,4 +1,5 @@
 <?php
+
 /*
  * The functions of this class support the billing process like the script billing_process.php.
  *
@@ -33,12 +34,12 @@ $deposit_date = isset($_POST['deposit_date']) ? $_POST['deposit_date'] : '';
 $type_code = isset($_POST['type_code']) ? $_POST['type_code'] : '';
 
 //===============================================================================
-// This is called back by ParseERA::parse_era() if we are processing X12 835's.
+// This is called back by ParseERA::parseERA() if we are processing X12 835's.
 $alertmsg = '';
 $where = '';
 $eraname = '';
 $eracount = 0;
-$Processed=0;
+$Processed = 0;
 function era_callback(&$out)
 {
     global $where, $eracount, $eraname;
@@ -64,18 +65,18 @@ if ($_FILES['form_erafile']['size']) {
     // Handle .zip extension if present.  Probably won't work on Windows.
     if (strtolower(substr($_FILES['form_erafile']['name'], -4)) == '.zip') {
         rename($tmp_name, "$tmp_name.zip");
-        exec("unzip -p " . escapeshellarg($tmp_name.".zip") . " > " . escapeshellarg($tmp_name));
+        exec("unzip -p " . escapeshellarg($tmp_name . ".zip") . " > " . escapeshellarg($tmp_name));
         unlink("$tmp_name.zip");
     }
-    $alertmsg .= ParseERA::parse_era($tmp_name, 'era_callback');
+    $alertmsg .= ParseERA::parseERA($tmp_name, 'era_callback');
     $erafullname = $GLOBALS['OE_SITE_DIR'] . "/documents/era/$eraname.edi";
     if (is_file($erafullname)) {
-        $alertmsg .=  xl("Warning").': '. xl("Set").' '.$eraname.' '. xl("was already uploaded").' ';
+        $alertmsg .=  xl("Warning") . ': ' . xl("Set") . ' ' . $eraname . ' ' . xl("was already uploaded") . ' ';
         if (is_file($GLOBALS['OE_SITE_DIR'] . "/documents/era/$eraname.html")) {
-            $Processed=1;
-            $alertmsg .=  xl("and processed.").' ';
+            $Processed = 1;
+            $alertmsg .=  xl("and processed.") . ' ';
         } else {
-            $alertmsg .=  xl("but not yet processed.").' ';
+            $alertmsg .=  xl("but not yet processed.") . ' ';
         };
     }
     rename($tmp_name, $erafullname);
@@ -123,7 +124,7 @@ if ($_FILES['form_erafile']['size']) {
         if ($_FILES['form_erafile']['size']) {
             ?>
             var f = document.forms[0];
-            var debug = <?php echo js_escape($_REQUEST['form_without']*1); ?> ;
+            var debug = <?php echo js_escape($_REQUEST['form_without'] * 1); ?> ;
          var paydate = f.check_date.value;
          var post_to_date = f.post_to_date.value;
          var deposit_date = f.deposit_date.value;
@@ -222,9 +223,7 @@ if ($_FILES['form_erafile']['size']) {
     <div id="container_div" class="<?php echo attr($oemr_ui->oeContainer());?>">
         <div class="row">
             <div class="col-sm-12">
-                <div class="page-header">
-                    <?php echo $oemr_ui->pageHeading() . "\r\n"; ?>
-                </div>
+                <?php echo $oemr_ui->pageHeading() . "\r\n"; ?>
             </div>
         </div>
         <nav class="navbar navbar-nav navbar-expand-md navbar-light text-body bg-light mb-4 p-4">
@@ -248,7 +247,7 @@ if ($_FILES['form_erafile']['size']) {
                 <form action='era_payments.php' enctype="multipart/form-data" method='post' style="display:inline">
                     <input type="hidden" name="csrf_token_form" value="<?php echo attr(CsrfUtils::collectCsrfToken()); ?>" />
                     <fieldset>
-                        <div class="col-12 oe-custom-line">
+                        <div class="row">
                             <div class="form-group col-9 oe-file-div">
                                 <div class="input-group">
                                     <label class="input-group-prepend">
@@ -261,7 +260,7 @@ if ($_FILES['form_erafile']['size']) {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 oe-custom-line">
+                        <div class="row">
                             <div class="form-group col-3">
                                 <label class="control-label" for="check_date"><?php echo xlt('Date'); ?>:</label>
                                 <input class="form-control datepicker" id='check_date' name='check_date' onkeydown="PreventIt(event)" type='text' value="<?php echo attr($check_date); ?>" />
@@ -282,7 +281,7 @@ if ($_FILES['form_erafile']['size']) {
                                 <input class="form-control datepicker" id='deposit_date' name='deposit_date' onkeydown="PreventIt(event)" type='text' value="<?php echo attr($deposit_date); ?>" />
                             </div>
                         </div>
-                        <div class="col-12 oe-custom-line">
+                        <div class="row">
                             <div class="form-group col-6">
                                 <label class="control-label" for="type_code"><?php echo xlt('Insurance'); ?>:</label>
                                 <input id="hidden_ajax_close_value" type="hidden" value="<?php echo attr($type_code); ?>" />

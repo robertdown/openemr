@@ -1,4 +1,5 @@
 <?php
+
 /**
  * library/FeeSheet.class.php
  *
@@ -488,7 +489,7 @@ class FeeSheet
             $li['ndcnum'  ] = $ndcnum;
             $li['ndcuom'  ] = $ndcuom;
             $li['ndcqty'  ] = $ndcqty;
-        } else if ($ndc_info) {
+        } elseif ($ndc_info) {
             $li['ndc_info'  ] = $ndc_info;
         }
 
@@ -719,19 +720,21 @@ class FeeSheet
                         if ($warehouse_id && $warehouse_id != $dirow['warehouse_id']) {
                             // Changing warehouse so check inventory in the new warehouse.
                             // Nothing is updated by this call.
-                            if (!sellDrug(
-                                $drug_id,
-                                $units,
-                                0,
-                                $this->pid,
-                                $this->encounter,
-                                0,
-                                $this->visit_date,
-                                '',
-                                $warehouse_id,
-                                true,
-                                $expiredlots
-                            )) {
+                            if (
+                                !sellDrug(
+                                    $drug_id,
+                                    $units,
+                                    0,
+                                    $this->pid,
+                                    $this->encounter,
+                                    0,
+                                    $this->visit_date,
+                                    '',
+                                    $warehouse_id,
+                                    true,
+                                    $expiredlots
+                                )
+                            ) {
                                 $insufficient = $drug_id;
                             }
                         } else {
@@ -742,19 +745,21 @@ class FeeSheet
                     }
                 } else { // Otherwise it's a new item...
                     // This only checks for sufficient inventory, nothing is updated.
-                    if (!sellDrug(
-                        $drug_id,
-                        $units,
-                        0,
-                        $this->pid,
-                        $this->encounter,
-                        0,
-                        $this->visit_date,
-                        '',
-                        $warehouse_id,
-                        true,
-                        $expiredlots
-                    )) {
+                    if (
+                        !sellDrug(
+                            $drug_id,
+                            $units,
+                            0,
+                            $this->pid,
+                            $this->encounter,
+                            0,
+                            $this->visit_date,
+                            '',
+                            $warehouse_id,
+                            true,
+                            $expiredlots
+                        )
+                    ) {
                         $insufficient = $drug_id;
                     }
                 }
@@ -827,9 +832,28 @@ class FeeSheet
                     if ($fee < 0) {
                         $fee = $fee * -1;
                     }
-
-                    if (!$id) {
-                        // adding new copay from fee sheet into ar_session and ar_activity tables
+                    if ($id) {
+                        // editing copay in ar_session
+                        $session_id = $id;
+                        $res_amount = sqlQuery(
+                            "SELECT pay_amount FROM ar_activity WHERE pid = ? AND encounter = ? AND session_id = ?",
+                            array($this->pid, $this->encounter, $session_id)
+                        );
+                        if ($fee != $res_amount['pay_amount']) {
+                            sqlStatement(
+                                "UPDATE ar_session SET user_id = ?, pay_total = ?, modified_time = now(), " .
+                                "post_to_date = now() WHERE session_id = ?",
+                                array($_SESSION['authUserID'], $fee, $session_id)
+                            );
+                        }
+                        // deleting old copay
+                        sqlStatement(
+                            "UPDATE ar_activity SET deleted = NOW() WHERE " .
+                            "deleted IS NULL AND pid = ? AND encounter = ? AND account_code = 'PCP' AND session_id = ?",
+                            array($this->pid, $this->encounter, $id)
+                        );
+                    } else {
+                        // adding new copay from fee sheet into ar_session
                         $session_id = sqlInsert(
                             "INSERT INTO ar_session " .
                             "(payer_id, user_id, pay_total, payment_type, description, patient_id, payment_method, " .
@@ -837,38 +861,19 @@ class FeeSheet
                             "VALUES ('0',?,?,'patient','COPAY',?,'','patient_payment',now())",
                             array($_SESSION['authUserID'], $fee, $this->pid)
                         );
-                        sqlBeginTrans();
-                        $sequence_no = sqlQuery("SELECT IFNULL(MAX(sequence_no),0) + 1 AS increment FROM ar_activity WHERE " .
-                          "pid = ? AND encounter = ?", array($this->pid, $this->encounter));
-                        SqlStatement(
-                            "INSERT INTO ar_activity (pid, encounter, sequence_no, code_type, code, modifier, " .
-                            "payer_type, post_time, post_user, session_id, " .
-                            "pay_amount, account_code) VALUES (?,?,?,?,?,?,0,now(),?,?,?,'PCP')",
-                            array($this->pid, $this->encounter, $sequence_no['increment'], $ct0, $cod0, $mod0,
-                                $_SESSION['authUserID'],
-                            $session_id,
-                            $fee)
-                        );
-                        sqlCommitTrans();
-                    } else {
-                        // editing copay saved to ar_session and ar_activity
-                        $session_id = $id;
-                        $res_amount = sqlQuery(
-                            "SELECT pay_amount FROM ar_activity WHERE pid=? AND encounter=? AND session_id=?",
-                            array($this->pid, $this->encounter, $session_id)
-                        );
-                        if ($fee != $res_amount['pay_amount']) {
-                              sqlStatement(
-                                  "UPDATE ar_session SET user_id=?,pay_total=?,modified_time=now(),post_to_date=now() WHERE session_id=?",
-                                  array($_SESSION['authUserID'], $fee, $session_id)
-                              );
-                                  sqlStatement(
-                                      "UPDATE ar_activity SET code_type=?, code=?, modifier=?, post_user=?, post_time=now(),".
-                                      "pay_amount=?, modified_time=now() WHERE pid=? AND encounter=? AND account_code='PCP' AND session_id=?",
-                                      array($ct0, $cod0, $mod0, $_SESSION['authUserID'], $fee, $this->pid, $this->encounter, $session_id)
-                                  );
-                        }
                     }
+                    // adding new or changed copay from fee sheet into ar_activity
+                    sqlBeginTrans();
+                    $sequence_no = sqlQuery("SELECT IFNULL(MAX(sequence_no),0) + 1 AS increment FROM ar_activity WHERE " .
+                      "pid = ? AND encounter = ?", array($this->pid, $this->encounter));
+                    SqlStatement(
+                        "INSERT INTO ar_activity (pid, encounter, sequence_no, code_type, code, modifier, " .
+                        "payer_type, post_time, post_user, session_id, pay_amount, account_code) " .
+                        "VALUES (?,?,?,?,?,?,0,now(),?,?,?,'PCP')",
+                        array($this->pid, $this->encounter, $sequence_no['increment'], $ct0, $cod0, $mod0,
+                            $_SESSION['authUserID'], $session_id, $fee)
+                    );
+                    sqlCommitTrans();
 
                     if (!$cod0) {
                         $copay_update = true;
@@ -968,9 +973,9 @@ class FeeSheet
                             }
                         }
                     }
-                } else if (!$del) { // Otherwise it's a new item...
+                } elseif (!$del) { // Otherwise it's a new item...
                     $this->logFSMessage(xl('Service added'));
-                    $code_text = lookup_code_descriptions($code_type.":".$code);
+                    $code_text = lookup_code_descriptions($code_type . ":" . $code);
                     BillingUtilities::addBilling(
                         $this->encounter,
                         $code_type,
@@ -997,8 +1002,8 @@ class FeeSheet
         // non-empty modifier and code
         if ($copay_update == true && $update_session_id != '' && $mod0 != '') {
             sqlStatement(
-                "UPDATE ar_activity SET code_type = ?, code = ?, modifier = ?".
-                " WHERE pid = ? AND encounter = ? AND account_code = 'PCP' AND session_id = ?",
+                "UPDATE ar_activity SET code_type = ?, code = ?, modifier = ?" .
+                " WHERE deleted IS NULL AND pid = ? AND encounter = ? AND account_code = 'PCP' AND session_id = ?",
                 array($ct0, $cod0, $mod0, $this->pid, $this->encounter, $update_session_id)
             );
         }
@@ -1050,13 +1055,15 @@ class FeeSheet
                     } else {
                           // Modify the sale and adjust inventory accordingly.
                         if (!empty($tmprow)) {
-                            foreach (array(
-                              'quantity'    => $units,
-                              'fee'         => $fee,
-                              'pricelevel'  => $pricelevel,
-                              'selector'    => $selector,
-                              'sale_date'   => $this->visit_date,
-                            ) as $key => $value) {
+                            foreach (
+                                array(
+                                'quantity'    => $units,
+                                'fee'         => $fee,
+                                'pricelevel'  => $pricelevel,
+                                'selector'    => $selector,
+                                'sale_date'   => $this->visit_date,
+                                ) as $key => $value
+                            ) {
                                 if ($tmprow[$key] != $value) {
                                                   $somechange = true;
                                     if ('fee'        == $key) {
@@ -1122,7 +1129,7 @@ class FeeSheet
                             sqlStatement("DELETE FROM prescriptions WHERE id = ?", array($rxid));
                         }
                     }
-                } else if (! $del) { // Otherwise it's a new item...
+                } elseif (! $del) { // Otherwise it's a new item...
                     $somechange = true;
                     $this->logFSMessage(xl('Product added'));
                     $tmpnull = null;
@@ -1287,7 +1294,7 @@ class FeeSheet
                     $this->insert_lbf_item($newid, 'provider', $main_provid);
                     addForm($this->encounter, 'Contraception', $newid, 'LBFccicon', $this->pid, $GLOBALS['userauthorized']);
                 }
-            } else if (empty($csrow) || $csrow['field_value'] != "IPPFCM:$ippfconmeth") {
+            } elseif (empty($csrow) || $csrow['field_value'] != "IPPFCM:$ippfconmeth") {
                   // Contraceptive method does not match what is in an existing Contraception
                   // form for this visit, or there is no such form. User intervention is needed.
                   return empty($csrow) ? -1 : intval($csrow['form_id']);

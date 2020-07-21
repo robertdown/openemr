@@ -1,9 +1,10 @@
 <?php
+
 /**
  * @package OpenEMR
  * @author Rod Roark <rod@sunsetsystems.com>
  * @author Stephen Waite <stephen.waite@cmsvt.com>
- * @copyright Copyright (c) 2005-2010 Rod Roark <rod@sunsetsystems.com>
+ * @copyright Copyright (c) 2005-2020 Rod Roark <rod@sunsetsystems.com>
  * @copyright Copyright (c) 2018-2019 Stephen Waite <stephen.waite@cmsvt.com>
  * @link https://www.open-emr.org
  * @license https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
@@ -41,7 +42,7 @@ use OpenEMR\Billing\SLEOB;
 //
 class InvoiceSummary
 {
-    public static function ar_get_invoice_summary($patient_id, $encounter_id, $with_detail = false)
+    public static function arGetInvoiceSummary($patient_id, $encounter_id, $with_detail = false)
     {
         $codes = array();
         $keysuff1 = 1000;
@@ -132,7 +133,7 @@ class InvoiceSummary
             "FROM ar_activity AS a " .
             "LEFT OUTER JOIN ar_session AS s ON s.session_id = a.session_id " .
             "LEFT OUTER JOIN insurance_companies AS i ON i.id = s.payer_id " .
-            "WHERE a.pid = ? AND a.encounter = ? " .
+            "WHERE a.deleted IS NULL AND a.pid = ? AND a.encounter = ? " .
             "ORDER BY s.check_date, a.sequence_no", array($patient_id, $encounter_id));
         while ($row = sqlFetchArray($res)) {
             $code = $row['code'];
@@ -206,7 +207,7 @@ class InvoiceSummary
 // Returns: -1=Nobody, 0=Patient, 1=Ins1, 2=Ins2, 3=Ins3.
 // for Integrated A/R.
 //
-    public static function ar_responsible_party($patient_id, $encounter_id)
+    public static function arResponsibleParty($patient_id, $encounter_id)
     {
         $row = sqlQuery("SELECT date, last_level_billed, last_level_closed " .
             "FROM form_encounter WHERE " .
@@ -228,7 +229,7 @@ class InvoiceSummary
         // There is no unclosed insurance, so see if there is an unpaid balance.
         // Currently hoping that form_encounter.balance_due can be discarded.
         $balance = 0;
-        $codes = self::ar_get_invoice_summary($patient_id, $encounter_id);
+        $codes = self::arGetInvoiceSummary($patient_id, $encounter_id);
         foreach ($codes as $cdata) {
             $balance += $cdata['bal'];
         }

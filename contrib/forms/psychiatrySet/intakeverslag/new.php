@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Intakeverslag
  * Report of First visit - Dutch specific form
@@ -110,7 +111,7 @@ if ($vectAutosave['id']) {
 }
 
 ?>
-<script type="text/javascript">
+<script>
 $(function () {
         autosave();
         $('.datepicker').datetimepicker({

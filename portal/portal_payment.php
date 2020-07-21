@@ -1,4 +1,5 @@
 <?php
+
 /**
  *
  * namespace OnsitePortal
@@ -8,7 +9,7 @@
  * @author    Rod Roark <rod@sunsetsystems.com>
  * @author    Jerry Padgett <sjpadgett@gmail.com>
  * @author    Brady Miller <brady.g.miller@gmail.com>
- * @copyright Copyright (c) 2006-2015 Rod Roark <rod@sunsetsystems.com>
+ * @copyright Copyright (c) 2006-2020 Rod Roark <rod@sunsetsystems.com>
  * @copyright Copyright (c) 2016-2019 Jerry Padgett <sjpadgett@gmail.com>
  * @copyright Copyright (c) 2019 Brady Miller <brady.g.miller@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
@@ -75,7 +76,7 @@ $invdata = array();
 if ($edata) {
     $ccdata = json_decode($cryptoGen->decryptStandard($edata['checksum']), true);
     $invdata = json_decode($edata['table_args'], true);
-    echo "<script  type='text/javascript'>var jsondata='" . $edata['table_args'] . "';var ccdata='" . $edata['checksum'] . "'</script>";
+    echo "<script>var jsondata='" . $edata['table_args'] . "';var ccdata='" . $edata['checksum'] . "'</script>";
 }
 
 function bucks($amount)
@@ -232,7 +233,7 @@ if ($_POST['form_save']) {
                 //----------------------------------------------------------------------------------------------------
                 //Fetching the existing code and modifier
                 $ResultSearchNew = sqlStatement(
-                    "SELECT * FROM billing LEFT JOIN code_types ON billing.code_type=code_types.ct_key ".
+                    "SELECT * FROM billing LEFT JOIN code_types ON billing.code_type=code_types.ct_key " .
                     "WHERE code_types.ct_fee=1 AND billing.activity!=0 AND billing.pid =? AND encounter=? ORDER BY billing.code,billing.modifier",
                     array($form_pid, $enc)
                 );
@@ -257,8 +258,8 @@ if ($_POST['form_save']) {
 
                     sqlBeginTrans();
                     $sequence_no = sqlQuery("SELECT IFNULL(MAX(sequence_no),0) + 1 AS increment FROM       ar_activity WHERE pid = ? AND encounter = ?", array($form_pid, $enc));
-                    $insrt_id=sqlInsert(
-                        "INSERT INTO ar_activity (pid,encounter,sequence_no,code_type,code,modifier,payer_type,post_time,post_user,session_id,pay_amount,account_code)".
+                    $insrt_id = sqlInsert(
+                        "INSERT INTO ar_activity (pid,encounter,sequence_no,code_type,code,modifier,payer_type,post_time,post_user,session_id,pay_amount,account_code)" .
                         " VALUES (?,?,?,?,?,?,0,now(),?,?,?,'PCP')",
                         array($form_pid, $enc, $sequence_no['increment'], $Codetype, $Code, $Modifier, $_SESSION['authUserID'], $session_id, $amount)
                     );
@@ -304,7 +305,7 @@ if ($_POST['form_save']) {
                     //--------------------------------------------------------------------------------------------------------------------
 
                     $resMoneyGot = sqlStatement(
-                        "SELECT sum(pay_amount) as PatientPay FROM ar_activity where pid =? and " .
+                        "SELECT sum(pay_amount) as PatientPay FROM ar_activity where deleted IS NULL AND pid =? and " .
                         "encounter =? and payer_type=0 and account_code='PCP'",
                         array($form_pid, $enc)
                     );//new fees screen copay gives account_code='PCP'
@@ -326,7 +327,7 @@ if ($_POST['form_save']) {
                         $Fee = $RowSearch['fee'];
 
                         $resMoneyGot = sqlStatement(
-                            "SELECT sum(pay_amount) as MoneyGot FROM ar_activity where pid =? " .
+                            "SELECT sum(pay_amount) as MoneyGot FROM ar_activity where deleted IS NULL AND pid = ? " .
                             "and code_type=? and code=? and modifier=? and encounter =? and !(payer_type=0 and account_code='PCP')",
                             array($form_pid, $Codetype, $Code, $Modifier, $enc)
                         );
@@ -335,7 +336,7 @@ if ($_POST['form_save']) {
                         $MoneyGot = $rowMoneyGot['MoneyGot'];
 
                         $resMoneyAdjusted = sqlStatement(
-                            "SELECT sum(adj_amount) as MoneyAdjusted FROM ar_activity where " .
+                            "SELECT sum(adj_amount) as MoneyAdjusted FROM ar_activity where deleted IS NULL AND " .
                             "pid =? and code_type=? and code=? and modifier=? and encounter =?",
                             array($form_pid, $Codetype, $Code, $Modifier, $enc)
                         );
@@ -375,7 +376,7 @@ if ($_POST['form_save']) {
                             sqlCommitTrans();
                         }//if
                     }//while
-                    if ($amount!=0) {//if any excess is there.
+                    if ($amount != 0) {//if any excess is there.
                         sqlBeginTrans();
                         $sequence_no = sqlQuery("SELECT IFNULL(MAX(sequence_no),0) + 1 AS increment FROM ar_activity WHERE pid = ? AND encounter = ?", array($form_pid, $enc));
                         sqlStatement(
@@ -436,7 +437,7 @@ if ($_POST['form_save'] || $_REQUEST['receipt']) {
     ?>
 
     <title><?php echo xlt('Receipt for Payment'); ?></title>
-    <script type="text/javascript" src="<?php echo $GLOBALS['assets_static_relative']; ?>/jquery/dist/jquery.min.js"></script>
+    <script src="<?php echo $GLOBALS['assets_static_relative']; ?>/jquery/dist/jquery.min.js"></script>
     <script>
 
         function goHome() {
@@ -530,7 +531,7 @@ if ($_POST['form_save'] || $_REQUEST['receipt']) {
 //
     ?>
     <title><?php echo xlt('Record Payment'); ?></title>
-    <style type="text/css">
+    <style>
         .dehead {
             color: #000000;
             font-weight: bold
@@ -541,9 +542,9 @@ if ($_POST['form_save'] || $_REQUEST['receipt']) {
             font-weight: normal
         }
     </style>
-    <script type="text/javascript" src="<?php echo $GLOBALS['assets_static_relative']; ?>/jquery-creditcardvalidator/jquery.creditCardValidator.js"></script>
-    <script type="text/javascript" src="<?php echo $GLOBALS['webroot'] ?>/library/textformat.js?v=<?php echo $v_js_includes; ?>"></script>
-    <script type="text/javascript">
+    <script src="<?php echo $GLOBALS['assets_static_relative']; ?>/jquery-creditcardvalidator/jquery.creditCardValidator.js"></script>
+    <script src="<?php echo $GLOBALS['webroot'] ?>/library/textformat.js?v=<?php echo $v_js_includes; ?>"></script>
+    <script>
         var chargeMsg = <?php $amsg = xl('Payment was successfully authorized and your card is charged.') . "\n" .
                 xl("You will be notified when your payment is applied for this invoice.") . "\n" .
                 xl('Until then you will continue to see payment details here.') . "\n" . xl('Thank You.');
@@ -991,7 +992,7 @@ if ($_POST['form_save'] || $_REQUEST['receipt']) {
                     </td>
                     <td colspan='2'>
                         <?php if ($ccdata['authCode'] && empty($payrow['source'])) {
-                            $payrow['source'] = $ccdata['authCode'] . " : " .$ccdata['transId'];
+                            $payrow['source'] = $ccdata['authCode'] . " : " . $ccdata['transId'];
                         }
                         ?>
                         <input class="form-control form-control-sm" id='check_number' name='form_source' style='' value='<?php echo attr($payrow['source']) ?>' />
@@ -1177,14 +1178,21 @@ if ($_POST['form_save'] || $_REQUEST['receipt']) {
                 $patcopay = BillingUtilities::getPatientCopay($pid, $enc);
                 // Insurance Payment
                 //
-                $drow = sqlQuery("SELECT  SUM(pay_amount) AS payments, " . "SUM(adj_amount) AS adjustments  FROM ar_activity WHERE " . "pid = ? and encounter = ? and " . "payer_type != 0 and account_code!='PCP' ", array($pid, $enc
-                ));
+                $drow = sqlQuery(
+                    "SELECT  SUM(pay_amount) AS payments, " .
+                    "SUM(adj_amount) AS adjustments FROM ar_activity WHERE " .
+                    "deleted IS NULL AND pid = ? and encounter = ? AND " .
+                    "payer_type != 0 AND account_code != 'PCP'",
+                    array($pid, $enc)
+                );
                 $dpayment = $drow['payments'];
                 $dadjustment = $drow['adjustments'];
                 // Patient Payment
                 //
                 $drow = sqlQuery(
-                    "SELECT  SUM(pay_amount) AS payments, " . "SUM(adj_amount) AS adjustments  FROM ar_activity WHERE " . "pid = ? and encounter = ? and " . "payer_type = 0 and account_code!='PCP' ",
+                    "SELECT  SUM(pay_amount) AS payments, SUM(adj_amount) AS adjustments " .
+                    "FROM ar_activity WHERE deleted IS NULL AND pid = ? and encounter = ? and " .
+                    "payer_type = 0 and account_code != 'PCP'",
                     array($pid, $enc)
                 );
                 $dpayment_pat = $drow['payments'];
@@ -1203,8 +1211,11 @@ if ($_POST['form_save'] || $_REQUEST['receipt']) {
                     ));
                     $srow = sqlQuery("SELECT SUM(fee) AS amount FROM drug_sales WHERE " . "pid = ? and encounter = ? ", array($pid, $enc
                     ));
-                    $drow = sqlQuery("SELECT SUM(pay_amount) AS payments, " . "SUM(adj_amount) AS adjustments FROM ar_activity WHERE " . "pid = ? and encounter = ? ", array($pid, $enc
-                    ));
+                    $drow = sqlQuery(
+                        "SELECT SUM(pay_amount) AS payments, SUM(adj_amount) AS adjustments " .
+                        "FROM ar_activity WHERE deleted IS NULL AND pid = ? and encounter = ? ",
+                        array($pid, $enc)
+                    );
                     $duept = $brow['amount'] + $srow['amount'] - $drow['payments'] - $drow['adjustments'];
                 }
 
@@ -1422,7 +1433,7 @@ if ($_POST['form_save'] || $_REQUEST['receipt']) {
                         <?php
                         if ($GLOBALS['payment_gateway'] == 'InHouse') { ?>
                             <button id="paySubmit" class="btn btn-primary"><?php echo xlt('Send Payment'); ?></button>
-                        <?php } else if ($GLOBALS['payment_gateway'] == 'AuthorizeNet') { ?>
+                        <?php } elseif ($GLOBALS['payment_gateway'] == 'AuthorizeNet') { ?>
                             <button id="payAurhorizeNet" class="btn btn-primary"
                                     onclick="sendPaymentDataToAnet(event)"><?php echo xlt('Pay Now'); ?></button>
                         <?php }

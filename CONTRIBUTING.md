@@ -8,8 +8,10 @@ You will need a "local" version of OpenEMR to make changes to the source code. T
 
 1. [Create your own fork of OpenEMR](https://github.com/openemr/openemr/fork) (you will need a GitHub account) and `git clone` it to your local machine.
     - It's best to also add an `upstream` origin to keep your local fork up to date. [Check out this guide](https://oneemptymind.wordpress.com/2018/07/11/keeping-a-fork-up-to-date/) for more info.
+	- If you haven't already, [install git](https://git-scm.com/downloads) for your system
 2. `cd openemr` (the directory you cloned the code into)
-    - If you haven't already, [install Docker](https://docs.docker.com/install/) for your system
+    - If you haven't already, [install Docker](https://docs.docker.com/install/) and [install compose](https://docs.docker.com/compose/install/) for your system
+	- If you want to troubleshoot with the below steps easier, please also [install openemr-cmd](https://github.com/openemr/openemr-devops/tree/master/utilities/openemr-cmd) for your system
 3. Run `docker-compose up` from your command line
     - When the build is done, you'll see the following message:
     ```sh
@@ -22,82 +24,167 @@ You will need a "local" version of OpenEMR to make changes to the source code. T
 4. Navigate to `http://localhost:8300/` to login as `admin`. Password is `pass`.
 5. Make changes to any files on your local file system. Most changes will appear after a refresh of the page or iFrame you're working on.
     - An exception to this is if making changes to styling scripts in interface/themes/. In that case will need to clear web browser cache and run the following command to rebuild the theme files:
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c 'cd openemr; npm run build'
-    ```
-     - We also have a handy Alias for the above command
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools build-themes'
-    ```
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools build-themes'
+      ```
 6. If you wish to connect to the sql database, this docker environment provides the following 2 options:
     - Navigate to `http://localhost:8310/` where you can login into phpMyAdmin.
     - Or you can directly connect to port 8320 via your favorite sql tool (Mysql Workbench etc.).
     - Use `username/user`: openemr, `password`: openemr .
-7. Developer tools and tricks.
-    - To check PHP error logs run:
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c 'cat /var/log/apache2/error.log'
-    ```
-    - We also have a handy Alias for the above command
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools php-log'
-    ```
-    - To create a report of PSR2 code styling issues (this takes several minutes):
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c 'cd openemr; php -d memory_limit=640M /root/.composer/vendor/squizlabs/php_codesniffer/bin/phpcs -n --extensions=php,inc --standard=ci/phpcs.xml --report=full .'
-    ```
-    - We also have a handy Alias for the above command
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools psr2-report'
-    ```
-    - To fix PSR2 code styling issues (this takes several minutes):
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c 'cd openemr; php -d memory_limit=640M /root/.composer/vendor/squizlabs/php_codesniffer/bin/phpcbf -n --extensions=php,inc --standard=ci/phpcs.xml .'
-    ```
-    - We also have a handy Alias for the above command
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools psr2-fix'
-    ```
+7. Developer tools for php syntax checking, psr12 checking, and automated testing.
+    - To check PHP error logs:
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools php-log'
+      ```
+    - To create a report of PSR12 code styling issues (this takes several minutes):
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools psr12-report'
+      ```
+    - To fix PSR12 code styling issues (this takes several minutes):
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools psr12-fix'
+      ```
+    - To create a report of theme styling issues:
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools lint-themes-report'
+      ```
+    - To fix theme styling issues:
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools lint-themes-fix'
+      ```
     - To check PHP parsing errors (this takes several minutes):
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c 'cd openemr; find . -type f \( -name "*.php" -or -name "*.inc" \) \( -not -path "./vendor/*" -and -not -path "./node_modules/*" -and -not -path "./ccdaservice/node_modules}/*" \) -exec php -d error_reporting=32767 -l {} \; 2>&1 >&- | grep "^"'
-    ```
-    - We also have a handy Alias for the above command
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools php-parserror'
-    ```
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools php-parserror'
+      ```
     - To run unit testing:
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c 'cd openemr; vendor/bin/phpunit --testsuite unit --testdox'
-    ```
-    - We also have a handy Alias for the above command
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools unit-test'
-    ```
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools unit-test'
+      ```
     - To run api testing:
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c 'cd openemr; vendor/bin/phpunit --testsuite api --testdox'
-    ```
-    - We also have a handy Alias for the above command
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools api-test'
-    ```
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools api-test'
+      ```
     - To run e2e testing:
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c 'export PANTHER_NO_SANDBOX=1; export PANTHER_CHROME_DRIVER_BINARY=/usr/lib/chromium/chromedriver; cd openemr; vendor/bin/phpunit --testsuite e2e --testdox'
-    ```
-    - We also have a handy Alias for the above command
-    ```sh
-    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools e2e-test'
-    ```
-8. To run the entire dev tool suite(PHPCS fix,unit test,API test,e2e test, PHP parse error ) in one command, run
-
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools e2e-test'
+      ```
+    - To run services testing:
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools services-test'
+      ```
+    - To run fixtures testing:
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools fixtures-test'
+      ```
+    - To run validators testing:
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools validators-test'
+      ```
+    - To run controllers testing:
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools controllers-test'
+      ```
+    - To run common testing:
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools common-test'
+      ```
+8. To run the entire dev tool suite (PSR12 fix, lint themes fix, PHP parse error, unit/API/e2e/services/fixtures/validators/controllers/common tests) in one command, run
     ```sh
     docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools clean-sweep'
     ```
-9. When you're done, it's best to clean up after yourself with `docker-compose down -v`
+9. To run only all the automated tests (unit/API/e2e/services/fixtures/validators/controllers/common tests) in one command, run
+    ```sh
+    docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools clean-sweep-tests'
+    ```
+10. Developer tools to reset openemr and to load demo data.
+    - To reset OpenEMR only (then can reinstall manually via setup.php in web browser):
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools dev-reset'
+      ```
+        - When running setup.php, need to use `mysql` for 'Server Host', `root` for 'Root Password', and `%` for 'User Hostname'.
+    - To reset and reinstall OpenEMR:
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools dev-reset-install'
+      ```
+    - To reset and reinstall OpenEMR with demo data (this includes several users with access controls setup in addition to patient portal logins. [See HERE for those credentials](https://www.open-emr.org/wiki/index.php/Development_Demo#Demo_Credentials).):
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools dev-reset-install-demodata'
+      ```
+        - hint: this is also a great way to test any changes a developer has made to the sql upgrade stuff (ie. such as sql/5_0_2-to-6_0_0_upgrade.sql)
+11. Developer tools to backup and restore OpenEMR data (database and data on drive) via snapshots.
+    - Create a backup snapshot (using `example` below, but can use any alphanumeric identifier):
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools backup example'
+      ```
+    - Restore from a snapshot (using `example` below, but can use any alphanumeric identifier)
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools restore example'
+      ```
+    - To list the snapshots
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools list-snapshots'
+      ```
+12. Developer tools to send/receive snapshots (via capsules) that are created above in item 11.
+    - Here is how to grab a capsule from the docker, which can then store or share with friends.
+        - List the capsules:
+          ```sh
+          docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools list-capsules'
+          ```
+        - Copy the capsule from the docker to your current directory (using `example.tgz` below):
+          ```sh
+          docker cp $(docker ps | grep _openemr | cut -f 1 -d " "):/snapshots/example.tgz .
+          ```
+    - Here is how to send a capsule into the docker.
+        - Copy the capsule from current directory into the docker (using `example.tgz` below):
+          ```sh
+          docker cp example.tgz $(docker ps | grep _openemr | cut -f 1 -d " "):/snapshots/
+          ```
+        - Restore from the new shiny snapshot (using `example` below):
+          ```sh
+          docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools restore example'
+          ```
+        - Ensure run upgrade to ensure will work with current version OpenEMR:
+          ```sh
+          docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools upgrade 5.0.2'
+          ```
+13. Developer tools to turn on and turn off support for multisite feature.
+    - Turn on support for multisite:
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools enable-multisite'
+      ```
+    - Turn off support for multisite:
+      ```sh
+      docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools disable-multisite'
+      ```
+14. Developer tool to change the database character set and collation (character set is the encoding that is used to store data in the database; collation are a set of rules that the database uses to sort the stored data).
+    - Best to demonstrate this devtool with examples.
+        - Set character set to utf8mb4 and collation to utf8mb4_general_ci (this is default for OpenEMR 6 and higher):
+          ```sh
+          docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools change-encoding-collation utf8mb4 utf8mb4_general_ci'
+          ```
+        - Set character set to utf8mb4 and collation to utf8mb4_unicode_ci:
+          ```sh
+          docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools change-encoding-collation utf8mb4 utf8mb4_unicode_ci'
+          ```
+        - Set character set to utf8mb4 and collation to utf8mb4_vietnamese_ci:
+          ```sh
+          docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools change-encoding-collation utf8mb4 utf8mb4_vietnamese_ci'
+          ```
+        - Set character set to utf8 and collation to utf8_general_ci (this is default for OpenEMR 5 and lower):
+          ```sh
+          docker exec -i $(docker ps | grep _openemr | cut -f 1 -d " ") sh -c '/root/devtools change-encoding-collation utf8 utf8_general_ci'
+          ```
+15. Xdebug and profiling is also supported for PHPStorm.
+    - Firefox install xdebug helper add on (configure for PHPSTORM)
+    - PHPStorm Settings->Language & Frameworks->PHP->Debug
+        - Start listening
+        - Untoggle "Break at first line in PHP scripts"
+        - Untoggle both settings that start with "Force Break at first line..."
+     - Make sure port 9000 is open on your host operating system
+     - Profiling output can be found in /tmp directory in the docker
+16. When you're done, it's best to clean up after yourself with `docker-compose down -v`
     - If you don't want to build from scratch every time, just use `docker-compose down` so your next `docker-compose up` will use the cached volumes.
-10. [Submit a PR](https://github.com/openemr/openemr/compare) from your fork into `openemr/openemr#master`!
+17. [Submit a PR](https://github.com/openemr/openemr/compare) from your fork into `openemr/openemr#master`!
 
 We look forward to your contribution...
 

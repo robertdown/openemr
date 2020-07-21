@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenEMR <https://open-emr.org>.
  *
@@ -77,7 +78,11 @@ class Header
     public static function setupHeader($assets = [], $echoOutput = true)
     {
         // Required tag
-        $output = '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />';
+        $output = '<meta charset="utf-8" />';
+        // Makes only compatible with MS Edge
+        $output .= '<meta http-equiv="X-UA-Compatible" content="IE=edge" />';
+        // BS4 required tag
+        $output .= '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />';
         $output .= self::setupAssets($assets, true, false);
         if ($echoOutput) {
             echo $output;
@@ -164,7 +169,7 @@ class Header
     {
         foreach ($map as $k => $opts) {
             $autoload = (isset($opts['autoload'])) ? $opts['autoload'] : false;
-            $allowNoLoad= (isset($opts['allowNoLoad'])) ? $opts['allowNoLoad'] : false;
+            $allowNoLoad = (isset($opts['allowNoLoad'])) ? $opts['allowNoLoad'] : false;
             $alreadyBuilt = (isset($opts['alreadyBuilt'])) ? $opts['alreadyBuilt'] : false;
             $loadInFile = (isset($opts['loadInFile'])) ? $opts['loadInFile'] : false;
             $rtl = (isset($opts['rtl'])) ? $opts['rtl'] : false;
@@ -300,7 +305,7 @@ class Header
     private static function createElement($path, $type, $alreadyBuilt)
     {
 
-        $script = "<script type=\"text/javascript\" src=\"%path%\"></script>\n";
+        $script = "<script src=\"%path%\"></script>\n";
         $link = "<link rel=\"stylesheet\" href=\"%path%\" type=\"text/css\">\n";
 
         $template = ($type == 'script') ? $script : $link;
@@ -348,6 +353,6 @@ class Header
     private static function getCurrentFile()
     {
         //remove web root and query string
-        return str_replace($GLOBALS['webroot'].'/', '', strtok($_SERVER["REQUEST_URI"], '?'));
+        return str_replace($GLOBALS['webroot'] . '/', '', strtok($_SERVER["REQUEST_URI"], '?'));
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OnsiteActivityViewListView.tpl.php
  *
@@ -15,7 +16,7 @@
     $this->display('_FormsHeader.tpl.php');
     echo "<script>var cuser='" . $this->cuser . "';</script>";
 ?>
-<script type="text/javascript">
+<script>
     $LAB.script("<?php echo $GLOBALS['web_root']; ?>/portal/patient/scripts/app/onsiteactivityviews.js?v=<?php echo $GLOBALS['v_js_includes']; ?>").wait(function(){
         $(function () {
             actpage.init();
@@ -26,7 +27,7 @@
     });
 </script>
 
-<div class="container">
+<div class="container mt-5">
 
 <h3>
     <i class="icon-th-list"></i><?php echo xlt('Onsite Patient Activities')?>
@@ -36,7 +37,7 @@
         <div class="input-group">
             <input type="text" class="form-control" placeholder="<?php echo xla('Search'); ?>" name="srch-term" id="srch-term" />
             <div class="input-group-append">
-                <button class="btn btn-secondary" type="submit"><i class="fa fa-search"></i></button>
+                <button class="btn btn-secondary" type="submit"><i class="fas fa-search"></i></button>
             </div>
         </div>
         </form>

@@ -1931,22 +1931,6 @@
     "menu_id": "misimg",
     "children": [
       {
-        "label": "Portal Activity",
-        "menu_id": "por0",
-        "target": "por",
-        "url": "/myportal/index.php",
-        "children": [],
-        "requirement": 0,
-        "global_req_strict": [
-          "portal_offsite_enable",
-          "portal_offsite_address"
-        ],
-        "acl_req": [
-          "patientportal",
-          "portal"
-        ]
-      },
-      {
         "label": "Portal Dashboard",
         "menu_id": "por2",
         "target": "por",
@@ -1960,18 +1944,17 @@
         ]
       },
       {
-        "label": "CMS Portal",
-        "menu_id": "por1",
-        "target": "por",
-        "url": "/interface/cmsportal/list_requests.php",
+        "label": "Dicom Viewer",
+        "menu_id": "dvwr",
+        "target": "msc",
+        "url": "/library/dicom_frame.php",
         "children": [],
         "requirement": 0,
-        "global_req": "gbl_portal_cms_enable",
         "acl_req": [
-          "patientportal",
-          "portal"
+            "patients",
+            "docs"
         ]
-      },
+        },
       {
         "label": "Patient Education",
         "menu_id": "ped0",

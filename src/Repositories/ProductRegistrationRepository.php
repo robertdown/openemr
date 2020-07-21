@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Product registration repository.
 
@@ -52,6 +53,6 @@ class ProductRegistrationRepository extends EntityRepository
     {
         $this->_em->persist($entry);
         $this->_em->flush();
-        return $entry->getRegistrationId();
+        return $entry->getEmail();
     }
 }

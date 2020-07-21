@@ -1,4 +1,5 @@
 <?php
+
 /**
  * delete tool, for logging and removing patient data.
  *
@@ -9,12 +10,11 @@
  * @author    Rod Roark <rod@sunsetsystems.com>
  * @author    Roberto Vasquez <robertogagliotta@gmail.com>
  * @author    Brady Miller <brady.g.miller@gmail.com>
- * @copyright Copyright (c) 2005-2016 Rod Roark <rod@sunsetsystems.com>
+ * @copyright Copyright (c) 2005-2020 Rod Roark <rod@sunsetsystems.com>
  * @copyright Copyright (c) 2015 Roberto Vasquez <robertogagliotta@gmail.com>
  * @copyright Copyright (c) 2018 Brady Miller <brady.g.miller@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 
 require_once('../globals.php');
 
@@ -146,7 +146,7 @@ function form_delete($formdir, $formid, $patient_id, $encounter_id)
           "lo.form_id = f.formdir AND lo.source = 'E' AND lo.uor > 0)";
         // echo "<!-- $where -->\n"; // debugging
         row_delete("shared_attributes", $where);
-    } else if ($formdir == 'procedure_order') {
+    } elseif ($formdir == 'procedure_order') {
         $tres = sqlStatement("SELECT procedure_report_id FROM procedure_report " .
         "WHERE procedure_order_id = ?", array($formid));
         while ($trow = sqlFetchArray($tres)) {
@@ -157,9 +157,9 @@ function form_delete($formdir, $formid, $patient_id, $encounter_id)
         row_delete("procedure_report", "procedure_order_id = '" . add_escape_custom($formid) . "'");
         row_delete("procedure_order_code", "procedure_order_id = '" . add_escape_custom($formid) . "'");
         row_delete("procedure_order", "procedure_order_id = '" . add_escape_custom($formid) . "'");
-    } else if ($formdir == 'physical_exam') {
+    } elseif ($formdir == 'physical_exam') {
         row_delete("form_$formdir", "forms_id = '" . add_escape_custom($formid) . "'");
-    } else if ($formdir == 'eye_mag') {
+    } elseif ($formdir == 'eye_mag') {
         $tables = array('form_eye_base','form_eye_hpi','form_eye_ros','form_eye_vitals',
             'form_eye_acuity','form_eye_refraction','form_eye_biometrics',
             'form_eye_external', 'form_eye_antseg','form_eye_postseg',
@@ -207,7 +207,7 @@ function delete_document($document)
     <?php Header::setupHeader('opener'); ?>
 <title><?php echo xlt('Delete Patient, Encounter, Form, Issue, Document, Payment, Billing or Transaction'); ?></title>
 
-<script language="javascript">
+<script>
 function submit_form()
 {
 top.restoreSession();
@@ -241,7 +241,7 @@ if ($_POST['form_submit']) {
         row_delete("claims", "patient_id = '" . add_escape_custom($patient) . "'");
         delete_drug_sales($patient);
         row_delete("payments", "pid = '" . add_escape_custom($patient) . "'");
-        row_delete("ar_activity", "pid = '" . add_escape_custom($patient) . "'");
+        row_modify("ar_activity", "deleted = NOW()", "pid = '" . add_escape_custom($patient) . "' AND deleted IS NULL");
         row_delete("openemr_postcalendar_events", "pc_pid = '" . add_escape_custom($patient) . "'");
         row_delete("immunizations", "patient_id = '" . add_escape_custom($patient) . "'");
         row_delete("issue_encounter", "pid = '" . add_escape_custom($patient) . "'");
@@ -265,14 +265,14 @@ if ($_POST['form_submit']) {
         }
 
         row_delete("patient_data", "pid = '" . add_escape_custom($patient) . "'");
-    } else if ($encounterid) {
+    } elseif ($encounterid) {
         if (!AclMain::aclCheckCore('admin', 'super')) {
             die("Not authorized!");
         }
 
         row_modify("billing", "activity = 0", "encounter = '" . add_escape_custom($encounterid) . "'");
         delete_drug_sales(0, $encounterid);
-        row_delete("ar_activity", "encounter = '" . add_escape_custom($encounterid) . "'");
+        row_modify("ar_activity", "deleted = NOW()", "encounter = '" . add_escape_custom($encounterid) . "' AND deleted IS NULL");
         row_delete("claims", "encounter_id = '" . add_escape_custom($encounterid) . "'");
         row_delete("issue_encounter", "encounter = '" . add_escape_custom($encounterid) . "'");
         $res = sqlStatement("SELECT * FROM forms WHERE encounter = ?", array($encounterid));
@@ -281,7 +281,7 @@ if ($_POST['form_submit']) {
         }
 
         row_delete("forms", "encounter = '" . add_escape_custom($encounterid) . "'");
-    } else if ($formid) {
+    } elseif ($formid) {
         if (!AclMain::aclCheckCore('admin', 'super')) {
             die("Not authorized!");
         }
@@ -293,20 +293,20 @@ if ($_POST['form_submit']) {
         }
         form_delete($formdir, $row['form_id'], $row['pid'], $row['encounter']);
         row_delete("forms", "id = '" . add_escape_custom($formid) . "'");
-    } else if ($issue) {
+    } elseif ($issue) {
         if (!AclMain::aclCheckCore('admin', 'super')) {
             die("Not authorized!");
         }
 
-        row_delete("issue_encounter", "list_id = '" . add_escape_custom($issue) ."'");
-        row_delete("lists", "id = '" . add_escape_custom($issue) ."'");
-    } else if ($document) {
+        row_delete("issue_encounter", "list_id = '" . add_escape_custom($issue) . "'");
+        row_delete("lists", "id = '" . add_escape_custom($issue) . "'");
+    } elseif ($document) {
         if (!AclMain::aclCheckCore('patients', 'docs_rm')) {
             die("Not authorized!");
         }
 
         delete_document($document);
-    } else if ($payment) {
+    } elseif ($payment) {
         if (!AclMain::aclCheckCore('admin', 'super')) {
             // allow biller to delete misapplied payments
             if (!AclMain::aclCheckCore('acct', 'bill')) {
@@ -332,6 +332,7 @@ if ($_POST['form_submit']) {
                 "FROM ar_activity WHERE " .
                 "pid = ? AND " .
                 "encounter = ? AND " .
+                "deleted IS NULL AND " .
                 "payer_type = 0 AND " .
                 "adj_amount = 0.00 " .
                 "GROUP BY session_id ORDER BY session_id DESC", array($patient_id, $payrow['encounter']));
@@ -351,21 +352,23 @@ if ($_POST['form_submit']) {
                 }
 
                 // Delete the payment.
-                row_delete(
+                row_modify(
                     "ar_activity",
+                    "deleted = NOW()",
                     "pid = '" . add_escape_custom($patient_id) . "' AND " .
                     "encounter = '" . add_escape_custom($payrow['encounter']) . "' AND " .
+                    "deleted IS NULL AND " .
                     "payer_type = 0 AND " .
                     "pay_amount != 0.00 AND " .
                     "adj_amount = 0.00 AND " .
                     "session_id = '" . add_escape_custom($ref_id) . "'"
                 );
                 if ($ref_id) {
-                        row_delete(
-                            "ar_session",
-                            "patient_id = '" . add_escape_custom($patient_id) ."' AND " .
-                            "session_id = '" . add_escape_custom($ref_id) . "'"
-                        );
+                    row_delete(
+                        "ar_session",
+                        "patient_id = '" . add_escape_custom($patient_id) . "' AND " .
+                        "session_id = '" . add_escape_custom($ref_id) . "'"
+                    );
                 }
             } else {
                 // Encounter is 0! Seems this happens for pre-payments.
@@ -387,17 +390,27 @@ if ($_POST['form_submit']) {
 
             row_delete("payments", "id = '" . add_escape_custom($payrow['id']) . "'");
         }
-    } else if ($billing) {
+    } elseif ($billing) {
         if (!AclMain::aclCheckCore('acct', 'disc')) {
             die("Not authorized!");
         }
 
         list($patient_id, $encounter_id) = explode(".", $billing);
-        sqlStatement("DELETE FROM ar_activity WHERE " .
-        "pid = ? AND encounter = ? ", array($patient_id, $encounter_id));
-        sqlStatement("DELETE ar_session FROM ar_session LEFT JOIN " .
-        "ar_activity ON ar_session.session_id = ar_activity.session_id " .
-        "WHERE ar_activity.session_id IS NULL");
+
+        row_modify(
+            "ar_activity",
+            "deleted = NOW()",
+            "pid = '" . add_escape_custom($patient_id) . "' AND encounter = '" .
+            add_escape_custom($encounter_id) . "' AND deleted IS NULL"
+        );
+
+        // Looks like this deletes all ar_session rows that have no matching ar_activity rows.
+        sqlStatement(
+            "DELETE ar_session FROM ar_session LEFT JOIN " .
+            "ar_activity ON ar_session.session_id = ar_activity.session_id AND ar_activity.deleted IS NULL " .
+            "WHERE ar_activity.session_id IS NULL"
+        );
+
         row_modify(
             "billing",
             "activity = 0",
@@ -412,7 +425,7 @@ if ($_POST['form_submit']) {
         sqlStatement("UPDATE drug_sales SET billed = 0 WHERE " .
         "pid = ? AND encounter = ?", array($patient_id, $encounter_id));
         BillingUtilities::updateClaim(true, $patient_id, $encounter_id, -1, -1, 1, 0, ''); // clears for rebilling
-    } else if ($transaction) {
+    } elseif ($transaction) {
         if (!AclMain::aclCheckCore('admin', 'super')) {
             die("Not authorized!");
         }
@@ -428,7 +441,7 @@ if ($_POST['form_submit']) {
 
   // Close this window and tell our opener that it's done.
   // Not sure yet if the callback can be used universally.
-    echo "<script language='JavaScript'>\n";
+    echo "<script>\n";
     if (!$encounterid) {
         if ($info_msg) {
             echo " alert(" . json_encode($info_msg) . ");\n";
@@ -453,19 +466,19 @@ if ($_POST['form_submit']) {
 <?php
 if ($patient) {
     echo xlt('patient') . " " . text($patient);
-} else if ($encounterid) {
+} elseif ($encounterid) {
     echo xlt('encounter') . " " . text($encounterid);
-} else if ($formid) {
+} elseif ($formid) {
     echo xlt('form') . " " . text($formid);
-} else if ($issue) {
-    echo xlt('issue') . " " .text($issue);
-} else if ($document) {
+} elseif ($issue) {
+    echo xlt('issue') . " " . text($issue);
+} elseif ($document) {
     echo xlt('document') . " " . text($document);
-} else if ($payment) {
-    echo xlt('payment') . " " .text($payment);
-} else if ($billing) {
+} elseif ($payment) {
+    echo xlt('payment') . " " . text($payment);
+} elseif ($billing) {
     echo xlt('invoice') . " " . text($billing);
-} else if ($transaction) {
+} elseif ($transaction) {
     echo xlt('transaction') . " " . text($transaction);
 }
 ?> <?php echo xlt('and all subordinate data? This action will be logged'); ?>!</p>

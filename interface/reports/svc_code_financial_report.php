@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This is a report of Financial Summary by Service Code.
  *
@@ -13,11 +14,10 @@
  * @author    Rod Roark <rod@sunsetsystems.com>
  * @author    Visolve
  * @author    Brady Miller <brady.g.miller@gmail.com>
- * @copyright Copyright (C) 2006-2016 Rod Roark <rod@sunsetsystems.com>
+ * @copyright Copyright (C) 2006-2020 Rod Roark <rod@sunsetsystems.com>
  * @copyright Copyright (c) 2017-2018 Brady Miller <brady.g.miller@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 
 require_once("../globals.php");
 require_once("$srcdir/patient.inc");
@@ -55,7 +55,7 @@ if ($_POST['form_csvexport']) {
     header("Expires: 0");
     header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
     header("Content-Type: application/force-download");
-    header("Content-Disposition: attachment; filename=svc_financial_report_".attr($form_from_date)."--".attr($form_to_date).".csv");
+    header("Content-Disposition: attachment; filename=svc_financial_report_" . attr($form_from_date) . "--" . attr($form_to_date) . ".csv");
     header("Content-Description: File Transfer");
     // CSV headers:
 } else { // end export
@@ -66,7 +66,7 @@ if ($_POST['form_csvexport']) {
 
     <?php Header::setupHeader(['datetime-picker', 'report-helper']); ?>
 
-    <style type="text/css">
+    <style>
         /* specifically include & exclude from printing */
         @media print {
             #report_parameters {
@@ -91,7 +91,7 @@ if ($_POST['form_csvexport']) {
         }
     </style>
 
-    <script language="JavaScript">
+    <script>
         $(function () {
             oeFixedHeaderSetup(document.getElementById('mymaintable'));
             var win = top.printLogSetup ? top : opener.top;
@@ -131,14 +131,14 @@ if ($_POST['form_csvexport']) {
             <td><?php
                     // Build a drop-down list of providers.
                             //
-                            $query = "SELECT id, lname, fname FROM users WHERE ".
+                            $query = "SELECT id, lname, fname FROM users WHERE " .
                               "authorized = 1 ORDER BY lname, fname"; //(CHEMED) facility filter
                             $ures = sqlStatement($query);
                             echo "   <select name='form_provider' class='form-control'>\n";
                             echo "    <option value=''>-- " . xlt('All') . " --\n";
             while ($urow = sqlFetchArray($ures)) {
                 $provid = $urow['id'];
-                echo "    <option value='" . attr($provid) ."'";
+                echo "    <option value='" . attr($provid) . "'";
                 if ($provid == $_POST['form_provider']) {
                     echo " selected";
                 }
@@ -217,7 +217,8 @@ if ($_POST['form_refresh'] || $_POST['form_csvexport']) {
     "c.financial_reporting " .
     "FROM form_encounter as fe " .
     "JOIN billing as b on b.pid=fe.pid and b.encounter=fe.encounter " .
-    "JOIN (select pid,encounter,code,sum(pay_amount) as paid,sum(adj_amount) as adjust from ar_activity group by pid,encounter,code) as ar_act " .
+    "JOIN (select pid, encounter, code, sum(pay_amount) as paid, sum(adj_amount) as adjust " .
+    "from ar_activity WHERE deleted IS NULL group by pid, encounter, code) as ar_act " .
     "ON ar_act.pid=b.pid and ar_act.encounter=b.encounter and ar_act.code=b.code " .
     "LEFT OUTER JOIN codes AS c ON c.code = b.code " .
     "INNER JOIN code_types AS ct ON ct.ct_key = b.code_type AND ct.ct_fee = '1' " .
@@ -312,7 +313,7 @@ if ($_POST['form_refresh'] || $_POST['form_csvexport']) {
             $bgcolor = "#FFDDDD";
         }
 
-        $print = "<tr bgcolor='". attr($bgcolor) . "'><td class='detail'>".text($row['Procedure codes'])."</td><td class='detail'>".text($row['Units'])."</td><td class='detail'>".text(oeFormatMoney($row['Amt Billed']))."</td><td class='detail'>".text(oeFormatMoney($row['Paid Amt']))."</td><td class='detail'>".text(oeFormatMoney($row['Adjustment Amt']))."</td><td class='detail'>".text(oeFormatMoney($row['Balance Amt']))."</td>";
+        $print = "<tr bgcolor='" . attr($bgcolor) . "'><td class='detail'>" . text($row['Procedure codes']) . "</td><td class='detail'>" . text($row['Units']) . "</td><td class='detail'>" . text(oeFormatMoney($row['Amt Billed'])) . "</td><td class='detail'>" . text(oeFormatMoney($row['Paid Amt'])) . "</td><td class='detail'>" . text(oeFormatMoney($row['Adjustment Amt'])) . "</td><td class='detail'>" . text(oeFormatMoney($row['Balance Amt'])) . "</td>";
 
         $csv = csvEscape($row['Procedure codes']) . ',' . csvEscape($row['Units']) . ',' . csvEscape(oeFormatMoney($row['Amt Billed'])) . ',' . csvEscape(oeFormatMoney($row['Paid Amt'])) . ',' . csvEscape(oeFormatMoney($row['Adjustment Amt'])) . ',' . csvEscape(oeFormatMoney($row['Balance Amt'])) . "\n";
 

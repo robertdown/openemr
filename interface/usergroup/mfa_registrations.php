@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Multi-Factor Authentication Management
  *
@@ -11,7 +12,6 @@
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE CNU General Public License 3
  */
 
-
 require_once("../globals.php");
 require_once("$srcdir/options.inc.php");
 
@@ -22,8 +22,8 @@ use OpenEMR\OeUI\OemrUI;
 function writeRow($method, $name, $allowEdit = false)
 {
     echo "        <tr><td>&nbsp;";
-    if ($name =='') {
-        echo '<i class="fa fa-exclamation-circle oe-text-orange" aria-hidden="true"></i>'. ' ' . text($method);
+    if ($name == '') {
+        echo '<i class="fa fa-exclamation-circle oe-text-orange" aria-hidden="true"></i>' . ' ' . text($method);
     } else {
         echo text($method);
     }
@@ -117,9 +117,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
     <div id="container_div" class="<?php echo $oemr_ui->oeContainer();?>">
         <div class="row">
             <div class="col-sm-12">
-                <div class="page-header">
-                    <?php echo $oemr_ui->pageHeading() . "\r\n"; ?>
-                </div>
+                <?php echo $oemr_ui->pageHeading() . "\r\n"; ?>
             </div>
         </div>
         <div class="row">

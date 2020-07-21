@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Report - Cash receipts by Provider
  *
@@ -12,7 +13,7 @@
  * @author    Rod Roark <rod@sunsetsystems.com>
  * @author    Terry Hill <terry@lillysystems.com>
  * @author    Brady Miller <brady.g.miller@gmail.com>
- * @copyright Copyright (c) 2006-2016 Rod Roark <rod@sunsetsystems.com>
+ * @copyright Copyright (c) 2006-2020 Rod Roark <rod@sunsetsystems.com>
  * @copyright Copyright (c) 2016 Terry Hill <terry@lillysystems.com>
  * @copyright Copyright (c) 2017-2019 Brady Miller <brady.g.miller@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
@@ -22,9 +23,9 @@
 
 
 require_once('../globals.php');
-require_once($GLOBALS['srcdir'].'/patient.inc');
-require_once($GLOBALS['srcdir'].'/options.inc.php');
-require_once($GLOBALS['fileroot'].'/custom/code_types.inc.php');
+require_once($GLOBALS['srcdir'] . '/patient.inc');
+require_once($GLOBALS['srcdir'] . '/options.inc.php');
+require_once($GLOBALS['fileroot'] . '/custom/code_types.inc.php');
 // This determines if a particular procedure code corresponds to receipts
 // for the "Clinic" column as opposed to receipts for the practitioner.  Each
 // practice will have its own policies in this regard, so you'll probably
@@ -89,7 +90,7 @@ $form_facility   = $_POST['form_facility'];
 
     <?php Header::setupHeader(['datetime-picker', 'report-helper']); ?>
 
-    <style type="text/css">
+    <style>
         /* specifically include & exclude from printing */
         @media print {
             #report_parameters {
@@ -161,7 +162,7 @@ $form_facility   = $_POST['form_facility'];
 <div class="container">
     <div class="row">
         <div class="col-sm-12">
-            <div class="page-header clearfix">
+            <div class="clearfix">
                 <h2 class="title">
                     <?php echo xlt('Report'); ?> - <?php echo xlt('Cash Receipts by Provider'); ?>
                 </h2>
@@ -205,7 +206,7 @@ $form_facility   = $_POST['form_facility'];
                                     echo "    <option value=''>-- " . xlt('All Providers') . " --\n";
                                     while ($row = sqlFetchArray($res)) {
                                         $provid = $row['id'];
-                                        echo "    <option value='". attr($provid) ."'";
+                                        echo "    <option value='" . attr($provid) . "'";
                                         if ($provid == $_POST['form_doctor']) {
                                             echo " selected";
                                         }
@@ -499,7 +500,7 @@ $form_facility   = $_POST['form_facility'];
                         "LEFT OUTER JOIN billing AS b ON b.pid = a.pid AND b.encounter = a.encounter AND " .
                         "b.code = a.code AND b.modifier = a.modifier AND b.activity = 1 AND " .
                         "b.code_type != 'COPAY' AND b.code_type != 'TAX' " .
-                        "WHERE a.pay_amount != 0 AND ( " .
+                        "WHERE a.deleted IS NULL AND a.pay_amount != 0 AND ( " .
                         "a.post_time >= ? AND a.post_time <= ? " .
                         "OR fe.date >= ? AND fe.date <= ? " .
                         "OR s.deposit_date >= ? AND s.deposit_date <= ? )";
@@ -731,7 +732,7 @@ $form_facility   = $_POST['form_facility'];
                         <?php $report_from_date = oeFormatShortDate($form_from_date)  ;
                         $report_to_date = oeFormatShortDate($form_to_date)  ;
                         ?>
-                <div align='right'><span class='title'><?php echo xlt('Report Date'). ' '; ?><?php echo text($report_from_date);?> - <?php echo text($report_to_date);?></span></div>
+                <div align='right'><span class='title'><?php echo xlt('Report Date') . ' '; ?><?php echo text($report_from_date);?> - <?php echo text($report_to_date);?></span></div>
 
                         <?php
                     }

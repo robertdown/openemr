@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maintenance for the list of procedure providers.
  *
@@ -10,7 +11,6 @@
  * @copyright Copyright (c) 2019 Brady Miller <brady.g.miller@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 
 require_once("../globals.php");
 require_once("$srcdir/options.inc.php");
@@ -36,7 +36,7 @@ $res = sqlStatement($query);
     <?php Header::setupAssets('topdialog'); ?>
 <?php } ?>
 
-<script language="JavaScript">
+<script>
 
 <?php if ($popup) {
     require($GLOBALS['srcdir'] . "/restoreSession.php");
@@ -79,7 +79,7 @@ function doedclick_edit(ppid) {
     <div class="container">
         <div class="row">
             <div class="col-sm-12">
-                <div class="page-header clearfix">
+                <div class="clearfix">
                     <h2 id="header_title" class="clearfix"><span id='header_text'><?php echo xlt('Procedure Providers');?></span><?php echo $help_icon; ?></h2>
                 </div>
             </div>

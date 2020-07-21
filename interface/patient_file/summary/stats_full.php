@@ -1,4 +1,5 @@
 <?php
+
 /**
  * stats_full.php
  *
@@ -11,11 +12,10 @@
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
 
-
 require_once('../../globals.php');
-require_once($GLOBALS['srcdir'].'/lists.inc');
-require_once($GLOBALS['fileroot'].'/custom/code_types.inc.php');
-require_once($GLOBALS['srcdir'].'/options.inc.php');
+require_once($GLOBALS['srcdir'] . '/lists.inc');
+require_once($GLOBALS['fileroot'] . '/custom/code_types.inc.php');
+require_once($GLOBALS['srcdir'] . '/options.inc.php');
 
 use OpenEMR\Common\Acl\AclMain;
 use OpenEMR\Common\Csrf\CsrfUtils;
@@ -56,7 +56,7 @@ $language = $tmp['language'];
 
 <title><?php echo xlt('Patient Issues'); ?></title>
 
-<script language="JavaScript">
+<script>
 
 // callback from add_edit_issue.php:
 function refreshIssue(issue, title) {
@@ -131,6 +131,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
         <div id='patient_stats'>
             <form method='post' action='stats_full.php' onsubmit='return top.restoreSession()'>
 
+            <div class="table-responsive">
             <table class="table">
 
             <?php
@@ -158,7 +159,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                 // Show header
                 $disptype = $focustitles[0];
                 if (AclMain::aclCheckIssue($focustype, '', array('write', 'addonly'))) {
-                    if (($focustype=='allergy' || $focustype=='medication') && $GLOBALS['erx_enable']) {
+                    if (($focustype == 'allergy' || $focustype == 'medication') && $GLOBALS['erx_enable']) {
                         echo "<a href='../../eRx.php?page=medentry' class='btn btn-primary btn-sm' onclick='top.restoreSession()' >" .
                         xlt('Add') . "</a>\n";
                     } else {
@@ -191,7 +192,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
 
               // collect issues
                 $condition = '';
-                if ($GLOBALS['erx_enable'] && $GLOBALS['erx_medication_display'] && $focustype=='medication') {
+                if ($GLOBALS['erx_enable'] && $GLOBALS['erx_medication_display'] && $focustype == 'medication') {
                     $condition .= "and erx_uploaded != '1' ";
                 }
 
@@ -211,7 +212,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                             echo " disabled";
                         }
 
-                          echo " /><b>" . xlt("None{{Issue}}") . "</b></td></tr>";
+                          echo " /><strong>" . xlt("None{{Issue}}") . "</strong></td></tr>";
                     }
                 }
 
@@ -249,18 +250,18 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                     // calculate the status
                     if ($row['outcome'] == "1" && $row['enddate'] != null) {
                           // Resolved
-                          $statusCompute = generate_display_field(array('data_type'=>'1','list_id'=>'outcome'), $row['outcome']);
+                          $statusCompute = generate_display_field(array('data_type' => '1','list_id' => 'outcome'), $row['outcome']);
                     } elseif ($row['enddate'] == null) {
                           $statusCompute = xlt("Active");
                     } else {
                           $statusCompute = xlt("Inactive");
                     }
 
-                    $click_class='statrow';
-                    if ($row['erx_source']==1 && $focustype=='allergy') {
-                        $click_class='';
-                    } elseif ($row['erx_uploaded']==1 && $focustype=='medication') {
-                        $click_class='';
+                    $click_class = 'statrow';
+                    if ($row['erx_source'] == 1 && $focustype == 'allergy') {
+                        $click_class = '';
+                    } elseif ($row['erx_uploaded'] == 1 && $focustype == 'medication') {
+                        $click_class = '';
                     }
 
                     echo " <tr class='" . attr($bgclass) . " detail' $colorstyle>\n";
@@ -271,11 +272,11 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                     echo "  <td>" . $codetext . "</td>\n";
                     echo "  <td>" . $statusCompute . "&nbsp;</td>\n";
                     echo "  <td class='nowrap'>";
-                    echo generate_display_field(array('data_type'=>'1','list_id'=>'occurrence'), $row['occurrence']);
+                    echo generate_display_field(array('data_type' => '1','list_id' => 'occurrence'), $row['occurrence']);
                     echo "</td>\n";
                     if ($focustype == "allergy") {
                           echo "  <td>";
-                            echo generate_display_field(array('data_type'=>'1','list_id'=>'reaction'), $row['reaction']);
+                            echo generate_display_field(array('data_type' => '1','list_id' => 'reaction'), $row['reaction']);
                           echo "</td>\n";
                     }
 
@@ -283,7 +284,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                     echo "  <td>" . text(oeFormatDateTime($row['modifydate'])) . "</td>\n";
                     echo "  <td>" . text($row['comments']) . "</td>\n";
                     echo "  <td id='e_" . attr($rowid) . "' class='noclick text-center' title='" . xla('View related encounters') . "'>";
-                    echo "  <input type='button' value='" . attr($ierow['count']) . "' class='editenc' id='" . attr($rowid) . "' />";
+                    echo "  <button value='" . attr($ierow['count']) . "' class='btn btn-primary btn-sm editenc' id='" . attr($rowid) . "'>" . xlt("Edit") . "</button>";
                     echo "  </td>";
                     echo " </tr>\n";
                 }
@@ -293,6 +294,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
             ?>
 
             </table>
+          </div>
 
             </form>
         </div> <!-- end patient_stats -->

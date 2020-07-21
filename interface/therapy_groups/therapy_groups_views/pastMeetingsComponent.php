@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Generated DocBlock
  *
@@ -10,14 +11,11 @@
  * @copyright Copyright (c) 2017 Robert Down <robertdown@live.com>
  * @license https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
+
 ?>
 <div id="component-border">
-    <div class="row">
-        <div class="col-md-12">
-            <h4><?php echo xlt('Past meetings')?></h4>
-            <button onclick="newGroup()"><?php echo xlt('Add encounter')?></button>
-        </div>
-    </div>
+    <h4><?php echo xlt('Past meetings')?></h4>
+    <button class="btn btn-primary" onclick="newGroup()"><?php echo xlt('Add encounter')?></button>
 </div>
 <script>
     function newGroup(){

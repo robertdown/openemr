@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Allows acl(php-gacl) administration. Heavily ajax and
  * javascript/jquery dependent. All ajax functions are called
@@ -12,7 +13,6 @@
  * @copyright Copyright (c) 2017 Ranganath Pathak <pathak01@hotmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 
 require_once("../globals.php");
 
@@ -34,7 +34,7 @@ if (!AclMain::aclCheckCore('admin', 'acl')) {
 
     <?php Header::setupHeader(); ?>
 
-    <script type="text/JavaScript">
+    <script>
         $(function () {
             //Bootstrap tooltip
             var groupTitle = <?php echo xlj('This section allows you to create and remove groups and modify or grant access privileges to existing groups. Check the check box to display section'); ?>;
@@ -520,9 +520,7 @@ if (!AclMain::aclCheckCore('admin', 'acl')) {
     <div id="container_div" class="<?php echo $oemr_ui->oeContainer();?>">
         <div class="row">
             <div class="col-sm-12">
-                <div class="page-header">
-                    <?php echo  $oemr_ui->pageHeading() . "\r\n"; ?>
-                </div>
+                <?php echo  $oemr_ui->pageHeading() . "\r\n"; ?>
             </div>
         </div>
         <div class="row">

@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright © 2010 by Andrew Moore <amoore@cpan.org> */
 /* Licensing information appears at the end of this file. */
 set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/../../library/classes');
@@ -40,8 +41,6 @@ class InstallerTest extends PHPUnit_Framework_TestCase
     public function testFilePaths()
     {
         $this->assertFileExists($this->installer->conffile);
-        $this->assertFileExists($this->installer->gaclSetupScript1);
-        $this->assertFileExists($this->installer->gaclSetupScript2);
     }
 
   /**
@@ -94,12 +93,6 @@ class InstallerTest extends PHPUnit_Framework_TestCase
     public function testRootDatabaseConnection()
     {
         $this->assertEquals(true, $this->installer->root_database_connection(), 'creating root database connection');
-    }
-
-    public function testGaclFilesExist()
-    {
-        $this->assertFileExists($this->installer->gaclSetupScript1, $this->installer->gaclSetupScript1);
-        $this->assertFileExists($this->installer->gaclSetupScript2, $this->installer->gaclSetupScript2);
     }
 
     public function testUserDatabaseConnection()

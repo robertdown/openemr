@@ -1,4 +1,5 @@
 <?php
+
 /**
  * User password change tool
  *
@@ -35,9 +36,9 @@ $user_full_name = $user_name['fname'] . " " . $user_name['lname'];
 <?php Header::setupHeader(); ?>
 <title><?php echo xlt('Change Password'); ?></title>
 
-<script src="checkpwd_validation.js" type="text/javascript"></script>
+<script src="checkpwd_validation.js"></script>
 
-<script language='JavaScript'>
+<script>
 //Validating password and display message if password field is empty - starts
 var webroot=<?php echo js_escape($webroot); ?>;
 function update_password()
@@ -86,14 +87,12 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
 
 $res = sqlStatement("select fname,lname,username from users where id=?", array($_SESSION['authUserID']));
 $row = sqlFetchArray($res);
-      $iter=$row;
+      $iter = $row;
 ?>
 <div id="container_div" class="<?php echo $oemr_ui->oeContainer();?>">
     <div class="row">
         <div class="col-sm-12">
-            <div class="page-header">
             <?php echo $oemr_ui->pageHeading() . "\r\n"; ?>
-            </div>
         </div>
     </div>
     <div class="row">

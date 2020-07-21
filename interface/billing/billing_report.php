@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Billing Report Program
  *
@@ -53,7 +54,7 @@ if (isset($_POST['mode'])) {
     }
 
     if ($_POST['mode'] == 'export') {
-        $sql = BillingReport::ReturnOFXSql();
+        $sql = BillingReport::returnOFXSql();
         $db = get_db();
         $results = $db->Execute($sql);
         $billings = array();
@@ -569,9 +570,7 @@ $partners = $x->_utility_array($x->x12_partner_factory());
     <div id="container_div" class="<?php echo attr($oemr_ui->oeContainer()); ?>">
         <div class="row">
             <div class="col-sm-12">
-                <div class="page-header">
-                    <?php echo $oemr_ui->pageHeading() . "\r\n"; ?>
-                </div>
+                <?php echo $oemr_ui->pageHeading() . "\r\n"; ?>
             </div>
         </div>
         <div class="hideaway">
@@ -682,7 +681,7 @@ $partners = $x->_utility_array($x->x12_partner_factory());
                         // The below section is needed if there is any 'include' type in the $TPSCriteriaDataTypeMaster
                         // Function name is added here.Corresponding include files need to be included in the respective pages as done in this page.
                         // It is labled(Included for Insurance ajax criteria)(Line:-279-299).
-                        $TPSCriteriaIncludeMaster[1] = "OpenEMR\Billing\BillingReport::InsuranceCompanyDisplay";
+                        $TPSCriteriaIncludeMaster[1] = "OpenEMR\Billing\BillingReport::insuranceCompanyDisplay";
                         if (!isset($_REQUEST['mode'])) {// default case
                             $_REQUEST['final_this_page_criteria'][0] = "(form_encounter.date between '" . date("Y-m-d 00:00:00") . "' and '" . date("Y-m-d 23:59:59") . "')";
                             $_REQUEST['final_this_page_criteria'][1] = "billing.billed = '0'";
@@ -1091,7 +1090,7 @@ top.window.parent.left_nav.setPatientEncounter(EncounterIdArray[" . attr($iter['
                                     "FROM insurance_data AS id, insurance_companies AS ic WHERE " .
                                     "ic.id = id.provider AND " .
                                     "id.pid = ? AND " .
-                                    "id.date <= ? " .
+                                    "(id.date <= ? OR id.date IS NULL) " .
                                     "ORDER BY id.type ASC, id.date DESC";
 
                                     $result = sqlStatement(
@@ -1164,7 +1163,7 @@ top.window.parent.left_nav.setPatientEncounter(EncounterIdArray[" . attr($iter['
                                             "FROM insurance_data AS id, insurance_companies AS ic WHERE " .
                                             "id.pid = ? AND " .
                                             "id.provider = ? AND " .
-                                            "id.date <= ? AND " .
+                                            "(id.date <= ? OR id.date IS NULL) AND " .
                                             "ic.id = id.provider " .
                                             "ORDER BY id.type ASC, id.date DESC";
 
@@ -1321,7 +1320,7 @@ top.window.parent.left_nav.setPatientEncounter(EncounterIdArray[" . attr($iter['
                                 $rowcnt = 0;
                                 $resMoneyGot = sqlStatement(
                                     "SELECT pay_amount AS PatientPay,date(post_time) AS date FROM ar_activity WHERE " .
-                                    "pid = ? AND encounter = ? AND payer_type=0 AND account_code='PCP'",
+                                    "pid = ? AND encounter = ? AND deleted IS NULL AND payer_type = 0 AND account_code = 'PCP'",
                                     array(
                                         $iter['enc_pid'],
                                         $iter['enc_encounter']

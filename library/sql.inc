@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Sql functions/classes for OpenEMR.
  *
@@ -14,7 +15,6 @@
  * @copyright Copyright (c) 2013 OEMR <www.oemr.org>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 
 require_once(dirname(__FILE__) . "/sqlconf.php");
 require_once(dirname(__FILE__) . "/../vendor/adodb/adodb-php/adodb.inc.php");
@@ -45,9 +45,16 @@ $GLOBALS['dbh'] = $database->_connectionID;
 
 // Modified 5/2009 by BM for UTF-8 project ---------
 if (!$disable_utf8_flag) {
-    $success_flag = $database->ExecuteNoLog("SET NAMES 'utf8'");
-    if (!$success_flag) {
-        error_log("PHP custom error: from openemr library/sql.inc  - Unable to set up UTF8 encoding with mysql database: " . errorLogEscape(getSqlLastError()), 0);
+    if ($sqlconf["db_encoding"] == "utf8mb4") {
+        $success_flag = $database->ExecuteNoLog("SET NAMES 'utf8mb4'");
+        if (!$success_flag) {
+            error_log("PHP custom error: from openemr library/sql.inc  - Unable to set up UTF8MB4 encoding with mysql database: " . errorLogEscape(getSqlLastError()), 0);
+        }
+    } else {
+        $success_flag = $database->ExecuteNoLog("SET NAMES 'utf8'");
+        if (!$success_flag) {
+            error_log("PHP custom error: from openemr library/sql.inc  - Unable to set up UTF8 encoding with mysql database: " . errorLogEscape(getSqlLastError()), 0);
+        }
     }
 }
 
@@ -439,7 +446,7 @@ function getSqlLastErrorNo()
 */
 function sqlListFields($table)
 {
-    $sql = "SHOW COLUMNS FROM ". add_escape_custom($table);
+    $sql = "SHOW COLUMNS FROM " . add_escape_custom($table);
     $resource = sqlQ($sql);
     $field_list = array();
     while ($row = sqlFetchArray($resource)) {
@@ -475,14 +482,14 @@ function HelpfulDie($statement, $sqlerr = '')
         echo "<p><font color='red'>ERROR:</font> " . text($statement) . "</p>";
     }
 
-    $logMsg="SQL Error with statement:".$statement;
+    $logMsg = "SQL Error with statement:" . $statement;
 
     if ($sqlerr) {
         if (!$GLOBALS['sql_string_no_show_screen']) {
              echo "<p>Error: <font color='red'>" . text($sqlerr) . "</font></p>";
         }
 
-        $logMsg.="--".$sqlerr;
+        $logMsg .= "--" . $sqlerr;
     }//if error
 
     $backtrace = debug_backtrace();
@@ -497,7 +504,7 @@ function HelpfulDie($statement, $sqlerr = '')
         }
     }
 
-    $logMsg.="==>".$backtrace[1]["file"]." at ".$backtrace[1]["line"].":".$backtrace[1]["function"];
+    $logMsg .= "==>" . $backtrace[1]["file"] . " at " . $backtrace[1]["line"] . ":" . $backtrace[1]["function"];
 
     error_log(errorLogEscape($logMsg));
 
@@ -661,10 +668,10 @@ function sqlRollbackTrans()
 function getPrivDB()
 {
     if (!isset($GLOBALS['PRIV_DB'])) {
-        $secure_config=$GLOBALS['OE_SITE_DIR'] . "/secure_sqlconf.php";
+        $secure_config = $GLOBALS['OE_SITE_DIR'] . "/secure_sqlconf.php";
         if (file_exists($secure_config)) {
             require_once($secure_config);
-            $GLOBALS['PRIV_DB']=NewADOConnection("mysqli_log"); // Use the subclassed driver which logs execute events
+            $GLOBALS['PRIV_DB'] = NewADOConnection("mysqli_log"); // Use the subclassed driver which logs execute events
             // Below optionFlags flag is telling the mysql connection to ensure local_infile setting,
             // which is needed to import data in the Administration->Other->External Data Loads feature.
             // (Note the MYSQLI_READ_DEFAULT_GROUP is just to keep the current setting hard-coded in adodb)
@@ -686,7 +693,7 @@ function getPrivDB()
                 error_log("CHECK SSL CIPHER IN PRIV_DB ADODB: " . errorLogEscape(print_r($GLOBALS[PRIV_DB]->ExecuteNoLog("SHOW STATUS LIKE 'Ssl_cipher';")->fields), true));
             }
         } else {
-            $GLOBALS['PRIV_DB']=$GLOBALS['adodb']['db'];
+            $GLOBALS['PRIV_DB'] = $GLOBALS['adodb']['db'];
         }
     }
 
@@ -711,7 +718,7 @@ function privStatement($sql, $params = null)
         // These error messages are explictly NOT run through xl() because we still
         // need them if there is a database problem.
         echo "Failure during database access! Check server error log.";
-        $backtrace=debug_backtrace();
+        $backtrace = debug_backtrace();
 
         error_log("Executing as user:" . errorLogEscape(getPrivDB()->user) . " Statement failed:" . errorLogEscape($sql) . ":" . errorLogEscape($GLOBALS['last_mysql_error'])
             . "==>" . errorLogEscape($backtrace[1]["file"]) . " at " . errorLogEscape($backtrace[1]["line"]) . ":" . errorLogEscape($backtrace[1]["function"]));
@@ -731,7 +738,7 @@ function privStatement($sql, $params = null)
  */
 function privQuery($sql, $params = null)
 {
-    $recordset=privStatement($sql, $params);
+    $recordset = privStatement($sql, $params);
     if ($recordset->EOF) {
         return false;
     }

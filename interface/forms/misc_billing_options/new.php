@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This program creates the misc_billing_form
  *
@@ -26,6 +27,7 @@ require_once("date_qualifier_options.php");
 require_once("$srcdir/user.inc");
 
 use OpenEMR\Common\Csrf\CsrfUtils;
+use OpenEMR\Common\Session\SessionUtil;
 use OpenEMR\Core\Header;
 use OpenEMR\OeUI\OemrUI;
 
@@ -33,8 +35,7 @@ if (isset($_REQUEST['isBilling'])) {
     $pid = $_SESSION['billpid'] = $_REQUEST['pid'];
     $encounter = $_SESSION['billencounter'] = $_REQUEST['enc'];
 } elseif (isset($_SESSION['billencounter'])) {
-    unset($_SESSION['billpid']);
-    unset($_SESSION['billencounter']);
+    SessionUtil::unsetSession(['billpid', 'billencounter']);
 }
 
 if (!$encounter) { // comes from globals.php
@@ -83,9 +84,7 @@ $obj = $formid ? formFetch("form_misc_billing_options", $formid) : array();
 <div id="container_div" class="<?php echo attr($oemr_ui->oeContainer()); ?>">
     <div class="row">
         <div class="col-sm-12">
-            <div class="page-header clearfix">
-                <?php echo  $oemr_ui->pageHeading() . "\r\n"; ?>
-            </div>
+            <?php echo  $oemr_ui->pageHeading() . "\r\n"; ?>
         </div>
     </div>
     <div class="row">
@@ -275,7 +274,7 @@ $obj = $formid ? formFetch("form_misc_billing_options", $formid) : array();
     </div>
 </div><!--End of container div-->
 <?php $oemr_ui->oeBelowContainerDiv();?>
-<script language="javascript">
+<script>
     // jQuery stuff to make the page a little easier to use
     $(function () {
         $(".dontsave").click(function () {

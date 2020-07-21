@@ -12,7 +12,9 @@
         root = root || {};
         root.alert = alert;
         root.ajax = ajax;
+        root.confirm = confirm;
         root.closeAjax = closeAjax;
+        root.close = close;
 
         return root;
 
@@ -23,6 +25,7 @@
                 allowResize: data.allowResize,
                 sizeHeight: data.sizeHeight,
                 type: data.type,
+                resolvePromiseOn: data.resolvePromiseOn,
                 data: data.data,
                 url: data.url,
                 dataType: data.dataType // xml/json/text etc.
@@ -38,15 +41,35 @@
             let alertTitle = '<i class="fa fa-warning alert-danger"></i>&nbsp;<span>' + title + '</span>';
             return dlgopen('', '', 675, 250, '', alertTitle, {
                 buttons: [
-                    {text: '<i class="fa fa-thumbs-up">&nbsp;OK</i>', close: true, style: 'default'}
+                    {text: '<i class="fa fa-thumbs-up">&nbsp;OK</i>', close: true, style: 'primary'}
                 ],
                 type: 'Alert',
                 html: '<blockquote class="blockquote">' + data + '</blockquote>'
             });
         }
 
+        function confirm(data, title) {
+            title = title ? title : 'Confirm';
+            let alertTitle = '<i class="fa fa-warning alert-info"></i>&nbsp;<span>' + title + '</span>';
+            return dlgopen('', '', 675, 250, '', alertTitle, {
+                buttons: [
+                    {text: '<i class="fa fa-thumbs-up">&nbsp;Yes</i>', close: false, id:'confirmYes', style: 'primary btn-sm'},
+                    {text: '<i class="fa fa-thumbs-down">&nbsp;No</i>', close: false, id:'confirmNo', style: 'primary btn-sm'},
+                    {text: 'Nevermind', close: true, style: 'secondary'}
+                ],
+                type: 'Confirm',
+                resolvePromiseOn: 'confirm',
+                sizeHeight: 'auto',
+                html: '<blockquote class="blockquote">' + data + '</blockquote>'
+            });
+        }
+
         function closeAjax() {
             dlgCloseAjax();
+        }
+
+        function close() {
+            dlgclose();
         }
     });
 
@@ -224,37 +247,35 @@ if (typeof top.set_opener !== "function") {
 // universal alert popup message
 if (typeof alertMsg !== "function") {
     function alertMsg(message, timer = 5000, type = 'danger', size = '', persist = '') {
-        // example of get php to js variables.
-        let isPromise = top.jsFetchGlobals('alert');
-        isPromise.then(xl => {
+        // this xl() is just so cool.
+        let gotIt = xl("Got It");
+        let title = xl("Alert");
+        let dismiss = xl("Dismiss");
+        $('#alert_box').remove();
+        let oHidden = '';
+        oHidden = !persist ? "hidden" : '';
+        let oSize = (size == 'lg') ? 'left:10%;width:80%;' : 'left:25%;width:50%;';
+        let style = "position:fixed;top:25%;" + oSize + " bottom:0;z-index:9999;";
+        $("body").prepend("<div class='container text-center' id='alert_box' style='" + style + "'></div>");
+        let mHtml = '<div id="alertmsg" class="alert alert-' + type + ' alert-dismissable">' +
+            '<button type="button" class="btn btn-link ' + oHidden + '" id="dontShowAgain" data-dismiss="alert">' +
+            gotIt + '&nbsp;<i class="fa fa-thumbs-up"></i></button>' +
+            '<h4 class="alert-heading text-center">' + title + '!</h4><hr>' + '<p style="color:#000;">' + message + '</p>' +
+            '<button type="button" class="pull-right btn btn-link" data-dismiss="alert">' + dismiss + '</button><br /></div>';
+        $('#alert_box').append(mHtml);
+        $('#alertmsg').on('closed.bs.alert', function () {
+            clearTimeout(AlertMsg);
             $('#alert_box').remove();
-            let oHidden = '';
-            oHidden = !persist ? "hidden" : '';
-            let oSize = (size == 'lg') ? 'left:10%;width:80%;' : 'left:25%;width:50%;';
-            let style = "position:fixed;top:25%;" + oSize + " bottom:0;z-index:9999;";
-            $("body").prepend("<div class='container text-center' id='alert_box' style='" + style + "'></div>");
-            let mHtml = '<div id="alertmsg" class="alert alert-' + type + ' alert-dismissable">' +
-                '<button type="button" class="btn btn-link ' + oHidden + '" id="dontShowAgain" data-dismiss="alert">' +
-                xl.alert.gotIt + '&nbsp;<i class="fa fa-thumbs-up"></i></button>' +
-                '<h4 class="alert-heading text-center">' + xl.alert.title + '!</h4><hr>' + '<p style="color:#000;">' + message + '</p>' +
-                '<button type="button" class="pull-right btn btn-link" data-dismiss="alert">' + xl.alert.dismiss + '</button><br /></div>';
-            $('#alert_box').append(mHtml);
-            $('#alertmsg').on('closed.bs.alert', function () {
-                clearTimeout(AlertMsg);
-                $('#alert_box').remove();
-                return false;
-            });
-            $('#dontShowAgain').on('click', function (e) {
-                persistUserOption(persist, 1);
-            });
-            let AlertMsg = setTimeout(function () {
-                $('#alertmsg').fadeOut(800, function () {
-                    $('#alert_box').remove();
-                });
-            }, timer);
-        }).catch(error => {
-            console.log(error.message)
+            return false;
         });
+        $('#dontShowAgain').on('click', function (e) {
+            persistUserOption(persist, 1);
+        });
+        let AlertMsg = setTimeout(function () {
+            $('#alertmsg').fadeOut(800, function () {
+                $('#alert_box').remove();
+            });
+        }, timer);
     }
 
     const persistUserOption = function (option, value) {
@@ -402,7 +423,7 @@ function dlgopen(url, winname, width, height, forceNewWindow, title, opts) {
         // use is onClosed: fnName ... args not supported however, onClosed: 'reload' is auto defined and requires no function to be created.
         onClosed: false,
         callBack: false, // use {call: 'functionName, args: args, args} if known or use dlgclose.
-        resolvePromiseOn: 'init' // this may be useful values are init, shown, show and closed which coincide with dialog events.
+        resolvePromiseOn: '' // this may be useful values are init, shown, show, confirm, alert and closed which coincide with dialog events.
     };
 
     if (!opts) {
@@ -410,10 +431,10 @@ function dlgopen(url, winname, width, height, forceNewWindow, title, opts) {
     }
     opts = jQuery.extend({}, opts_defaults, opts);
     opts.type = opts.type ? opts.type.toLowerCase() : '';
-
+    opts.resolvePromiseOn = opts.resolvePromiseOn ?? 'init';
     var mHeight, mWidth, mSize, msSize, dlgContainer, fullURL, where; // a growing list...
 
-    where = opts.type === 'iframe' ? top : window;
+    where = (opts.type === 'iframe') ? top : window;
 
     // get url straight...
     fullURL = "";
@@ -436,7 +457,7 @@ function dlgopen(url, winname, width, height, forceNewWindow, title, opts) {
         width = "modal-xl";
     }
     // Convert dialog size to percentages and/or css class.
-    var sizeChoices = ['modal-sm', 'modal-md', 'modal-mlg', 'modal-lg', 'modal-xl'];
+    var sizeChoices = ['modal-sm', 'modal-md', 'modal-mlg', 'modal-lg', 'modal-xl', 'modal-full'];
     if (Math.abs(width) > 0) {
         width = Math.abs(width);
         mWidth = (width / where.innerWidth * 100).toFixed(1) + '%';
@@ -458,6 +479,8 @@ function dlgopen(url, winname, width, height, forceNewWindow, title, opts) {
         msSize = '<style>.modal-custom-' + winname + ' {max-width:75% !important;}</style>';
     } else if (mSize === 'modal-xl') {
         msSize = '<style>.modal-custom-' + winname + ' {max-width:92% !important;}</style>';
+    } else if (mSize === 'modal-full') {
+        msSize = '<style>.modal-custom-' + winname + ' {max-width:97% !important;}</style>';
     }
     mSize = 'modal-custom-' + winname;
 
@@ -475,16 +498,12 @@ function dlgopen(url, winname, width, height, forceNewWindow, title, opts) {
 
     var headerhtml =
         ('<div class="modal-header">%title%<button type="button" class="close" data-dismiss="modal">' +
-            '&times;</button></div>')
-        .replace('%title%', mTitle);
+            '&times;</button></div>').replace('%title%', mTitle);
 
     var frameHtml =
-        ('<iframe id="modalframe" class="w-100 h-100 modalIframe" name="%winname%" %url% frameborder=0></iframe>')
-        .replace('%winname%', winname)
-        .replace('%url%', fullURL ? 'src=' + fullURL : '');
+        ('<iframe id="modalframe" class="w-100 h-100 modalIframe" name="%winname%" %url% frameborder=0></iframe>').replace('%winname%', winname).replace('%url%', fullURL ? 'src=' + fullURL : '');
 
-    var bodyStyles = (' style="height:%initHeight%;max-height:92vh;"')
-    .replace('%initHeight%', opts.sizeHeight !== 'full' ? mHeight : '80vh');
+    var bodyStyles = ('style="height:%initHeight%;"').replace('%initHeight%', opts.sizeHeight !== 'full' ? mHeight : '80vh');
 
     var altClose = '<div class="closeDlgIframe" data-dismiss="modal" ></div>';
 
@@ -492,19 +511,8 @@ function dlgopen(url, winname, width, height, forceNewWindow, title, opts) {
         ('<div id="%id%" class="modal fade dialogModal" tabindex="-1" role="dialog">%sizeStyle%' +
             '<style>.drag-resize {touch-action:none;user-select:none;}</style>' +
             '<div %dialogId% class="modal-dialog %drag-action% %sizeClass%" role="document">' +
-            '<div class="modal-content %resize-action%">' + '%head%' + '%altclose%' + '%wait%' +
-            '<div class="modal-body px-1" %bodyStyles%>' + '%body%' + '</div></div></div></div>')
-        .replace('%id%', winname)
-        .replace('%sizeStyle%', msSize ? msSize : '')
-        .replace('%dialogId%', opts.dialogId ? ('id=' + opts.dialogId + '"') : '')
-        .replace('%sizeClass%', mSize ? mSize : '')
-        .replace('%head%', mTitle !== '' ? headerhtml : '')
-        .replace('%altclose%', mTitle === '' ? altClose : '')
-        .replace('%drag-action%', (opts.allowDrag) ? 'drag-action' : '')
-        .replace('%resize-action%', (opts.allowResize) ? 'resize-action' : '')
-        .replace('%wait%', '')
-        .replace('%bodyStyles%', bodyStyles)
-        .replace('%body%', opts.type === 'iframe' ? frameHtml : '');
+            '<div class="modal-content %resize-action%" style="max-height: 94vh">' + '%head%' + '%altclose%' + '%wait%' +
+            '<div class="modal-body overflow-auto px-1" %bodyStyles%>' + '%body%' + '</div></div></div></div>').replace('%id%', winname).replace('%sizeStyle%', msSize ? msSize : '').replace('%dialogId%', opts.dialogId ? ('id=' + opts.dialogId + '"') : '').replace('%sizeClass%', mSize ? mSize : '').replace('%head%', mTitle !== '' ? headerhtml : '').replace('%altclose%', mTitle === '' ? altClose : '').replace('%drag-action%', (opts.allowDrag) ? 'drag-action' : '').replace('%resize-action%', (opts.allowResize) ? 'resize-action' : '').replace('%wait%', '').replace('%bodyStyles%', bodyStyles).replace('%body%', opts.type === 'iframe' ? frameHtml : '');
 
     // Write modal template.
     dlgContainer = where.jQuery(mhtml);
@@ -523,7 +531,10 @@ function dlgopen(url, winname, width, height, forceNewWindow, title, opts) {
     if (opts.type === 'alert') {
         dlgContainer.find('.modal-body').html(opts.html);
     }
-    if (opts.type !== 'iframe' && opts.type !== 'alert') {
+    if (opts.type === 'confirm') {
+        dlgContainer.find('.modal-body').html(opts.html);
+    }
+    if (opts.type !== 'iframe' && opts.type !== 'alert' && opts.type !== 'confirm') {
         var params = {
             async: opts.async,
             method: opts.type || '', // if empty and has data object, then post else get.
@@ -547,7 +558,7 @@ function dlgopen(url, winname, width, height, forceNewWindow, title, opts) {
             // DOM Ready. Handle events and cleanup.
             if (opts.type === 'iframe') {
                 var modalwin = where.jQuery('body').find("[name='" + winname + "']");
-                jQuery('div.modal-dialog', modalwin).css({'margin': '15px auto auto'});
+                jQuery('div.modal-dialog', modalwin).css({'margin': "15px auto auto"});
                 modalwin.on('load', function (e) {
                     setTimeout(function () {
                         if (opts.sizeHeight === 'auto') {
@@ -559,15 +570,30 @@ function dlgopen(url, winname, width, height, forceNewWindow, title, opts) {
                         }
                     }, 800);
                 });
+            } else {
+                var modalwin = where.jQuery('body').find("[name='" + winname + "']");
+                jQuery('div.modal-dialog', modalwin).css({'margin': '15px auto auto'});
+                modalwin.on('show.bs.modal', function (e) {
+                    setTimeout(function () {
+                        sizing(e, height);
+                    }, 800);
+                });
             }
-
+            if (opts.resolvePromiseOn === 'confirm') {
+                jQuery("#confirmYes").on('click', function (e) {
+                    resolve(true);
+                });
+                jQuery("#confirmNo").on('click', function (e) {
+                    resolve(false);
+                });
+            }
             // events chain.
             dlgContainer.on('show.bs.modal', function () {
                 if (opts.allowResize || opts.allowDrag) {
                     initDragResize(where.document, where.document);
                 }
 
-                if (opts.resolvePromiseOn == 'show') {
+                if (opts.resolvePromiseOn === 'show') {
                     resolve(dlgContainer);
                 }
             }).on('shown.bs.modal', function () {
@@ -577,10 +603,12 @@ function dlgopen(url, winname, width, height, forceNewWindow, title, opts) {
                 });
                 dlgContainer.modal('handleUpdate'); // allow for scroll bar
 
-                if (opts.resolvePromiseOn == 'shown') {
+                if (opts.resolvePromiseOn === 'shown') {
                     resolve(dlgContainer);
                 }
             }).on('hidden.bs.modal', function (e) {
+                // clear cursor
+                e.target.style.cursor = "pointer";
                 // remove our dialog
                 jQuery(this).remove();
                 // now we can run functions in our window.
@@ -726,23 +754,16 @@ function dlgopen(url, winname, width, height, forceNewWindow, title, opts) {
         return oFoot; // jquery object of modal footer.
     }
 
-    // dynamic sizing - special case for full height - @todo use for fixed wt and ht
+    // dynamic sizing - special case for full height
     function sizing(e, height) {
         let viewPortHt = 0;
         let $idoc = jQuery(e.currentTarget);
-        viewPortHt = Math.max(top.window.document.documentElement.clientHeight, top.window.innerHeight || 0);
-        viewPortWt = Math.max(top.window.document.documentElement.clientWidth, top.window.innerWidth || 0);
+        viewPortHt = Math.max(window.document.documentElement.clientHeight, window.innerHeight || 0);
         let frameContentHt = opts.sizeHeight === 'full' ? viewPortHt : height;
-        frameContentHt = frameContentHt > viewPortHt ? viewPortHt : frameContentHt;
-        let hasHeader = $idoc.parents('div.modal-content').find('div.modal-header').height() || 0;
-        let hasFooter = $idoc.parents('div.modal-content').find('div.modal-footer').height() || 0;
-        frameContentHt = frameContentHt - hasHeader - hasFooter;
-        size = (frameContentHt / viewPortHt * 100).toFixed(4);
-        let maxsize = hasHeader ? 90 : hasFooter ? 86.5 : 95.5;
-        maxsize = hasHeader && hasFooter ? 80 : maxsize;
-        maxsize = maxsize + 'vh';
+        frameContentHt = frameContentHt >= viewPortHt ? viewPortHt : frameContentHt;
+        size = (frameContentHt / viewPortHt * 100).toFixed(2);
         size = size + 'vh';
-        $idoc.parents('div.modal-body').css({'height': size, 'max-height': maxsize, 'max-width': '96vw'});
+        $idoc.find('div.modal-content').css({'height': size});
 
         return size;
     }
@@ -751,22 +772,14 @@ function dlgopen(url, winname, width, height, forceNewWindow, title, opts) {
     function SizeModaliFrame(e, minSize) {
         let viewPortHt;
         let idoc = e.currentTarget.contentDocument ? e.currentTarget.contentDocument : e.currentTarget.contentWindow.document;
-        jQuery(e.currentTarget).parents('div.modal-content').height('');
-        jQuery(e.currentTarget).parent('div.modal-body').css({'height': 0});
-        viewPortHt = top.window.innerHeight || 0;
-        //minSize = 100;
-        let frameContentHt = Math.max(jQuery(idoc).height(), idoc.body.offsetHeight || 0) + 40;
+        jQuery(e.currentTarget).parents('div.modal-body').css({'height': 0});
+        viewPortHt = top.window.innerHeight;
+        let frameContentHt = Math.max(jQuery(idoc).height(), idoc.body.offsetHeight) + 40;
         frameContentHt = frameContentHt < minSize ? minSize : frameContentHt;
-        frameContentHt = frameContentHt > viewPortHt ? viewPortHt : frameContentHt;
-        let hasHeader = jQuery(e.currentTarget).parents('div.modal-content').find('div.modal-header').length;
-        let hasFooter = jQuery(e.currentTarget).parents('div.modal-content').find('div.modal-footer').length;
+        frameContentHt = frameContentHt >= viewPortHt ? viewPortHt : frameContentHt;
         size = (frameContentHt / viewPortHt * 100).toFixed(1);
-        let maxsize = hasHeader ? 85 : hasFooter ? 85 : 95;
-        maxsize = hasHeader && hasFooter ? 76 : maxsize;
-        maxsize = maxsize + 'vh';
         size = size + 'vh'; // will start the dialog as responsive. Any resize by user turns dialog to absolute positioning.
-
-        jQuery(e.currentTarget).parent('div.modal-body').css({'height': size, 'max-height': maxsize}); // Set final size. Width was previously set.
+        jQuery(e.currentTarget).parents('div.modal-body').css({'height': size});
 
         return size;
     }

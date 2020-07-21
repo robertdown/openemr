@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OnsitePortalActivityListView.tpl.php
  *
@@ -8,13 +9,14 @@
  * @copyright Copyright (c) 2016-2017 Jerry Padgett <sjpadgett@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
+
     $this->assign('title', xlt("Patient Portal") . " | " . xlt("Onsite Portal Activities"));
     $this->assign('nav', 'onsiteportalactivities');
 
     $this->display('_Header.tpl.php');
 ?>
 
-<script type="text/javascript">
+<script>
     $LAB.script("scripts/app/onsiteportalactivities.js?v=<?php echo $GLOBALS['v_js_includes']; ?>").wait(function(){
         $(function () {
             page.init();
@@ -36,7 +38,7 @@
         <div class="input-group">
             <input type="text" class="form-control" placeholder="<?php echo xla('Search'); ?>" name="srch-term" id="srch-term" />
             <div class="input-group-append">
-                <button class="btn btn-secondary" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                <button class="btn btn-secondary" type="submit"><i class="fas fa-search"></i></button>
             </div>
         </div>
         </form>

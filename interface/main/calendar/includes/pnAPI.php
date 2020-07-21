@@ -1,4 +1,5 @@
 <?php
+
 // $Id$
 // ----------------------------------------------------------------------
 // PostNuke Content Management System
@@ -119,8 +120,10 @@ function pnConfigInit()
     while (!$dbresult->EOF) {
         list($k, $v) = $dbresult->fields;
         $dbresult->MoveNext();
-        if (($k != 'dbtype') && ($k != 'dbhost') && ($k != 'dbuname') && ($k != 'dbpass')
-                && ($k != 'dbname') && ($k != 'system') && ($k != 'prefix') && ($k != 'encoded')) {
+        if (
+            ($k != 'dbtype') && ($k != 'dbhost') && ($k != 'dbuname') && ($k != 'dbpass')
+                && ($k != 'dbname') && ($k != 'system') && ($k != 'prefix') && ($k != 'encoded')
+        ) {
             $pnconfig[$k] = $v;
         }
     }
@@ -272,7 +275,12 @@ function pnDBInit()
     }
 
     // Modified 5/2009 by BM for UTF-8 project
-    if ($pnconfig['utf8Flag']) {
+    if ($pnconfig['db_encoding'] == "utf8mb4") {
+        $success_flag = $dbconn->Execute("SET NAMES 'utf8mb4'");
+        if (!$success_flag) {
+            error_log("PHP custom error: from postnuke interface/main/calendar/includes/pnAPI.php - Unable to set up UTF8MB4 encoding with mysql database", 0);
+        }
+    } elseif ($pnconfig['db_encoding'] == "utf8") {
         $success_flag = $dbconn->Execute("SET NAMES 'utf8'");
         if (!$success_flag) {
             error_log("PHP custom error: from postnuke interface/main/calendar/includes/pnAPI.php - Unable to set up UTF8 encoding with mysql database", 0);
@@ -601,8 +609,10 @@ function pnGetBaseURI()
         $path = getenv('REQUEST_URI');
     }
 
-    if ((empty($path)) ||
-        (substr($path, -1, 1) == '/')) {
+    if (
+        (empty($path)) ||
+        (substr($path, -1, 1) == '/')
+    ) {
         // REQUEST_URI was empty or pointed to a path
         // Try looking at PATH_INFO
         $path = getenv('PATH_INFO');

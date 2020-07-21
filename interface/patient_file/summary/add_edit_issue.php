@@ -1,4 +1,5 @@
 <?php
+
 /**
  * add or edit a medical problem.
  *
@@ -11,13 +12,12 @@
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
 
-
 require_once('../../globals.php');
-require_once($GLOBALS['srcdir'].'/lists.inc');
-require_once($GLOBALS['srcdir'].'/patient.inc');
-require_once($GLOBALS['srcdir'].'/options.inc.php');
-require_once($GLOBALS['fileroot'].'/custom/code_types.inc.php');
-require_once($GLOBALS['srcdir'].'/csv_like_join.php');
+require_once($GLOBALS['srcdir'] . '/lists.inc');
+require_once($GLOBALS['srcdir'] . '/patient.inc');
+require_once($GLOBALS['srcdir'] . '/options.inc.php');
+require_once($GLOBALS['fileroot'] . '/custom/code_types.inc.php');
+require_once($GLOBALS['srcdir'] . '/csv_like_join.php');
 
 use OpenEMR\Common\Acl\AclMain;
 use OpenEMR\Common\Csrf\CsrfUtils;
@@ -25,7 +25,7 @@ use OpenEMR\Core\Header;
 
 // TBD - Resolve functional issues if opener is included in Header
 ?>
-<script type="text/javascript" src="<?php echo $webroot ?>/interface/main/tabs/js/include_opener.js?v=<?php echo $v_js_includes; ?>"></script>
+<script src="<?php echo $webroot ?>/interface/main/tabs/js/include_opener.js?v=<?php echo $v_js_includes; ?>"></script>
 <script><?php require($GLOBALS['srcdir'] . '/formatting_DateToYYYYMMDD_js.js.php'); ?></script>
 <?php
 
@@ -49,7 +49,7 @@ if ($_POST['form_save']) {
 if (isset($ISSUE_TYPES['ippf_gcac'])) {
     if ($ISSUE_TYPES['ippf_gcac']) {
         // Similarly for IPPF issues.
-        require_once($GLOBALS['srcdir'].'/ippf_issues.inc.php');
+        require_once($GLOBALS['srcdir'] . '/ippf_issues.inc.php');
     }
 }
 
@@ -70,7 +70,7 @@ if ($tmp['squad'] && ! AclMain::aclCheckCore('squads', $tmp['squad'])) {
 function QuotedOrNull($fld)
 {
     if ($fld) {
-        return "'".add_escape_custom($fld)."'";
+        return "'" . add_escape_custom($fld) . "'";
     }
 
     return "NULL";
@@ -79,12 +79,12 @@ function QuotedOrNull($fld)
 function rbinput($name, $value, $desc, $colname)
 {
     global $irow;
-    $ret  = "<input type='radio' name='".attr($name)."' value='".attr($value)."'";
+    $ret  = "<input type='radio' name='" . attr($name) . "' value='" . attr($value) . "'";
     if ($irow[$colname] == $value) {
         $ret .= " checked";
     }
 
-    $ret .= " />".text($desc);
+    $ret .= " />" . text($desc);
     return $ret;
 }
 
@@ -175,7 +175,7 @@ function ActiveIssueCodeRecycleFn($thispid2, $ISSUE_TYPES2)
         if ($displayCodeSet) {
             foreach ($displayCodeSet as $dispCode2) {
                 $codeDesc2 = lookup_code_descriptions($dispCode2);
-                echo "listBoxOptionSets[" . attr($akey) . "][listBoxOptionSets[" . attr($akey) . "].length] = new Option(" . js_escape($dispCode2." (".trim($codeDesc2).") ") . ", " . js_escape($dispCode2) . ", false, false);\n";
+                echo "listBoxOptionSets[" . attr($akey) . "][listBoxOptionSets[" . attr($akey) . "].length] = new Option(" . js_escape($dispCode2 . " (" . trim($codeDesc2) . ") ") . ", " . js_escape($dispCode2) . ", false, false);\n";
             }
         }
     }
@@ -320,7 +320,7 @@ if ($_POST['form_save']) {
 
   // Close this window and redisplay the updated list of issues.
   //
-    echo "<html><body><script language='JavaScript'>\n";
+    echo "<html><body><script>\n";
     if ($info_msg) {
         echo " alert(" . js_escape($info_msg) . ");\n";
     }
@@ -363,15 +363,6 @@ if (!empty($irow['type'])) {
 <title><?php echo ($issue) ? xlt('Edit Issue') : xlt('Add New Issue'); ?></title>
 
 <style>
-
-td,
-input,
-select
-textarea {
- font-family: "Arial", "Helvetica", sans-serif;
- font-size: 13px;
-}
-
 div.section {
  border: 1px solid var(--primary) !important;
  margin: 0 0 0 13px;
@@ -384,7 +375,7 @@ ul.tabNav li.current a {
 }
 </style>
 
-<script language="JavaScript">
+<script>
  var aitypes = new Array(); // issue type attributes
  var aopts   = new Array(); // Option objects
 <?php
@@ -392,7 +383,7 @@ ul.tabNav li.current a {
 foreach ($ISSUE_TYPES as $key => $value) {
     echo " aitypes[" . attr($i) . "] = " . js_escape($value[3]) . ";\n";
     echo " aopts[" . attr($i) . "] = new Array();\n";
-    $qry = sqlStatement("SELECT * FROM list_options WHERE list_id = ? AND activity = 1", array($key."_issue_list"));
+    $qry = sqlStatement("SELECT * FROM list_options WHERE list_id = ? AND activity = 1", array($key . "_issue_list"));
     while ($res = sqlFetchArray($qry)) {
         echo " aopts[" . attr($i) . "][aopts[" . attr($i) . "].length] = new Option(" . js_escape(xl_list_label(trim($res['title']))) . ", " . js_escape(trim($res['option_id'])) . ", false, false);\n";
         if ($res['codes']) {
@@ -637,7 +628,7 @@ $('div').hide();
 
 </head>
 
-<body class="body_top" style="padding-right:0.5em">
+<body class="body_top">
 <div class="container">
 <ul class="tabNav">
  <li class='current'><a href='#'><?php echo xlt('Issue'); ?></a></li>
@@ -660,7 +651,7 @@ if ($issue) {
         echo " <li><a href='#'>" . text(oeFormatShortDate(substr($vrow['date'], 0, 10))) . ' ' .
             text($vrow['form_name']) . "</a></li>\n";
         $tabcontents .= "<div class='tab' style='height:90%;width:98%;'>\n";
-        $tabcontents .= "<iframe frameborder='0' style='height:100%;width:100%;' " .
+        $tabcontents .= "<iframe frameborder='0' class='h-100 w-100' " .
             "src='../../forms/LBF/new.php?formname=" . attr_url($formdir) . "&id=" . attr_url($formid) . "&visitid=" . attr_url($visitid) . "&from_issue_form=1'" .
             ">Oops</iframe>\n";
         $tabcontents .= "</div>\n";
@@ -671,19 +662,19 @@ if ($issue) {
 
 
 <div class="tabContainer">
-    <div class='tab current' style='height:auto;width:97%;'>
+    <div class='tab current h-auto' style='width:97%;'>
         <div class='col-sm-12'>
             <form class="form-horizontal" name='theform' method="post" onsubmit='return validate()'>
                 <input type="hidden" name="csrf_token_form" value="<?php echo attr(CsrfUtils::collectCsrfToken()); ?>" />
                 <?php
                 // action setting not required in html5.  By default form will submit to itself.
                 // Provide key values previously passed as part of action string.
-                foreach (array('issue'=>$issue, 'thispid'=>$thispid, 'thisenc'=>$thisenc) as $fldName => $fldVal) {
+                foreach (array('issue' => $issue, 'thispid' => $thispid, 'thisenc' => $thisenc) as $fldName => $fldVal) {
                     printf('<input name="%s" type="hidden" value="%s"/>%s', attr($fldName), attr($fldVal), PHP_EOL);
                 }
                 ?>
                 <div class="form-group">
-                    <label for="" class="control-label col-2"><?php echo xlt('Type'); ?>:</label>
+                    <label for="" class="col-form-label col-2"><?php echo xlt('Type'); ?>:</label>
                     <div class="col-10">
                         <?php
                          $index = 0;
@@ -712,27 +703,27 @@ if ($issue) {
                     </div>
                 </div>
                 <div class="form-group" id='row_titles'>
-                    <label for="form_titles" class="control-label col-2"> </label>
+                    <label for="form_titles" class="col-form-label col-2"> </label>
                     <div class="col-10">
                         <select name='form_titles' id='form_titles'  class= "form-control" multiple size='4' onchange='set_text()'></select>
                         <p><?php echo xlt('(Select one of these, or type your own title)'); ?></p>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-2" for="title_diagnosis"><?php echo xlt('Title'); ?>:</label>
+                    <label class="col-form-label col-2" for="title_diagnosis"><?php echo xlt('Title'); ?>:</label>
                     <div class="col-10">
                         <input type='text' class="form-control" name='form_title' id='form_title' value='<?php echo attr($irow['title']) ?>'>
                         <input type='hidden' name='form_title_id' value='<?php echo attr($irow['list_option_id']) ?>'>
                     </div>
                 </div>
                 <div class="form-group" id='row_codeSelect2'>
-                    <label for="form_codeSelect2" class="control-label col-2"><?php echo xlt('Active Issue Codes'); ?>:</label>
+                    <label for="form_codeSelect2" class="col-form-label col-2"><?php echo xlt('Active Issue Codes'); ?>:</label>
                     <div class="col-10">
                         <select name='form_codeSelect2' id='form_codeSelect2' class= "form-control" multiple size='4' onchange="codeBoxFunction2()" style="width:100%;"></select>
                     </div>
                 </div>
                 <div class="form-group" id='row_diagnosis'>
-                    <label class="control-label col-2" for="form_diagnosis"><?php echo xlt('Coding'); ?>:</label>
+                    <label class="col-form-label col-2" for="form_diagnosis"><?php echo xlt('Coding'); ?>:</label>
                     <div class="col-10">
                         <input type='text' class="form-control" name='form_diagnosis' id='form_diagnosis'
                         value='<?php echo attr($irow['diagnosis']) ?>' onclick='sel_diagnosis()'
@@ -740,7 +731,7 @@ if ($issue) {
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-2" for="form_begin"><?php echo xlt('Begin Date'); ?>:</label>
+                    <label class="col-form-label col-2" for="form_begin"><?php echo xlt('Begin Date'); ?>:</label>
                     <div class="col-10">
                         <input type='text' class='datepicker form-control' style="width:50%" name='form_begin' id='form_begin'
                         value='<?php echo attr(oeFormatShortDate($irow['begdate'])) ?>'
@@ -748,7 +739,7 @@ if ($issue) {
                     </div>
                 </div>
                 <div class="form-group" id='row_enddate'>
-                    <label class="control-label col-2" for="form_begin"><?php echo xlt('End Date'); ?>:</label>
+                    <label class="col-form-label col-2" for="form_begin"><?php echo xlt('End Date'); ?>:</label>
                     <div class="col-10">
                         <input type='text' class='datepicker form-control' style="width:50%" name='form_end' id='form_end'
                         value='<?php echo attr(oeFormatShortDate($irow['enddate'])) ?>'
@@ -757,7 +748,7 @@ if ($issue) {
                     </div>
                 </div>
                 <div class="form-group" id='row_active'>
-                    <label class="control-label col-2" for="form_active"><?php echo xlt('Active{{Issue}}'); ?>: </label>
+                    <label class="col-form-label col-2" for="form_active"><?php echo xlt('Active{{Issue}}'); ?>: </label>
                     <div class="col-10">
                         <div class="checkbox">
                             <label><input type='checkbox' name='form_active' id=='form_active' value='1' <?php echo ($irow['enddate']) ? "" : "checked"; ?>
@@ -772,16 +763,16 @@ if ($issue) {
                     <img id='img_return'/>
                 </div>
                 <div class="form-group"id='row_occurrence'>
-                    <label class="control-label col-2" for="form_occur"><?php echo xlt('Occurrence'); ?>:</label>
+                    <label class="col-form-label col-2" for="form_occur"><?php echo xlt('Occurrence'); ?>:</label>
                     <div class="col-10">
                         <?php
                         // Modified 6/2009 by BM to incorporate the occurrence items into the list_options listings
-                        generate_form_field(array('data_type'=>1,'field_id'=>'occur','list_id'=>'occurrence','empty_title'=>'SKIP'), $irow['occurrence']);
+                        generate_form_field(array('data_type' => 1,'field_id' => 'occur','list_id' => 'occurrence','empty_title' => 'SKIP'), $irow['occurrence']);
                         ?>
                     </div>
                 </div>
                 <div class="form-group" id='row_classification'>
-                    <label class="control-label col-2" for="form_classification"><?php echo xlt('Classification'); ?>:</label>
+                    <label class="col-form-label col-2" for="form_classification"><?php echo xlt('Classification'); ?>:</label>
                     <div class="col-10">
                        <select name='form_classification' id='form_classification' class='form-control'>
                             <?php
@@ -798,16 +789,16 @@ if ($issue) {
                 </div>
                 <!-- Reaction For Medication Allergy -->
                 <div class="form-group" id='row_severity'>
-                    <label class="control-label col-2" for="form_severity_id"><?php echo xlt('Severity'); ?>:</label>
+                    <label class="col-form-label col-2" for="form_severity_id"><?php echo xlt('Severity'); ?>:</label>
                     <div class="col-10">
                         <?php
-                            $severity=$irow['severity_al'];
-                            generate_form_field(array('data_type'=>1,'field_id'=>'severity_id','list_id'=>'severity_ccda','empty_title'=>'SKIP'), $severity);
+                            $severity = $irow['severity_al'];
+                            generate_form_field(array('data_type' => 1,'field_id' => 'severity_id','list_id' => 'severity_ccda','empty_title' => 'SKIP'), $severity);
                         ?>
                     </div>
                 </div>
                 <div class="form-group" id='row_reaction'>
-                    <label class="control-label col-2" for="form_reaction"><?php echo xlt('Reaction'); ?>:</label>
+                    <label class="col-form-label col-2" for="form_reaction"><?php echo xlt('Reaction'); ?>:</label>
                     <div class="col-10">
                         <?php
                             echo generate_select_list('form_reaction', 'reaction', $irow['reaction'], '', '', '', '');
@@ -816,14 +807,14 @@ if ($issue) {
                 </div>
                 <!-- End of reaction -->
                 <div class="form-group"id='row_referredby'>
-                    <label class="control-label col-2" for="form_referredby"><?php echo xlt('Referred by'); ?>:</label>
+                    <label class="col-form-label col-2" for="form_referredby"><?php echo xlt('Referred by'); ?>:</label>
                     <div class="col-10">
                         <input type='text' name='form_referredby' id='form_referredby' class='form-control' value='<?php echo attr($irow['referredby']) ?>'
                         title='<?php echo xla('Referring physician and practice'); ?>' />
                     </div>
                 </div>
                 <div class="form-group" id='row_comments'>
-                    <label class="control-label col-2" for="form_comments"><?php echo xlt('Comments'); ?>:</label>
+                    <label class="col-form-label col-2" for="form_comments"><?php echo xlt('Comments'); ?>:</label>
                     <div class="col-10">
                       <textarea class="form-control" name='form_comments' id='form_comments' rows="4" id='form_comments'><?php echo text($irow['comments']) ?></textarea>
                     </div>
@@ -833,7 +824,7 @@ if ($issue) {
                 if ($GLOBALS['ippf_specific']) {
                         echo " style='display:none;'";
                 } ?>>
-                    <label class="control-label col-2" for="form_outcome"><?php echo xlt('Outcome'); ?>:</label>
+                    <label class="col-form-label col-2" for="form_outcome"><?php echo xlt('Outcome'); ?>:</label>
                     <div class="col-10">
                         <?php
                             echo generate_select_list('form_outcome', 'outcome', $irow['outcome'], '', '', '', 'outcomeClicked(this);');
@@ -845,7 +836,7 @@ if ($issue) {
                 if ($GLOBALS['ippf_specific']) {
                         echo " style='display:none;'";
                 } ?>>
-                    <label class="control-label col-2" for="form_destination"><?php echo xlt('Destination'); ?>:</label>
+                    <label class="col-form-label col-2" for="form_destination"><?php echo xlt('Destination'); ?>:</label>
                     <div class="col-10">
                         <?php if (true) { ?>
                            <input type='text' class='form-control' name='form_destination' id='form_destination' value='<?php echo attr($irow['destination']) ?>'
@@ -891,7 +882,7 @@ if ($issue) {
 </div>
 </div>
 
-<script language='JavaScript'>
+<script>
  newtype(<?php echo js_escape($type_index); ?>);
  // Set up the tabbed UI.
  tabbify();

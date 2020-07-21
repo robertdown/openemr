@@ -1,4 +1,5 @@
 <?php
+
 /**
  * bronchitis new.php
  *
@@ -15,7 +16,6 @@
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
 
-
 require_once(__DIR__ . "/../../globals.php");
 require_once("$srcdir/api.inc");
 
@@ -26,7 +26,7 @@ formHeader("Form: bronchitis");
 $returnurl = 'encounter_top.php';
 ?>
 <html><head>
-<SCRIPT LANGUAGE="JavaScript">
+<script>
 <!--
 
    function onset_check (form)   {
@@ -51,7 +51,7 @@ $returnurl = 'encounter_top.php';
     alert("OK, Bye!!!");
     return;
    }
-</SCRIPT>
+</script>
 
 <?php Header::setupHeader(); ?>
 </head>
@@ -69,7 +69,7 @@ $returnurl = 'encounter_top.php';
 <a href="<?php echo $GLOBALS['form_exit_url']; ?>" class="link" style="color: #483D8B"
  onclick="top.restoreSession()">[<?php echo xlt('Don\'t Save'); ?>]</a>
 <br /><br />
-<span class="text" ><?php echo xlt('Onset of Illness:'); ?> </span><input type="entry" name="bronchitis_date_of_illness" value=""></input>
+<span class="text" ><?php echo xlt('Onset of Illness:'); ?> </span><input type="text" name="bronchitis_date_of_illness" value=""></input>
 <br /><br />
 
 <span class="text" ><?php echo xlt('HPI:'); ?>:</span><br /><br />

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OpenEMR About Page
  *
@@ -57,7 +58,7 @@ use OpenEMR\Services\VersionService;
         }
     </style>
 
-    <script type="text/javascript">
+    <script>
         var registrationTranslations = <?php echo json_encode(array(
             'title' => xla('OpenEMR Product Registration'),
             'pleaseProvideValidEmail' => xla('Please provide a valid email address'),
@@ -78,10 +79,10 @@ use OpenEMR\Services\VersionService;
             ?>;
     </script>
 
-    <script type="text/javascript" src="<?php echo $webroot ?>/interface/product_registration/product_registration_service.js?v=<?php echo $v_js_includes; ?>"></script>
-    <script type="text/javascript" src="<?php echo $webroot ?>/interface/product_registration/product_registration_controller.js?v=<?php echo $v_js_includes; ?>"></script>
+    <script src="<?php echo $webroot ?>/interface/product_registration/product_registration_service.js?v=<?php echo $v_js_includes; ?>"></script>
+    <script src="<?php echo $webroot ?>/interface/product_registration/product_registration_controller.js?v=<?php echo $v_js_includes; ?>"></script>
 
-    <script type="text/javascript">
+    <script>
         $(function () {
             var productRegistrationController = new ProductRegistrationController();
             productRegistrationController.getProductRegistrationStatus(function(err, data) {
@@ -104,11 +105,9 @@ $version = $versionService->fetch();
     <div class="container">
         <div class="row">
             <div class="col-12 col-md-4 offset-md-4 text-center">
-                <div class="page-header">
-                    <h1><?php echo xlt("About");?>&nbsp;OpenEMR</h1>
-                </div>
-                <h4><?php echo xlt('Version Number'); ?>: <?php echo "v".text($openemr_version); ?></h4>
-                <span class="text product-registration"><span class="email"></span> <span class="id"></span></span><br />
+                <h1><?php echo xlt("About");?>&nbsp;OpenEMR</h1>
+                <h4><?php echo xlt('Version Number'); ?>: <?php echo "v" . text($openemr_version); ?></h4>
+                <span class="text product-registration"><span class="email"></span></span><br />
                 <?php if (!empty($GLOBALS['support_phone_number'])) { ?>
                     <span class="text"><?php  echo xlt('Support Phone Number'); ?>: <?php echo text($GLOBALS['support_phone_number']); ?></span><br />
                 <?php } ?>
@@ -139,10 +138,8 @@ $version = $versionService->fetch();
                     <p class="message font-italic"></p>
                 </div>
                 <div class="modal-footer">
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-primary submit" ><?php echo xlt("Submit"); ?></button>
-                        <button type="button" class="btn btn-danger nothanks" ><?php echo xlt("No Thanks"); ?></button>
-                    </div>
+                    <button type="button" class="btn btn-secondary submit" ><?php echo xlt("Submit"); ?></button>
+                    <button type="button" class="btn btn-secondary nothanks" ><?php echo xlt("No Thanks"); ?></button>
                 </div>
             </div>
         </div>

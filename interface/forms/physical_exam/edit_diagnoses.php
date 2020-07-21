@@ -1,4 +1,5 @@
 <?php
+
 /**
  * physical_exam edit_diagnoses.php
  *
@@ -10,7 +11,6 @@
  * @copyright Copyright (c) 2019 Brady Miller <brady.g.miller@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 
 require_once(__DIR__ . "/../../globals.php");
 
@@ -61,7 +61,7 @@ if ($_POST['form_save']) {
 
   // Close this window and redisplay the updated encounter form.
   //
-    echo "<script language='JavaScript'>\n";
+    echo "<script>\n";
     if ($info_msg) {
         echo " alert(" . js_escape($info_msg) . ");\n";
     }

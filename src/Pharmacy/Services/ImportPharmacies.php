@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class ImportPharmacies
  * @package   OpenEMR
@@ -63,7 +64,7 @@ class ImportPharmacies
          * apparently still used by the CMS server.  Once CMS updates their encryption it may be possible to
          * revert this back to the original call.
          */
-         $response = oeHttpRequest::getCurlOptions(
+         $response = oeHttp::getCurlOptions(
              'https://npiregistry.cms.hhs.gov/api/',
              $query,
              [CURLOPT_SSL_CIPHER_LIST => 'ECDHE-RSA-AES256-GCM-SHA384']
@@ -72,7 +73,7 @@ class ImportPharmacies
         $body = $response->body(); // already should be json.
 
         $pharmacyObj = json_decode($body, true, 512, 0);
-        $i=0;
+        $i = 0;
         foreach ($pharmacyObj as $obj => $value) {
             foreach ($value as $key => $show) {
                 /*********************Skip duplicates*******************/

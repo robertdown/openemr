@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ankleinjury new.php
  *
@@ -14,7 +15,6 @@
  * @copyright Copyright (c) 2019 Brady Miller <brady.g.miller@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 
 require_once(__DIR__ . "/../../globals.php");
 require_once("$srcdir/api.inc");
@@ -41,7 +41,7 @@ formHeader("Form: ankleinjury");
  onclick="top.restoreSession()">[<?php echo xlt('Don\'t Save'); ?>]</a>
 <br /><br />
 
-<span class="text" ><?php echo xlt('Date of Injury'); ?>: </span><input type="entry" name="ankle_date_of_injuary" value=""></input>
+<span class="text" ><?php echo xlt('Date of Injury'); ?>: </span><input type="text" name="ankle_date_of_injuary" value=""></input>
 <tr>
 <td width="120" align="right"><?php echo xlt('Work related?'); ?></td>
 <td><input type="checkbox" name="ankle_work_related"></input></td>
@@ -112,7 +112,7 @@ formHeader("Form: ankleinjury");
 
 </tr>
 </table>
- <script language="javascript">
+ <script>
  <!--
  function doCPT(select) {
     var numchecked = 0;

@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This program saves data from the misc_billing_form
  *
@@ -20,6 +21,7 @@ require_once("$srcdir/api.inc");
 require_once("$srcdir/forms.inc");
 
 use OpenEMR\Common\Csrf\CsrfUtils;
+use OpenEMR\Common\Session\SessionUtil;
 
 if (!CsrfUtils::verifyCsrfToken($_POST["csrf_token_form"])) {
     CsrfUtils::csrfNotVerified();
@@ -29,7 +31,7 @@ if (!CsrfUtils::verifyCsrfToken($_POST["csrf_token_form"])) {
 if (isset($_SESSION['billencounter'])) {
     $pid = $_SESSION['billpid'];
     $encounter = $_SESSION['billencounter'];
-    echo "<script type='text/javascript' src='" . $webroot . "/interface/main/tabs/js/include_opener.js'></script>";
+    echo "<script src='" . $webroot . "/interface/main/tabs/js/include_opener.js'></script>";
 }
 if (!$encounter) { // comes from globals.php
     die(xlt("Internal error: we do not seem to be in an encounter!"));
@@ -162,8 +164,7 @@ if (empty($id)) {
 }
 
 if (isset($_SESSION['billencounter'])) {
-    unset($_SESSION['billpid']);
-    unset($_SESSION['billencounter']);
+    SessionUtil::unsetSession(['billpid', 'billencounter']);
     echo "<script>dlgclose('SubmitTheScreen')</script>";
 } else {
     formHeader("Redirecting....");

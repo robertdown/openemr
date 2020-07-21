@@ -1,4 +1,5 @@
 <?php
+
 /**
  * portal_patient_report.php
  *
@@ -25,7 +26,7 @@ if (isset($_SESSION['pid']) && isset($_SESSION['patient_portal_onsite_two'])) {
     $user = $_SESSION['sessionUser'];
 } else {
     OpenEMR\Common\Session\SessionUtil::portalSessionCookieDestroy();
-    header('Location: '.$landingpage.'&w');
+    header('Location: ' . $landingpage . '&w');
     exit;
 }
 
@@ -47,12 +48,6 @@ $auth_coding   = true; //AclMain::aclCheckCore('encounters', 'coding');
 $auth_relaxed  = true; //AclMain::aclCheckCore('encounters', 'relaxed');
 $auth_med      = true; //AclMain::aclCheckCore('patients'  , 'med');
 $auth_demo     = true; //AclMain::aclCheckCore('patients'  , 'demo');
-
-$cmsportal = false;
-if ($GLOBALS['gbl_portal_cms_enable']) {
-    $ptdata = getPatientData($pid, 'cmsportal_login');
-    $cmsportal = $ptdata['cmsportal_login'] !== '';
-}
 
 $ignoreAuth = 1;
 ?>
@@ -273,9 +268,9 @@ var mypcc = '<?php echo $GLOBALS['phone_country_code']; ?>';
 <!-- <button data-target="#reportdialog" data-toggle="modal" class="btn btn-secondary">
     <?php //echo xla('Generate Report'); ?></button> -->
 <input type="button" class="generateCCR" value="<?php echo xla('Generate Report'); ?>" />
-<!-- <input type="button" class="generateCCR_download_h" value="<?php echo xl('Download')." (Hybrid)"; ?>" /> -->
+<!-- <input type="button" class="generateCCR_download_h" value="<?php echo xl('Download') . " (Hybrid)"; ?>" /> -->
 <input type="button" class="generateCCR_download_p" value="<?php echo xla('Download'); ?>" />
-    <?php if ($GLOBALS['phimail_enable']==true && $GLOBALS['phimail_ccr_enable']==true) { ?>
+    <?php if ($GLOBALS['phimail_enable'] == true && $GLOBALS['phimail_ccr_enable'] == true) { ?>
 <input type="button" class="viewCCR_send_dialog" value="<?php echo xla('Transmit'); ?>" />
              <br />
              <div id="ccr_send_dialog" style="display:none" >
@@ -303,7 +298,7 @@ var mypcc = '<?php echo $GLOBALS['phone_country_code']; ?>';
 <br/>
 <input type="button" class="viewCCD" value="<?php echo xla('Generate Report'); ?>" />
 <input type="button" class="viewCCD_download" value="<?php echo xla('Download'); ?>" />
-    <?php if ($GLOBALS['phimail_enable']==true && $GLOBALS['phimail_ccd_enable']==true) { ?>
+    <?php if ($GLOBALS['phimail_enable'] == true && $GLOBALS['phimail_ccd_enable'] == true) { ?>
 <input type="button" class="viewCCD_send_dialog" value="<?php echo xla('Transmit'); ?>" />
              <br />
              <div id="ccd_send_dialog" style="display:none" >
@@ -458,11 +453,11 @@ while ($prow = sqlFetchArray($pres)) {
     $isfirst = 1;
     $res = sqlStatement("SELECT forms.encounter, forms.form_id, forms.form_name, " .
                     "forms.formdir, forms.date AS fdate, form_encounter.date " .
-                    ",form_encounter.reason ".
+                    ",form_encounter.reason " .
                     "FROM forms, form_encounter WHERE " .
                     "forms.pid = ? AND form_encounter.pid = ? AND " .
                     "form_encounter.encounter = forms.encounter " .
-                    " AND forms.deleted=0 ". // --JRM--
+                    " AND forms.deleted=0 " . // --JRM--
                     "ORDER BY form_encounter.date DESC, fdate ASC", [$pid, $pid]);
     $res2 = sqlStatement("SELECT name FROM registry ORDER BY priority");
     $html_strings = array();
@@ -490,11 +485,11 @@ while ($prow = sqlFetchArray($pres)) {
 
             $isfirst = 0;
             echo "<div class='encounter_data'>\n";
-            echo "<input type=checkbox ".
-                " name='" . attr($result["formdir"]) . "_" .  attr($result["form_id"]) . "'".
-                " id='" . attr($result["formdir"]) . "_" .  attr($result["form_id"]) . "'".
+            echo "<input type=checkbox " .
+                " name='" . attr($result["formdir"]) . "_" .  attr($result["form_id"]) . "'" .
+                " id='" . attr($result["formdir"]) . "_" .  attr($result["form_id"]) . "'" .
                 " value='" . attr($result["encounter"]) . "'" .
-                " class='encounter'".
+                " class='encounter'" .
                 " >";
 
             // show encounter reason, not just 'New Encounter'
@@ -535,11 +530,11 @@ while ($prow = sqlFetchArray($pres)) {
                 $html_strings[$form_name] = array();
             }
 
-            array_push($html_strings[$form_name], "<input type='checkbox' ".
-                                                " name='" . attr($result["formdir"]) . "_" . attr($result["form_id"]) . "'".
-                                                " id='" . attr($result["formdir"]) . "_" . attr($result["form_id"]) . "'".
+            array_push($html_strings[$form_name], "<input type='checkbox' " .
+                                                " name='" . attr($result["formdir"]) . "_" . attr($result["form_id"]) . "'" .
+                                                " id='" . attr($result["formdir"]) . "_" . attr($result["form_id"]) . "'" .
                                                 " value='" . attr($result["encounter"]) . "'" .
-                                                " class='encounter_form' ".
+                                                " class='encounter_form' " .
                                                 ">" . text(xl_form_title($result["form_name"])) . "<br />\n");
         }
     }
@@ -638,9 +633,6 @@ while ($result && !$result->EOF) {
 
 <input type="button" class="genreport" value="<?php echo xla('Generate Report'); ?>" />&nbsp;
 <input type="button" class="genpdfrep" value="<?php echo xla('Download PDF'); ?>" />&nbsp;
-<?php if ($cmsportal) { ?>
-<input type="button" class="genportal" value="<?php echo xla('Send to Portal'); ?>" />
-<?php } ?>
 
 </div>  <!-- close patient_reports DIV -->
 
@@ -764,7 +756,7 @@ initReport = function(){
                 raw[0].value = 'pure';
                 $("#ccr_form").submit();
         });
-<?php if ($GLOBALS['phimail_enable']==true && $GLOBALS['phimail_ccr_enable']==true) { ?>
+<?php if ($GLOBALS['phimail_enable'] == true && $GLOBALS['phimail_ccr_enable'] == true) { ?>
         $(".viewCCR_send_dialog").click(
         function() {
                 $("#ccr_send_dialog").toggle();
@@ -803,7 +795,7 @@ initReport = function(){
         });
 <?php }
 
-if ($GLOBALS['phimail_enable']==true && $GLOBALS['phimail_ccd_enable']==true) { ?>
+if ($GLOBALS['phimail_enable'] == true && $GLOBALS['phimail_ccd_enable'] == true) { ?>
         $(".viewCCD_send_dialog").click(
         function() {
                 $("#ccd_send_dialog").toggle();

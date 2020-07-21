@@ -1,4 +1,5 @@
 <?php
+
 /**
  * facility_admin.php
  *
@@ -8,7 +9,6 @@
  * @copyright Copyright (c) 2019 Brady Miller <brady.g.miller@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 
 require_once("../globals.php");
 require_once("$srcdir/options.inc.php");
@@ -28,9 +28,9 @@ if (isset($_GET["fid"])) {
 <head>
     <?php Header::setupHeader(['opener']); ?>
 
-    <script type="text/javascript" src="../main/calendar/modules/PostCalendar/pnincludes/AnchorPosition.js"></script>
-    <script type="text/javascript" src="../main/calendar/modules/PostCalendar/pnincludes/PopupWindow.js"></script>
-    <script type="text/javascript" src="../main/calendar/modules/PostCalendar/pnincludes/ColorPicker2.js"></script>
+    <script src="../main/calendar/modules/PostCalendar/pnincludes/AnchorPosition.js"></script>
+    <script src="../main/calendar/modules/PostCalendar/pnincludes/PopupWindow.js"></script>
+    <script src="../main/calendar/modules/PostCalendar/pnincludes/ColorPicker2.js"></script>
 
     <!-- validation library -->
     <!--//Not lbf forms use the new validation, please make sure you have the corresponding values in the list Page validation-->
@@ -285,7 +285,7 @@ if (isset($_GET["fid"])) {
                             <label for="domain_identifier" class="col-form-label col-form-label-sm"><?php echo xlt('CLIA Number'); ?>:</label>
                         </div>
                         <div class="col">
-                            <input type="entry" class="form-control form-control-sm" name="domain_identifier" size="45" value="<?php echo attr($facility['domain_identifier']); ?>" />
+                            <input type="text" class="form-control form-control-sm" name="domain_identifier" size="45" value="<?php echo attr($facility['domain_identifier']); ?>" />
                         </div>
                     </div>
                 </div>
@@ -295,7 +295,7 @@ if (isset($_GET["fid"])) {
                             <label for='phone' class='col-form-label col-form-label-sm'><?php echo xlt('Phone'); ?></label>
                         </div>
                         <div class="col">
-                            <input type='entry' class='form-control form-control-sm' name='phone' size='20' value='<?php echo attr($facility['phone']); ?>' />
+                            <input type='text' class='form-control form-control-sm' name='phone' size='20' value='<?php echo attr($facility['phone']); ?>' />
                             <small class="form-text text-muted"><?php echo xlt('as'); ?> (000) 000-0000</small>
                         </div>
                     </div>
@@ -368,7 +368,7 @@ if (isset($_GET["fid"])) {
                             <label for="attn" class="col-form-label col-form-label-sm"><?php echo xlt('Billing Attn'); ?>:</label>
                         </div>
                         <div class="col">
-                            <input type="entry" class="form-control form-control-sm" name="attn" size="45" value="<?php echo attr($facility['attn']); ?>" />
+                            <input type="text" class="form-control form-control-sm" name="attn" size="45" value="<?php echo attr($facility['attn']); ?>" />
                         </div>
                     </div>
                     <div class="form-row my-2 d-flex align-items-center">
@@ -376,7 +376,7 @@ if (isset($_GET["fid"])) {
                             <label for="facility_id" class="col-form-label col-form-label-sm"><?php echo xlt('Facility ID'); ?>:</label>
                         </div>
                         <div class="col">
-                            <input type="entry" class="form-control form-control-sm" name="facility_id" size="45" value="<?php echo attr($facility['facility_code']); ?>" />
+                            <input type="text" class="form-control form-control-sm" name="facility_id" size="45" value="<?php echo attr($facility['facility_code']); ?>" />
                         </div>
                     </div>
                     <div class="form-row my-2">
@@ -384,7 +384,7 @@ if (isset($_GET["fid"])) {
                             <label for="oid" class="col-form-label col-form-label-sm"><?php echo xlt('OID'); ?>: </label>
                         </div>
                         <div class="col">
-                            <input type="entry" class="form-control form-control-sm" size="20" name="oid" value="<?php echo attr($facility["oid"]) ?>" />
+                            <input type="text" class="form-control form-control-sm" size="20" name="oid" value="<?php echo attr($facility["oid"]) ?>" />
                         </div>
                     </div>
                 </div>
@@ -397,7 +397,7 @@ if (isset($_GET["fid"])) {
                     <label for="mail_street" class="col-form-label col-form-label-sm"><?php echo xlt('Mailing Address'); ?>:</label>
                 </div>
                 <div class="col">
-                    <input type="entry" class="form-control form-control-sm" size="20" name="mail_street" value="<?php echo attr($facility["mail_street"]) ?>" />
+                    <input type="text" class="form-control form-control-sm" size="20" name="mail_street" value="<?php echo attr($facility["mail_street"]) ?>" />
                 </div>
             </div>
 
@@ -406,7 +406,7 @@ if (isset($_GET["fid"])) {
                     <label for="mail_street2" class="col-form-label col-form-label-sm"><?php echo xlt('Suite'); ?>: </label>
                 </div>
                 <div class="col">
-                    <input type="entry" class="form-control form-control-sm" size="20" name="mail_street2" value="<?php echo attr($facility["mail_street2"]) ?>" />
+                    <input type="text" class="form-control form-control-sm" size="20" name="mail_street2" value="<?php echo attr($facility["mail_street2"]) ?>" />
                 </div>
             </div>
 
@@ -415,7 +415,7 @@ if (isset($_GET["fid"])) {
                     <label for="mail_city" class="col-form-label col-form-label-sm"><?php echo xlt('City'); ?>: </label>
                 </div>
                 <div class="col">
-                    <input type="entry" class="form-control form-control-sm" size="20" name="mail_city" value="<?php echo attr($facility["mail_city"]) ?>" />
+                    <input type="text" class="form-control form-control-sm" size="20" name="mail_city" value="<?php echo attr($facility["mail_city"]) ?>" />
                 </div>
             </div>
 
@@ -424,7 +424,7 @@ if (isset($_GET["fid"])) {
                     <label for="mail_state" class="col-form-label col-form-label-sm"><?php echo xlt('State'); ?>: </label>
                 </div>
                 <div class="col">
-                    <input type="entry" class="form-control form-control-sm" size="20" name="mail_state" value="<?php echo attr($facility["mail_state"]) ?>" />
+                    <input type="text" class="form-control form-control-sm" size="20" name="mail_state" value="<?php echo attr($facility["mail_state"]) ?>" />
                 </div>
             </div>
 
@@ -433,7 +433,7 @@ if (isset($_GET["fid"])) {
                     <label for="mail_zip" class="col-form-label col-form-label-sm"><?php echo xlt('Zip'); ?>:</label>
                 </div>
                 <div class="col">
-                    <input type="entry" class="form-control form-control-sm" size="20" name="mail_zip" value="<?php echo attr($facility["mail_zip"]) ?>" />
+                    <input type="text" class="form-control form-control-sm" size="20" name="mail_zip" value="<?php echo attr($facility["mail_zip"]) ?>" />
                 </div>
             </div>
 

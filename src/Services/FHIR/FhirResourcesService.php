@@ -1,4 +1,5 @@
 <?php
+
 /**
  * FHIRResources service class
  *
@@ -9,12 +10,13 @@
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
 
-
 namespace OpenEMR\Services\FHIR;
 
 use OpenEMR\FHIR\R4\FHIRResource\FHIRBundle;
 use OpenEMR\FHIR\R4\FHIRResource\FHIRBundle\FHIRBundleLink;
 use OpenEMR\FHIR\R4\PHPFHIRResponseParser;
+
+require_once(__DIR__ . '/../../../_rest_config.php');
 
 class FhirResourcesService
 {

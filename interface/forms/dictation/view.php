@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Dictation form
  *
@@ -12,7 +13,6 @@
  * @copyright Copyright (c) 2017 Robert Down <robertdown@live.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  **/
-
 
 require_once(__DIR__ . "/../../globals.php");
 require_once("$srcdir/api.inc");
@@ -35,9 +35,7 @@ $obj = formFetch("form_dictation", $_GET["id"]);
 <div class="container">
     <div class="row">
         <div class="col-12">
-            <div class="page-header">
-                <h2><?php echo xlt("Dictation"); ?></h2>
-            </div>
+            <h2><?php echo xlt("Dictation"); ?></h2>
         </div>
     </div>
     <div class="row">

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package Patient
  *
@@ -14,6 +15,7 @@
  * @license http://www.gnu.org/copyleft/lesser.html LGPL
  *
  */
+
 /* */
 
 // Will start the (patient) portal OpenEMR session/cookie.
@@ -50,7 +52,11 @@ GlobalConfig::$CONNECTION_SETTING->Username = $GLOBALS['login'];
 GlobalConfig::$CONNECTION_SETTING->Password = $GLOBALS['pass'];
 GlobalConfig::$CONNECTION_SETTING->Type = "MySQLi";
 if (!$disable_utf8_flag) {
-    GlobalConfig::$CONNECTION_SETTING->Charset = "utf8";
+    if ($sqlconf['db_encoding'] == "utf8mb4") {
+        GlobalConfig::$CONNECTION_SETTING->Charset = "utf8mb4";
+    } else {
+        GlobalConfig::$CONNECTION_SETTING->Charset = "utf8";
+    }
 }
 
 GlobalConfig::$CONNECTION_SETTING->Multibyte = true;

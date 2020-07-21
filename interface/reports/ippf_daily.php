@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This module creates the Barbados Daily Record.
  *
@@ -10,7 +11,6 @@
  * @copyright Copyright (c) 2017-2018 Brady Miller <brady.g.miller@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 
 require_once("../globals.php");
 require_once("../../library/patient.inc");
@@ -139,13 +139,13 @@ if ($form_output == 3) {
 
     <?php Header::setupHeader('datetime-picker'); ?>
 
-<style type="text/css">
+<style>
  body       { font-family:sans-serif; font-size:10pt; font-weight:normal }
  .dehead    { color:var(--black); font-family:sans-serif; font-size:10pt; font-weight:bold }
  .detail    { color:var(--black); font-family:sans-serif; font-size:10pt; font-weight:normal }
 </style>
 
-<script language="JavaScript">
+<script>
     $(function () {
         $('.datepicker').datetimepicker({
             <?php $datetimepicker_timepicker = false; ?>
@@ -176,7 +176,7 @@ if ($form_output == 3) {
     <?php
  // Build a drop-down list of facilities.
  //
-    $fres = $facilityService->getAll();
+    $fres = $facilityService->getAllFacility();
     echo "   <select name='form_facility'>\n";
     echo "    <option value=''>-- All Facilities --\n";
     foreach ($fres as $frow) {
@@ -248,7 +248,7 @@ if ($_POST['form_submit']) {
     "AND b.code_type = 'MA' " .
     "WHERE fe.date >= ? AND " .
     "fe.date <= ? ";
-    array_push($sqlBindArray, $from_date.' 00:00:00', $from_date.' 23:59:59');
+    array_push($sqlBindArray, $from_date . ' 00:00:00', $from_date . ' 23:59:59');
 
     if ($form_facility) {
         $query .= "AND fe.facility_id = ? ";
@@ -386,7 +386,7 @@ if ($_POST['form_submit']) {
 
     foreach ($areport as $key => $varr) {
         $bgcolor = (++$encount & 1) ? "#ddddff" : "#ffdddd";
-        genStartRow("bgcolor='". attr($bgcolor) . "'");
+        genStartRow("bgcolor='" . attr($bgcolor) . "'");
         genAnyCell($varr[0], false, 'detail');
         // Generate data and accumulate totals for this row.
         for ($cnum = 0; $cnum < $report_col_count; ++$cnum) {
@@ -415,7 +415,7 @@ if ($form_output != 3) {
 </form>
 </center>
 
-<script language='JavaScript'>
+<script>
     <?php if ($form_output == 2) { ?>
  var win = top.printLogPrint ? top : opener.top;
  win.printLogPrint(window);

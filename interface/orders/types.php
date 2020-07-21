@@ -1,4 +1,5 @@
 <?php
+
 /**
  * types.php
  *
@@ -11,7 +12,6 @@
  * @copyright Copyright (c) 2018-2019 Brady Miller <brady.g.miller@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 
 require_once("../globals.php");
 
@@ -33,10 +33,8 @@ if ($popup && $_POST['form_save']) {
     $ptrow = sqlQuery("SELECT name FROM procedure_type WHERE procedure_type_id = ?", [$form_order]);
     $name = $ptrow['name'];
     ?>
-    <script type="text/javascript"
-        src="<?php echo $webroot ?>/interface/main/tabs/js/include_opener.js">
-    </script>
-    <script language="JavaScript">
+    <script src="<?php echo $webroot ?>/interface/main/tabs/js/include_opener.js"></script>
+    <script>
     if (opener.closed || ! opener.set_proc_type) {
         alert(<?php echo xlj('The destination form was closed; I cannot act on your selection.'); ?>);
     } else {
@@ -132,7 +130,7 @@ if ($popup && $_POST['form_save']) {
     <?php } ?>
 
 
-    <script type="text/javascript">
+    <script>
 
     <?php
     if ($popup) {
@@ -286,7 +284,7 @@ if ($popup && $_POST['form_save']) {
     <div class="container">
         <div class="row">
              <div class="col-sm-12">
-                <div class="page-header clearfix">
+                <div class="clearfix">
                     <h2 id="header_title" class="clearfix"><span id='header_text'><?php echo xlt('Configure Orders and Results');?></span><?php echo $help_icon; ?></h2>
                 </div>
             </div>

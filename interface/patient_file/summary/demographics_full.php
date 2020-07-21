@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Edit demographics.
  *
@@ -37,8 +38,10 @@ if ($pid) {
     $updateEvent = new UpdateEvent($pid);
     $updateEvent = $GLOBALS["kernel"]->getEventDispatcher()->dispatch(UpdateEvent::EVENT_HANDLE, $updateEvent, 10);
 
-    if (!$updateEvent->authorized() ||
-        !AclMain::aclCheckCore('patients', 'demo', '', 'write')) {
+    if (
+        !$updateEvent->authorized() ||
+        !AclMain::aclCheckCore('patients', 'demo', '', 'write')
+    ) {
         die(xlt('Updating demographics is not authorized.'));
     }
 
@@ -79,6 +82,7 @@ $fres = sqlStatement("SELECT * FROM layout_options " .
 <title><?php echo xlt('Edit Current Patient'); ?></title>
 
 <style>
+    /* TODO: Find a way to remove this stylesheet */
     .form-control {
         width: auto;
         display: inline;
@@ -88,13 +92,23 @@ $fres = sqlStatement("SELECT * FROM layout_options " .
 
 <?php include_once($GLOBALS['srcdir'] . "/options.js.php"); ?>
 
-<script type="text/javascript">
+<script>
 
 // Support for beforeunload handler.
 var somethingChanged = false;
 
 $(function () {
     tabbify();
+
+    $(".select-dropdown").select2({
+        theme: "bootstrap4",
+        <?php require($GLOBALS['srcdir'] . '/js/xl/select2.js.php'); ?>
+    });
+    if (typeof error !== 'undefined') {
+        if (error) {
+            alertMsg(error);
+        }
+    }
 
     $(".medium_modal").on('click', function(e) {
         e.preventDefault();e.stopPropagation();
@@ -207,7 +221,7 @@ function upperFirst(string,text) {
  return replace(string,text,text.charAt(0).toUpperCase() + text.substring(1,text.length));
 }
 
-<?php for ($i=1; $i<=3; $i++) { ?>
+<?php for ($i = 1; $i <= 3; $i++) { ?>
 function auto_populate_employer_address<?php echo attr($i); ?>(){
  var f = document.demographics_form;
  if (f.form_i<?php echo attr($i); ?>subscriber_relationship.options[f.form_i<?php echo attr($i); ?>subscriber_relationship.selectedIndex].value == "self")
@@ -406,7 +420,7 @@ if(dateVal > currentDate)
      return false;
    }
    if (!samess && ss_valid) {
-    if(!confirm(<?php echo js_escape(xl('Subscriber relationship is self but SS number is different!')." ".xl("Is this really OK?")); ?>))
+    if(!confirm(<?php echo js_escape(xl('Subscriber relationship is self but SS number is different!') . " " . xl("Is this really OK?")); ?>))
     return false;
    }
   } // end self
@@ -416,7 +430,7 @@ if(dateVal > currentDate)
      return false;
    }
    if (samess && ss_valid)  {
-    if(!confirm(<?php echo js_escape(xl('Subscriber relationship is not self but SS number is the same!')." ".xl("Is this really OK?")); ?>))
+    if(!confirm(<?php echo js_escape(xl('Subscriber relationship is not self but SS number is the same!') . " " . xl("Is this really OK?")); ?>))
     return false;
    }
   } // end not self
@@ -452,7 +466,7 @@ function policykeyup(e) {
 // Added 06/2009 by BM to make compatible with list_options table and functions - using jquery
 $(function () {
 
-    <?php for ($i=1; $i<=3; $i++) { ?>
+    <?php for ($i = 1; $i <= 3; $i++) { ?>
   $("#form_i<?php echo attr($i); ?>subscriber_relationship").change(function() { auto_populate_employer_address<?php echo attr($i); ?>(); });
     <?php } ?>
 
@@ -477,16 +491,14 @@ $constraints = LBF_Validation::generate_validate_constraints("DEM");
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
-                <div class="page-header">
-                    <h2><?php echo xlt('Edit Current Patient');?></h2>
-                </div>
+                <h2><?php echo xlt('Edit Current Patient');?></h2>
             </div>
             <div class="col-12">
                 <div class="btn-group">
-                    <button type="submit" class="btn btn-secondary btn-save" id="submit_btn" disabled="disabled" value="<?php echo xla('Save'); ?>">
+                    <button type="submit" class="btn btn-primary btn-save" id="submit_btn" disabled="disabled" value="<?php echo xla('Save'); ?>">
                         <?php echo xlt('Save'); ?>
                     </button>
-                    <a class="btn btn-link btn-cancel" href="demographics.php" onclick="top.restoreSession()">
+                    <a class="btn btn-secondary btn-cancel" href="demographics.php" onclick="top.restoreSession()">
                         <?php echo xlt('Cancel'); ?>
                     </a>
                 </div>
@@ -534,7 +546,7 @@ $cell_count = 0;
 $item_count = 0;
 $display_style = 'block';
 
-$group_seq=0; // this gives the DIV blocks unique IDs
+$group_seq = 0; // this gives the DIV blocks unique IDs
 
 $condition_str = '';
 ?>
@@ -578,30 +590,28 @@ if (! $GLOBALS['simplified_demographics']) {
     <div class="section-header">
        <span class="text font-weight-bold"><?php echo xlt("Insurance")?></span>
     </div>
-    <div id="INSURANCE" >
+    <div id="INSURANCE">
        <ul class="tabNav">
         <?php
         foreach ($insurance_array as $instype) {
-            ?><li <?php echo $instype == 'primary' ? 'class="current"' : '' ?>><a href="#"><?php $CapInstype=ucfirst($instype);
-echo xlt($CapInstype); ?></a></li><?php
-        }
-        ?>
+            ?><li <?php echo $instype == 'primary' ? 'class="current"' : '' ?>><a href="#"><?php $CapInstype = ucfirst($instype);
+echo xlt($CapInstype); ?></a></li><?php } ?>
         </ul>
 
     <div class="tabContainer">
 
     <?php
-    for ($i=1; $i<=3; $i++) {
+    for ($i = 1; $i <= 3; $i++) {
         $result3 = $insurance_info[$i];
         ?>
 
-     <div class="tab <?php echo $i == 1 ? 'current': '' ?> h-auto w-auto">
+     <div class="tab <?php echo $i == 1 ? 'current' : '' ?> h-auto w-auto">
       <div class="row">
         <div class="col-md-6">
-         <table border="0">
+         <table class="table table-borderless">
            <tr>
-            <td valign='top'>
-            <label class='required'><?php echo text($insurance_headings[$i -1])."&nbsp;"?></label>
+            <td class="align-top">
+            <label class='required'><?php echo text($insurance_headings[$i - 1]) . "&nbsp;"?></label>
             </td>
             <td class='required'>:</td>
             <td class="form-row align-items-center">
@@ -655,7 +665,7 @@ echo xlt($CapInstype); ?></a></li><?php
             <tr>
              <td><label class='required'><?php echo xlt('Group Number'); ?></label></td>
              <td class='required'>:</td>
-             <td><input type=entry class='form-control' size='16' name=i<?php echo attr($i); ?>group_number value="<?php echo attr($result3["group_number"]); ?>" onkeyup='policykeyup(this)'></td>
+             <td><input type="text" class='form-control' size='16' name=i<?php echo attr($i); ?>group_number value="<?php echo attr($result3["group_number"]); ?>" onkeyup='policykeyup(this)'></td>
             </tr>
 
             <tr<?php if ($GLOBALS['omit_employers']) {
@@ -687,7 +697,7 @@ echo xlt($CapInstype); ?></a></li><?php
             <td>
                 <?php
                  // Modified 7/2009 by BM to incorporate data types
-                generate_form_field(array('data_type'=>$GLOBALS['state_data_type'],'field_id'=>('i'.$i.'subscriber_employer_state'),'list_id'=>$GLOBALS['state_list'],'fld_length'=>'15','max_length'=>'63','edit_options'=>'C'), $result3['subscriber_employer_state']);
+                generate_form_field(array('data_type' => $GLOBALS['state_data_type'],'field_id' => ('i' . $i . 'subscriber_employer_state'),'list_id' => $GLOBALS['state_list'],'fld_length' => '15','max_length' => '63','edit_options' => 'C'), $result3['subscriber_employer_state']);
                 ?>
                 </td>
                </tr>
@@ -704,7 +714,7 @@ echo xlt($CapInstype); ?></a></li><?php
                    <td>
                        <?php
                   // Modified 7/2009 by BM to incorporate data types
-                        generate_form_field(array('data_type'=>$GLOBALS['country_data_type'],'field_id'=>('i'.$i.'subscriber_employer_country'),'list_id'=>$GLOBALS['country_list'],'fld_length'=>'10','max_length'=>'63','edit_options'=>'C'), $result3['subscriber_employer_country']);
+                        generate_form_field(array('data_type' => $GLOBALS['country_data_type'],'field_id' => ('i' . $i . 'subscriber_employer_country'),'list_id' => $GLOBALS['country_list'],'fld_length' => '10','max_length' => '63','edit_options' => 'C'), $result3['subscriber_employer_country']);
                         ?>
                    </td>
                </tr>
@@ -716,7 +726,7 @@ echo xlt($CapInstype); ?></a></li><?php
           </div>
 
     <div class="col-md-6">
-        <table class="border-0">
+        <table class="table table-borderless">
             <tr>
                 <td>
                     <label class='required'><?php echo xlt('Relationship'); ?></label>
@@ -725,7 +735,7 @@ echo xlt($CapInstype); ?></a></li><?php
                 <td colspan='3'>
                 <?php
                  // Modified 6/2009 by BM to use list_options and function
-                 generate_form_field(array('data_type'=>1,'field_id'=>('i'.$i.'subscriber_relationship'),'list_id'=>'sub_relation','empty_title'=>' '), $result3['subscriber_relationship']);
+                 generate_form_field(array('data_type' => 1,'field_id' => ('i' . $i . 'subscriber_relationship'),'list_id' => 'sub_relation','empty_title' => ' '), $result3['subscriber_relationship']);
                 ?>
 
                 <a href="javascript:popUp('browse.php?browsenum=<?php echo attr_url($i); ?>')" class='text'>(<?php echo xlt('Browse'); ?>)</a>
@@ -764,7 +774,7 @@ echo xlt($CapInstype); ?></a></li><?php
                 <td>
                     <?php
                      // Modified 6/2009 by BM to use list_options and function
-                     generate_form_field(array('data_type'=>1,'field_id'=>('i'.$i.'subscriber_sex'),'list_id'=>'sex'), $result3['subscriber_sex']);
+                     generate_form_field(array('data_type' => 1,'field_id' => ('i' . $i . 'subscriber_sex'),'list_id' => 'sex'), $result3['subscriber_sex']);
                     ?>
                 </td>
                 <td></td>
@@ -797,7 +807,7 @@ echo xlt($CapInstype); ?></a></li><?php
                 <td>
                     <?php
                     // Modified 7/2009 by BM to incorporate data types
-                    generate_form_field(array('data_type'=>$GLOBALS['state_data_type'],'field_id'=>('i'.$i.'subscriber_state'),'list_id'=>$GLOBALS['state_list'],'fld_length'=>'15','max_length'=>'63','edit_options'=>'C'), $result3['subscriber_state']);
+                    generate_form_field(array('data_type' => $GLOBALS['state_data_type'],'field_id' => ('i' . $i . 'subscriber_state'),'list_id' => $GLOBALS['state_list'],'fld_length' => '15','max_length' => '63','edit_options' => 'C'), $result3['subscriber_state']);
                     ?>
                 </td>
             </tr>
@@ -816,7 +826,7 @@ echo xlt($CapInstype); ?></a></li><?php
                 <td>
                     <?php
                     // Modified 7/2009 by BM to incorporate data types
-                    generate_form_field(array('data_type'=>$GLOBALS['country_data_type'],'field_id'=>('i'.$i.'subscriber_country'),'list_id'=>$GLOBALS['country_list'],'fld_length'=>'10','max_length'=>'63','edit_options'=>'C'), $result3['subscriber_country']);
+                    generate_form_field(array('data_type' => $GLOBALS['country_data_type'],'field_id' => ('i' . $i . 'subscriber_country'),'list_id' => $GLOBALS['country_list'],'fld_length' => '10','max_length' => '63','edit_options' => 'C'), $result3['subscriber_country']);
                     ?>
                 </td>
             </tr>
@@ -866,7 +876,7 @@ echo xlt($CapInstype); ?></a></li><?php
                 <td colspan='2'></td>
                 <td></td>
             </tr>
-            <?php if (!$GLOBALS['insurance_only_one']) : ?>
+            <?php if (!$GLOBALS['insurance_only_one']) { ?>
                 <tr>
                     <td>
                         <label class='bold'><?php echo xlt('Secondary Medicare Type'); ?></label>
@@ -887,7 +897,7 @@ echo xlt($CapInstype); ?></a></li><?php
                         </select>
                     </td>
                 </tr>
-            <?php endif ?>
+            <?php } ?>
       </table>
 
     </div>
@@ -939,12 +949,12 @@ var skipArray = [
 </script>
 
 <!-- include support for the list-add selectbox feature -->
-<?php include $GLOBALS['fileroot']."/library/options_listadd.inc"; ?>
+<?php include $GLOBALS['fileroot'] . "/library/options_listadd.inc"; ?>
 
 <?php /*Include the validation script and rules for this form*/
-$form_id="DEM";
+$form_id = "DEM";
 //LBF forms use the new validation depending on the global value
-$use_validate_js=$GLOBALS['new_validate'];
+$use_validate_js = $GLOBALS['new_validate'];
 
 ?>
 <?php  include_once("$srcdir/validation/validation_script.js.php");?>
@@ -963,7 +973,7 @@ $use_validate_js=$GLOBALS['new_validate'];
 
         // Use hook to open the controller and get the new patient validation .
         // when no params are sent this window will be closed from the zend controller.
-        var url ='<?php echo  $GLOBALS['web_root']."/interface/modules/zend_modules/public/patientvalidation";?>';
+        var url ='<?php echo  $GLOBALS['web_root'] . "/interface/modules/zend_modules/public/patientvalidation";?>';
         $("#submit_btn").attr("name","btnSubmit");
         $("#submit_btn").attr("id","btnSubmit");
         $("#btnSubmit").click(function( event ) {

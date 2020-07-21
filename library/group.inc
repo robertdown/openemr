@@ -1,4 +1,5 @@
 <?php
+
 /**
  * interface/therapy_groups/index.php routing for therapy groups
  *
@@ -31,6 +32,8 @@ require_once(dirname(__FILE__) . "/../interface/therapy_groups/therapy_groups_mo
 require_once(dirname(__FILE__) . "/../interface/therapy_groups/therapy_groups_models/users_model.php");
 require_once(dirname(__FILE__) . "/../interface/therapy_groups/therapy_groups_models/therapy_groups_participants_model.php");
 require_once(dirname(__FILE__) . "/../interface/therapy_groups/therapy_groups_controllers/therapy_groups_controller.php");
+
+use OpenEMR\Common\Session\SessionUtil;
 
 //Fetches groups data by given search parameter (used in popup search when in add_edit_event for groups)
 function getGroup($gid)
@@ -114,6 +117,5 @@ function getGroupCounselorsNames($gid)
 
 function unsetGroup()
 {
-
-    unset($_SESSION['therapy_group']);
+    SessionUtil::unsetSession('therapy_group');
 }

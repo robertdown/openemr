@@ -31,10 +31,10 @@ border-radius: 4px 0 0 4px!important;
 }
 </style>
 {/literal}
-<script type="text/javascript" src="{$GLOBALS.webroot}/library/js/DocumentTreeMenu.js"></script>
-<script type="text/javascript" src="{$GLOBALS.assets_static_relative}/dropzone/dist/dropzone.js"></script>
+<script src="{$GLOBALS.webroot}/library/js/DocumentTreeMenu.js"></script>
+<script src="{$GLOBALS.assets_static_relative}/dropzone/dist/dropzone.js"></script>
 
-<script type="text/javascript">
+<script>
 	function callTemplateModule() {literal}{{/literal}
 		top.restoreSession();
 		let tele  = document.getElementById("template_filename");
@@ -68,7 +68,7 @@ border-radius: 4px 0 0 4px!important;
 				<legend>{xlt t='Documents List'}</legend>
                 <div style="padding: 0 10px">
                     <div class="ui-widget form-inline" class='float-right'>
-                         <select id="selectPatient" class="form-control" type="text" data-placeholder="{$place_hld|attr}" style="width:150px;" >
+                         <select id="selectPatient" class="form-control" type="text" data-placeholder="{$place_hld|attr}" style="width:150px;">
                             <option></option></select>
                         <button id='pid' class="btn btn-primary pBtn" type="button" class='float-right' style="border-radius: 0 0.25rem 0.25rem 0">0</button>
                     </div>
@@ -100,7 +100,7 @@ border-radius: 4px 0 0 4px!important;
 		</div>
 	</div>
 </div><!--end of container div-->
-<script type="text/javascript">
+<script>
 var curpid = {$cur_pid|js_escape};
 var newVersion= {$is_new|js_escape};
 var demoPid = {$demo_pid|js_escape};
@@ -176,7 +176,7 @@ $(function () {
         if (!popsrc.includes('&view&')) {
             return false;
         } else if (diview.toLowerCase().includes('.dcm') || diview.toLowerCase().includes('.zip')) {
-            popsrc = "{/literal}{$GLOBALS.webroot}{literal}/library/dicom_frame.php?web_path=" + encodeURIComponent(popsrc);
+            popsrc = "{/literal}{$GLOBALS.webroot}{literal}/library/dicom_frame.php?web_path=" + popsrc;
             dflg = true;
         }
         popsrc = popsrc.replace('&view&', '&retrieve&') + 'as_file=false';
@@ -189,16 +189,11 @@ $(function () {
         let btnText = {/literal}{xlj t="Full Screen"}{literal};
         let btnClose = {/literal}{xlj t="Close"}{literal};
         let size = 'modal-xl';
-        let sizeHeight = 'full';
-        if (dflg) {
-            size = 'modal-md';
-        }
-        dlgopen(popsrc, 'popdoc', size, 600, '', '', {
+        dlgopen(popsrc, 'popdoc', size, 700, '', '', {
             buttons: [
                 {text: btnText, close: true, style: 'primary btn-sm', click: poContentModal},
                 {text: btnClose, close: true, style: 'default btn-sm'}
             ],
-            sizeHeight: sizeHeight,
             allowResize: true,
             allowDrag: true,
             dialogId: '',

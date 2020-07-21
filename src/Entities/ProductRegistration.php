@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Product Registration entity.
  *
@@ -26,6 +27,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Table;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\GeneratedValue;
 
 /**
  * @Table(name="product_registration")
@@ -42,9 +44,10 @@ class ProductRegistration
 
     /**
      * @Id
-     * @Column(name="registration_id"), type="char", length=36 nullable=false, options={"default" : 0})
+     * @Column(name="id", type="integer")
+     * @GeneratedValue(strategy="AUTO")
      */
-    private $registrationId;
+    private $id;
 
     /**
      * @Column(name="email"), type="varchar", length=255 nullable=false, options={"default" : 0})
@@ -62,23 +65,23 @@ class ProductRegistration
     private $statusAsString;
 
     /**
-     * Getter for registration id.
+     * Getter for id.
      *
-     * return registration id
+     * return id integer
      */
-    public function getRegistrationId()
+    public function getId()
     {
-        return $this->registrationId;
+        return $this->id;
     }
 
     /**
-     * Setter for registration id.
+     * Setter for id.
      *
-     * @param registration id
+     * @param id integer
      */
-    public function setRegistrationId($value)
+    public function setId($value)
     {
-        $this->registrationId = $value;
+        $this->id = $value;
     }
 
     /**
@@ -150,7 +153,7 @@ class ProductRegistration
      */
     public function __toString()
     {
-        return "registrationId: '" . $this->getRegistrationId() . "' " .
+        return "id: '" . $this->getId() . "' " .
                "email: '" . $this->getEmail() . "' " .
                "statusAsString: '" . $this->getStatusAsString() . "' " .
                "optOut" . $this->getOptOut() . "' " ;

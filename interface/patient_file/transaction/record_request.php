@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Patient Records Request.
  *
@@ -8,7 +9,6 @@
  * @copyright Copyright (c) 2010-2018 Brady Miller <brady.g.miller@gmail.com>
  * @license https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 
 require_once("../../globals.php");
 
@@ -23,7 +23,7 @@ use OpenEMR\Core\Header;
 
     <?php Header::setupHeader(); ?>
 
-    <script language="JavaScript">
+    <script>
         $(function () {
             $("#req_button").click(function() {
                 // hide the button, show the message, and send the ajax call
@@ -54,9 +54,7 @@ $recordRequest = sqlQuery("SELECT * FROM `amc_misc_data` WHERE `pid`=? AND `amc_
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <div class="page-header">
-                    <h2><?php echo xlt('Patient Records Request'); ?></h2>
-                </div>
+                <h2><?php echo xlt('Patient Records Request'); ?></h2>
             </div>
         </div>
         <div class="row">

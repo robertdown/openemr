@@ -2,8 +2,6 @@
 -- Database: `openemr`
 --
 
------------------------------------------------------------
-
 --
 -- Table structure for table `addresses`
 --
@@ -23,7 +21,7 @@ CREATE TABLE `addresses` (
   KEY `foreign_id` (`foreign_id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `amc_misc_data`
@@ -41,7 +39,7 @@ CREATE TABLE `amc_misc_data` (
   KEY  (`amc_id`,`pid`,`map_id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `amendments`
@@ -57,13 +55,13 @@ CREATE TABLE `amendments` (
   `amendment_desc` text COMMENT 'Amendment Details',
   `created_by` int(11) NOT NULL COMMENT 'references users.id for session owner',
   `modified_by` int(11) NULL COMMENT 'references users.id for session owner',
-  `created_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'created time',
+  `created_time` timestamp NULL COMMENT 'created time',
   `modified_time` timestamp NULL COMMENT 'modified time',
   PRIMARY KEY amendments_id(`amendment_id`),
   KEY amendment_pid(`pid`)
 ) ENGINE = InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `amendments_history`
@@ -75,11 +73,11 @@ CREATE TABLE `amendments_history` (
   `amendment_note` text COMMENT 'Amendment requested from',
   `amendment_status` VARCHAR(50) NULL COMMENT 'Amendment Request Status',
   `created_by` int(11) NOT NULL COMMENT 'references users.id for session owner',
-  `created_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'created time',
+  `created_time` timestamp NULL COMMENT 'created time',
 KEY amendment_history_id(`amendment_id`)
 ) ENGINE = InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `audit_master`
@@ -99,7 +97,7 @@ CREATE TABLE `audit_master` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `audit_details`
@@ -116,7 +114,7 @@ CREATE TABLE `audit_details` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `background_services`
@@ -147,7 +145,7 @@ INSERT INTO `background_services` (`name`, `title`, `execute_interval`, `functio
 INSERT INTO `background_services` (`name`, `title`, `active`, `running`, `next_run`, `execute_interval`, `function`, `require_once`, `sort_order`) VALUES
 ('MedEx', 'MedEx Messaging Service', 0, 0, '2017-05-09 17:39:10', 0, 'start_MedEx', '/library/MedEx/MedEx_background.php', 100);
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `batchcom`
@@ -161,11 +159,11 @@ CREATE TABLE `batchcom` (
   `msg_type` varchar(60) default NULL,
   `msg_subject` varchar(255) default NULL,
   `msg_text` mediumtext,
-  `msg_date_sent` datetime NOT NULL default '0000-00-00 00:00:00',
+  `msg_date_sent` datetime NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `billing`
@@ -204,9 +202,9 @@ CREATE TABLE `billing` (
   `revenue_code` varchar(6) NOT NULL default '' COMMENT 'Item revenue code',
   PRIMARY KEY  (`id`),
   KEY `pid` (`pid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `categories`
@@ -260,7 +258,7 @@ INSERT INTO `categories` VALUES (27, 'Onsite Portal', '', 1, 51, 56, 'patients|d
 INSERT INTO `categories` VALUES (28, 'Patient', '', 27, 52, 53, 'patients|docs');
 INSERT INTO `categories` VALUES (29, 'Reviewed', '', 27, 54, 55, 'patients|docs');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `categories_seq`
@@ -278,7 +276,7 @@ CREATE TABLE `categories_seq` (
 
 INSERT INTO `categories_seq` VALUES (29);
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `categories_to_documents`
@@ -291,7 +289,7 @@ CREATE TABLE `categories_to_documents` (
   PRIMARY KEY  (`category_id`,`document_id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `claims`
@@ -313,9 +311,9 @@ CREATE TABLE `claims` (
   `x12_partner_id` int(11) NOT NULL default '0',
   `submitted_claim` text COMMENT 'This claims form claim data',
   PRIMARY KEY  (`patient_id`,`encounter_id`,`version`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `clinical_plans`
@@ -331,7 +329,7 @@ CREATE TABLE `clinical_plans` (
   `cqm_2014_flag` tinyint(1) COMMENT '2014 Clinical Quality Measure flag (unable to customize per patient)',
   `cqm_measure_group` varchar(10) NOT NULL default '' COMMENT 'Clinical Quality Measure Group Identifier',
   PRIMARY KEY  (`id`,`pid`)
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
 --
 -- Inserting data for Clinical Quality Measure (CQM) plans
@@ -391,7 +389,7 @@ INSERT INTO `clinical_plans` ( `id`, `pid`, `normal_flag`, `cqm_flag`, `cqm_meas
 
 INSERT INTO `clinical_plans` ( `id`, `pid`, `normal_flag`, `cqm_flag`, `cqm_measure_group` ) VALUES ('prevent_plan', 0, 1, 0, '');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `clinical_plans_rules`
@@ -402,7 +400,7 @@ CREATE TABLE `clinical_plans_rules` (
   `plan_id` varchar(31) NOT NULL DEFAULT '' COMMENT 'Unique and maps to list_options list clinical_plans',
   `rule_id` varchar(31) NOT NULL DEFAULT '' COMMENT 'Unique and maps to list_options list clinical_rules',
   PRIMARY KEY  (`plan_id`,`rule_id`)
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
 --
 -- Inserting data for Clinical Quality Measure (CQM) plans to rules mappings
@@ -552,7 +550,7 @@ INSERT INTO `clinical_plans_rules` ( `plan_id`, `rule_id` ) VALUES ('prevent_pla
 
 INSERT INTO `clinical_plans_rules` ( `plan_id`, `rule_id` ) VALUES ('prevent_plan', 'rule_cs_prostate');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `clinical_rules`
@@ -583,7 +581,7 @@ CREATE TABLE `clinical_rules` (
   `web_reference` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Clinical Rule Web Reference',
   `access_control` VARCHAR(255) NOT NULL DEFAULT 'patients:med' COMMENT 'ACO link for access control',
   PRIMARY KEY  (`id`,`pid`)
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
 --
 -- Inserting data for Automated Measure Calculation (AMC) rules
@@ -997,7 +995,7 @@ INSERT INTO `clinical_rules`
 (`id`, `pid`, `active_alert_flag`, `passive_alert_flag`, `cqm_flag`, `cqm_nqf_code`, `cqm_pqri_code`, `amc_flag`, `amc_code`, `patient_reminder_flag`, `amc_2011_flag`, `amc_2014_flag`, `amc_code_2014`, `cqm_2011_flag`, `cqm_2014_flag`, `amc_2014_stage1_flag`, `amc_2014_stage2_flag`) VALUES
 ('e_prescribe_2_stage2_amc', 0, 0, 0, 0, '', '', 1, '170.304(b)', 0, 0, 1, '170.314(g)(1)/(2)–8', 0, 0, 0, 1);
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `clinical_rules_log
@@ -1016,9 +1014,9 @@ CREATE TABLE `clinical_rules_log` (
   KEY `pid` (`pid`),
   KEY `uid` (`uid`),
   KEY `category` (`category`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `codes`
@@ -1028,7 +1026,7 @@ DROP TABLE IF EXISTS `codes`;
 CREATE TABLE `codes` (
   `id` int(11) NOT NULL auto_increment,
   `code_text` varchar(255) NOT NULL default '',
-  `code_text_short` varchar(24) NOT NULL default '',
+  `code_text_short` varchar(255) NOT NULL default '',
   `code` varchar(25) NOT NULL default '',
   `code_type` smallint(6) default NULL,
   `modifier` varchar(12) NOT NULL default '',
@@ -1045,7 +1043,7 @@ CREATE TABLE `codes` (
   PRIMARY KEY  (`id`),
   KEY `code` (`code`),
   KEY `code_type` (`code_type`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
 INSERT INTO `codes` (`code_text`,`code`,`code_type`) VALUES ('suspension','C60928',112);
 INSERT INTO `codes` (`code_text`,`code`,`code_type`) VALUES ('tablet','C42998',112);
@@ -1063,7 +1061,7 @@ INSERT INTO `codes` (`code_text`,`code`,`code_type`) VALUES ('Inhale','C38216',1
 INSERT INTO `codes` (`code_text`,`code`,`code_type`) VALUES ('Intramuscular','C28161',112);
 INSERT INTO `codes` (`code_text`,`code`,`code_type`) VALUES ('mg','C28253',112);
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `syndromic_surveillance`
@@ -1077,9 +1075,9 @@ CREATE TABLE `syndromic_surveillance` (
   `filename` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`id`),
   KEY (`lists_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `dated_reminders`
@@ -1101,7 +1099,7 @@ CREATE TABLE `dated_reminders` (
   KEY `dr_from_ID` (`dr_from_ID`,`dr_message_due_date`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `dated_reminders_link`
@@ -1117,7 +1115,7 @@ CREATE TABLE `dated_reminders_link` (
   KEY `dr_id` (`dr_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `direct_message_log`
@@ -1141,7 +1139,7 @@ CREATE TABLE `direct_message_log` (
   KEY `patient_id` (`patient_id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `documents`
@@ -1174,13 +1172,14 @@ CREATE TABLE `documents` (
   `audit_master_id` int(11) default NULL,
   `documentationOf` varchar(255) DEFAULT NULL,
   `encrypted` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0->No,1->Yes',
+  `document_data` MEDIUMTEXT,
   PRIMARY KEY  (`id`),
   KEY `revision` (`revision`),
   KEY `foreign_id` (`foreign_id`),
   KEY `owner` (`owner`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `documents_legal_detail`
@@ -1206,9 +1205,9 @@ CREATE TABLE `documents_legal_detail` (
   `dld_moved` tinyint(4) NOT NULL DEFAULT '0',
   `dld_patient_comments` text COMMENT 'Patient comments stored here',
   PRIMARY KEY (`dld_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `documents_legal_master`
@@ -1233,9 +1232,9 @@ CREATE TABLE `documents_legal_master` (
   `dlm_review` varchar(255) DEFAULT NULL COMMENT '0-Yes 1-No',
   `dlm_upload_type` tinyint(4) DEFAULT '0' COMMENT '0-Provider Uploaded,1-Patient Uploaded',
   PRIMARY KEY (`dlm_document_id`)
-) ENGINE=InnoDB COMMENT='List of Master Docs to be signed' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB COMMENT='List of Master Docs to be signed' AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `documents_legal_categories`
@@ -1248,7 +1247,7 @@ CREATE TABLE `documents_legal_categories` (
   `dlc_category_name` varchar(45) NOT NULL,
   `dlc_category_parent` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`dlc_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 ;
+) ENGINE=InnoDB AUTO_INCREMENT=7;
 
 --
 -- Inserting data for table `documents_legal_categories`
@@ -1274,15 +1273,15 @@ CREATE TABLE `drug_inventory` (
   `on_hand` int(11) NOT NULL default '0',
   `warehouse_id` varchar(31) NOT NULL DEFAULT '',
   `vendor_id` bigint(20) NOT NULL DEFAULT 0,
-  `last_notify` date NOT NULL default '0000-00-00',
+  `last_notify` date NULL,
   `destroy_date` date default NULL,
   `destroy_method` varchar(255) default NULL,
   `destroy_witness` varchar(255) default NULL,
   `destroy_notes` varchar(255) default NULL,
   PRIMARY KEY  (`inventory_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `drug_sales`
@@ -1308,9 +1307,9 @@ CREATE TABLE `drug_sales` (
   `pricelevel` varchar(31) default '',
   `selector` varchar(255) default '' comment 'references drug_templates.selector',
   PRIMARY KEY  (`sale_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `drug_templates`
@@ -1328,7 +1327,7 @@ CREATE TABLE `drug_templates` (
   PRIMARY KEY  (`drug_id`,`selector`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `drugs`
@@ -1342,7 +1341,7 @@ CREATE TABLE `drugs` (
   `on_order` int(11) NOT NULL default '0',
   `reorder_point` float NOT NULL DEFAULT 0.0,
   `max_level` float NOT NULL DEFAULT 0.0,
-  `last_notify` date NOT NULL default '0000-00-00',
+  `last_notify` date NULL,
   `reactions` text,
   `form` int(3) NOT NULL default '0',
   `size` varchar(25) NOT NULL default '',
@@ -1358,9 +1357,9 @@ CREATE TABLE `drugs` (
   `consumable` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1 = will not show on the fee sheet',
   `dispensable` tinyint(1) NOT NULL DEFAULT 1 COMMENT '0 = pharmacy elsewhere, 1 = dispensed here',
   PRIMARY KEY  (`drug_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `eligibility_verification`
@@ -1380,7 +1379,7 @@ CREATE TABLE `eligibility_verification` (
   KEY `insurance_id` (`insurance_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `employer_data`
@@ -1399,9 +1398,9 @@ CREATE TABLE `employer_data` (
   `pid` bigint(20) NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `pid` (`pid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `enc_category_map`
@@ -1415,7 +1414,7 @@ CREATE TABLE `enc_category_map` (
   `rule_enc_id` varchar(31) NOT NULL DEFAULT '' COMMENT 'encounter id from rule_enc_types list in list_options',
   `main_cat_id` int(11) NOT NULL DEFAULT 0 COMMENT 'category id from event category in openemr_postcalendar_categories',
   KEY  (`rule_enc_id`,`main_cat_id`)
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
 --
 -- Inserting data for table `enc_category_map`
@@ -1459,7 +1458,7 @@ INSERT INTO `enc_category_map` ( `rule_enc_id`, `main_cat_id` ) VALUES ('enc_inf
 INSERT INTO `enc_category_map` ( `rule_enc_id`, `main_cat_id` ) VALUES ('enc_influenza', 10);
 INSERT INTO `enc_category_map` ( `rule_enc_id`, `main_cat_id` ) VALUES ('enc_ophthal_serv', 14);
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `erx_ttl_touch`
@@ -1472,9 +1471,9 @@ CREATE  TABLE `erx_ttl_touch` (
   `process` ENUM('allergies','medications') NOT NULL COMMENT 'NewCrop eRx SOAP process' ,
   `updated` DATETIME NOT NULL COMMENT 'Date and time of last process update for patient' ,
   PRIMARY KEY (`patient_id`, `process`)
-) ENGINE = InnoDB COMMENT = 'Store records last update per patient data process' ;
+) ENGINE = InnoDB COMMENT = 'Store records last update per patient data process';
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `erx_weno_drugs`
@@ -1512,7 +1511,7 @@ CREATE TABLE `erx_weno_drugs` (
   PRIMARY KEY (`drug_id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `erx_rx_log`
@@ -1531,7 +1530,7 @@ CREATE TABLE `erx_rx_log` (
  PRIMARY KEY (`id`)
   ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `erx_narcotics`
@@ -1548,7 +1547,7 @@ CREATE TABLE `erx_narcotics` (
    PRIMARY KEY (`id`)
   ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `standardized_tables_track`
@@ -1563,9 +1562,9 @@ CREATE TABLE `standardized_tables_track` (
   `revision_date` datetime default NULL COMMENT 'revision of standardized tables that were imported',
   `file_checksum` varchar(32) NOT NULL DEFAULT '',
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `facility`
@@ -1574,6 +1573,7 @@ CREATE TABLE `standardized_tables_track` (
 DROP TABLE IF EXISTS `facility`;
 CREATE TABLE `facility` (
   `id` int(11) NOT NULL auto_increment,
+  `uuid` binary(16) DEFAULT NULL,
   `name` varchar(255) default NULL,
   `phone` varchar(30) default NULL,
   `fax` varchar(30) default NULL,
@@ -1607,16 +1607,17 @@ CREATE TABLE `facility` (
   `oid` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'HIEs CCDA and FHIR an OID is required/wanted',
   `iban` varchar(50) default NULL,
   `info` TEXT,
+  UNIQUE KEY `uuid` (`uuid`),
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=4;
 
 --
 -- Inserting data for table `facility`
 --
 
-INSERT INTO `facility` VALUES (3, 'Your Clinic Name Here', '000-000-0000', '000-000-0000', '', '', '', '', '', '', NULL, NULL, 1, 1, 0, NULL, '', '', '', '', '', '','#99FFFF','0', '', '1', '', '', '', '', '', '', '', '');
+INSERT INTO `facility` VALUES (3, NULL, 'Your Clinic Name Here', '000-000-0000', '000-000-0000', '', '', '', '', '', '', NULL, NULL, 1, 1, 0, NULL, '', '', '', '', '', '','#99FFFF','0', '', '1', '', '', '', '', '', '', '', '');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `facility_user_ids`
@@ -1627,13 +1628,15 @@ CREATE TABLE  `facility_user_ids` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `uid` bigint(20) DEFAULT NULL,
   `facility_id` bigint(20) DEFAULT NULL,
+  `uuid` binary(16) DEFAULT NULL,
   `field_id`    varchar(31)  NOT NULL COMMENT 'references layout_options.field_id',
   `field_value` TEXT,
   PRIMARY KEY (`id`),
-  KEY `uid` (`uid`,`facility_id`,`field_id`)
-) ENGINE=InnoDB  AUTO_INCREMENT=1 ;
+  KEY `uid` (`uid`,`facility_id`,`field_id`),
+  KEY `uuid` (`uuid`)
+) ENGINE=InnoDB  AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `fee_sheet_options`
@@ -1661,7 +1664,7 @@ INSERT INTO `fee_sheet_options` VALUES ('2Established Patient', '3Detailed', 'CP
 INSERT INTO `fee_sheet_options` VALUES ('2Established Patient', '4Extended', 'CPT4|99214|');
 INSERT INTO `fee_sheet_options` VALUES ('2Established Patient', '5Comprehensive', 'CPT4|99215|');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_dictation`
@@ -1679,9 +1682,9 @@ CREATE TABLE `form_dictation` (
   `dictation` longtext,
   `additional_notes` longtext,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_encounter`
@@ -1690,6 +1693,7 @@ CREATE TABLE `form_dictation` (
 DROP TABLE IF EXISTS `form_encounter`;
 CREATE TABLE `form_encounter` (
   `id` bigint(20) NOT NULL auto_increment,
+  `uuid` binary(16) DEFAULT NULL,
   `date` datetime default NULL,
   `reason` longtext,
   `facility` longtext,
@@ -1712,12 +1716,14 @@ CREATE TABLE `form_encounter` (
   `external_id` VARCHAR(20) DEFAULT NULL,
   `pos_code` tinyint(4) default NULL,
   `parent_encounter_id` BIGINT(20) NULL DEFAULT NULL,
+  `class_code` VARCHAR(10) NOT NULL DEFAULT "AMB",
   PRIMARY KEY  (`id`),
+  UNIQUE KEY `uuid` (`uuid`),
   KEY `pid_encounter` (`pid`, `encounter`),
   KEY `encounter_date` (`date`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_misc_billing_options`
@@ -1759,9 +1765,9 @@ CREATE TABLE `form_misc_billing_options` (
   `box_14_date_qual` char(3) default NULL,
   `box_15_date_qual` char(3) default NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_reviewofs`
@@ -1885,9 +1891,9 @@ CREATE TABLE `form_reviewofs` (
   `addison_syndrom` varchar(5) default NULL,
   `additional_notes` longtext,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_ros`
@@ -2038,9 +2044,9 @@ CREATE TABLE `form_ros` (
   `hiv` varchar(3) default NULL,
   `hai_status` varchar(3) default NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_soap`
@@ -2060,9 +2066,9 @@ CREATE TABLE `form_soap` (
   `assessment` text,
   `plan` text,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_vitals`
@@ -2094,9 +2100,9 @@ CREATE TABLE `form_vitals` (
   `external_id` VARCHAR(20) DEFAULT NULL,
   PRIMARY KEY  (`id`),
   KEY `pid` (`pid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `forms`
@@ -2121,9 +2127,424 @@ CREATE TABLE `forms` (
   PRIMARY KEY  (`id`),
   KEY `pid_encounter` (`pid`, `encounter`),
   KEY `form_id` (`form_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_acl`
+--
+
+DROP TABLE IF EXISTS `gacl_acl`;
+CREATE TABLE `gacl_acl` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `section_value` varchar(150) NOT NULL DEFAULT 'system',
+  `allow` int(11) NOT NULL DEFAULT 0,
+  `enabled` int(11) NOT NULL DEFAULT 0,
+  `return_value` text,
+  `note` text,
+  `updated_date` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `gacl_enabled_acl` (`enabled`),
+  KEY `gacl_section_value_acl` (`section_value`),
+  KEY `gacl_updated_date_acl` (`updated_date`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_acl_sections`
+--
+
+DROP TABLE IF EXISTS `gacl_acl_sections`;
+CREATE TABLE `gacl_acl_sections` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `value` varchar(150) NOT NULL,
+  `order_value` int(11) NOT NULL DEFAULT 0,
+  `name` varchar(230) NOT NULL,
+  `hidden` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `gacl_value_acl_sections` (`value`),
+  KEY `gacl_hidden_acl_sections` (`hidden`)
+) ENGINE=InnoDB;
+
+--
+-- Dumping data for table `gacl_acl_sections`
+--
+
+INSERT INTO `gacl_acl_sections` VALUES (1,'system',1,'System',0),(2,'user',2,'User',0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_acl_seq`
+--
+
+DROP TABLE IF EXISTS `gacl_acl_seq`;
+CREATE TABLE `gacl_acl_seq` (
+  `id` int(11) NOT NULL
+) ENGINE=InnoDB;
+
+--
+-- Inserting data for table `gacl_acl_seq`
+--
+
+INSERT INTO `gacl_acl_seq` VALUES (9);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_aco`
+--
+
+DROP TABLE IF EXISTS `gacl_aco`;
+CREATE TABLE `gacl_aco` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `section_value` varchar(150) NOT NULL DEFAULT '0',
+  `value` varchar(150) NOT NULL,
+  `order_value` int(11) NOT NULL DEFAULT 0,
+  `name` varchar(255) NOT NULL,
+  `hidden` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `gacl_section_value_value_aco` (`section_value`,`value`),
+  KEY `gacl_hidden_aco` (`hidden`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_aco_map`
+--
+
+DROP TABLE IF EXISTS `gacl_aco_map`;
+CREATE TABLE `gacl_aco_map` (
+  `acl_id` int(11) NOT NULL DEFAULT 0,
+  `section_value` varchar(150) NOT NULL DEFAULT '0',
+  `value` varchar(150) NOT NULL,
+  PRIMARY KEY (`acl_id`,`section_value`,`value`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_aco_sections`
+--
+
+DROP TABLE IF EXISTS `gacl_aco_sections`;
+CREATE TABLE `gacl_aco_sections` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `value` varchar(150) NOT NULL,
+  `order_value` int(11) NOT NULL DEFAULT 0,
+  `name` varchar(230) NOT NULL,
+  `hidden` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `gacl_value_aco_sections` (`value`),
+  KEY `gacl_hidden_aco_sections` (`hidden`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_aco_sections_seq`
+--
+
+DROP TABLE IF EXISTS `gacl_aco_sections_seq`;
+CREATE TABLE `gacl_aco_sections_seq` (
+  `id` int(11) NOT NULL
+) ENGINE=InnoDB;
+
+--
+-- Inserting data for table `gacl_aco_sections_seq`
+--
+
+INSERT INTO `gacl_aco_sections_seq` VALUES (9);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_aco_seq`
+--
+
+DROP TABLE IF EXISTS `gacl_aco_seq`;
+CREATE TABLE `gacl_aco_seq` (
+  `id` int(11) NOT NULL
+) ENGINE=InnoDB;
+
+
+--
+-- Inserting data for table `gacl_aco_seq`
+--
+
+INSERT INTO `gacl_aco_seq` VALUES (9);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_aro`
+--
+
+DROP TABLE IF EXISTS `gacl_aro`;
+CREATE TABLE `gacl_aro` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `section_value` varchar(150) NOT NULL DEFAULT '0',
+  `value` varchar(150) NOT NULL,
+  `order_value` int(11) NOT NULL DEFAULT 0,
+  `name` varchar(255) NOT NULL,
+  `hidden` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `gacl_section_value_value_aro` (`section_value`,`value`),
+  KEY `gacl_hidden_aro` (`hidden`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_aro_groups`
+--
+
+DROP TABLE IF EXISTS `gacl_aro_groups`;
+CREATE TABLE `gacl_aro_groups` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `parent_id` int(11) NOT NULL DEFAULT 0,
+  `lft` int(11) NOT NULL DEFAULT 0,
+  `rgt` int(11) NOT NULL DEFAULT 0,
+  `name` varchar(255) NOT NULL,
+  `value` varchar(150) NOT NULL,
+  PRIMARY KEY (`id`,`value`),
+  UNIQUE KEY `gacl_value_aro_groups` (`value`),
+  KEY `gacl_parent_id_aro_groups` (`parent_id`),
+  KEY `gacl_lft_rgt_aro_groups` (`lft`,`rgt`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_aro_groups_id_seq`
+--
+
+DROP TABLE IF EXISTS `gacl_aro_groups_id_seq`;
+CREATE TABLE `gacl_aro_groups_id_seq` (
+  `id` int(11) NOT NULL
+) ENGINE=InnoDB;
+
+--
+-- Inserting data for table `gacl_aro_groups_id_seq`
+--
+
+INSERT INTO `gacl_aro_groups_id_seq` VALUES (9);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_aro_groups_map`
+--
+
+DROP TABLE IF EXISTS `gacl_aro_groups_map`;
+CREATE TABLE `gacl_aro_groups_map` (
+  `acl_id` int(11) NOT NULL DEFAULT 0,
+  `group_id` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`acl_id`,`group_id`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_aro_map`
+--
+
+DROP TABLE IF EXISTS `gacl_aro_map`;
+CREATE TABLE `gacl_aro_map` (
+  `acl_id` int(11) NOT NULL DEFAULT 0,
+  `section_value` varchar(150) NOT NULL DEFAULT '0',
+  `value` varchar(150) NOT NULL,
+  PRIMARY KEY (`acl_id`,`section_value`,`value`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_aro_sections`
+--
+
+DROP TABLE IF EXISTS `gacl_aro_sections`;
+CREATE TABLE `gacl_aro_sections` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `value` varchar(150) NOT NULL,
+  `order_value` int(11) NOT NULL DEFAULT 0,
+  `name` varchar(230) NOT NULL,
+  `hidden` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `gacl_value_aro_sections` (`value`),
+  KEY `gacl_hidden_aro_sections` (`hidden`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_aro_sections_seq`
+--
+
+DROP TABLE IF EXISTS `gacl_aro_sections_seq`;
+CREATE TABLE `gacl_aro_sections_seq` (
+  `id` int(11) NOT NULL
+) ENGINE=InnoDB;
+
+--
+-- Inserting data for table `gacl_aro_sections_seq`
+--
+
+INSERT INTO `gacl_aro_sections_seq` VALUES (9);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_aro_seq`
+--
+
+DROP TABLE IF EXISTS `gacl_aro_seq`;
+CREATE TABLE `gacl_aro_seq` (
+  `id` int(11) NOT NULL
+) ENGINE=InnoDB;
+
+--
+-- Inserting data for table `gacl_aro_seq`
+--
+
+INSERT INTO `gacl_aro_seq` VALUES (9);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_axo`
+--
+
+DROP TABLE IF EXISTS `gacl_axo`;
+CREATE TABLE `gacl_axo` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `section_value` varchar(150) NOT NULL DEFAULT '0',
+  `value` varchar(150) NOT NULL,
+  `order_value` int(11) NOT NULL DEFAULT 0,
+  `name` varchar(255) NOT NULL,
+  `hidden` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `gacl_section_value_value_axo` (`section_value`,`value`),
+  KEY `gacl_hidden_axo` (`hidden`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_axo_groups`
+--
+
+DROP TABLE IF EXISTS `gacl_axo_groups`;
+CREATE TABLE `gacl_axo_groups` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `parent_id` int(11) NOT NULL DEFAULT 0,
+  `lft` int(11) NOT NULL DEFAULT 0,
+  `rgt` int(11) NOT NULL DEFAULT 0,
+  `name` varchar(255) NOT NULL,
+  `value` varchar(150) NOT NULL,
+  PRIMARY KEY (`id`,`value`),
+  UNIQUE KEY `gacl_value_axo_groups` (`value`),
+  KEY `gacl_parent_id_axo_groups` (`parent_id`),
+  KEY `gacl_lft_rgt_axo_groups` (`lft`,`rgt`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_axo_groups_map`
+--
+
+DROP TABLE IF EXISTS `gacl_axo_groups_map`;
+CREATE TABLE `gacl_axo_groups_map` (
+  `acl_id` int(11) NOT NULL DEFAULT 0,
+  `group_id` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`acl_id`,`group_id`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_axo_map`
+--
+
+DROP TABLE IF EXISTS `gacl_axo_map`;
+CREATE TABLE `gacl_axo_map` (
+  `acl_id` int(11) NOT NULL DEFAULT 0,
+  `section_value` varchar(150) NOT NULL DEFAULT '0',
+  `value` varchar(150) NOT NULL,
+  PRIMARY KEY (`acl_id`,`section_value`,`value`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_axo_sections`
+--
+
+DROP TABLE IF EXISTS `gacl_axo_sections`;
+CREATE TABLE `gacl_axo_sections` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `value` varchar(150) NOT NULL,
+  `order_value` int(11) NOT NULL DEFAULT 0,
+  `name` varchar(230) NOT NULL,
+  `hidden` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `gacl_value_axo_sections` (`value`),
+  KEY `gacl_hidden_axo_sections` (`hidden`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_groups_aro_map`
+--
+
+DROP TABLE IF EXISTS `gacl_groups_aro_map`;
+CREATE TABLE `gacl_groups_aro_map` (
+  `group_id` int(11) NOT NULL DEFAULT 0,
+  `aro_id` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`group_id`,`aro_id`),
+  KEY `gacl_aro_id` (`aro_id`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_groups_axo_map`
+--
+
+DROP TABLE IF EXISTS `gacl_groups_axo_map`;
+CREATE TABLE `gacl_groups_axo_map` (
+  `group_id` int(11) NOT NULL DEFAULT 0,
+  `axo_id` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`group_id`,`axo_id`),
+  KEY `gacl_axo_id` (`axo_id`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gacl_phpgacl`
+--
+
+DROP TABLE IF EXISTS `gacl_phpgacl`;
+CREATE TABLE `gacl_phpgacl` (
+  `name` varchar(230) NOT NULL,
+  `value` varchar(150) NOT NULL,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB;
+
+
+--
+-- Dumping data for table `gacl_phpgacl`
+--
+
+INSERT INTO `gacl_phpgacl` VALUES ('schema_version','2.1'),('version','3.3.7');
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `groups`
@@ -2135,9 +2556,9 @@ CREATE TABLE `groups` (
   `name` longtext,
   `user` longtext,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `history_data`
@@ -2236,9 +2657,9 @@ CREATE TABLE `history_data` (
   `userarea12` text,
   PRIMARY KEY  (`id`),
   KEY `pid` (`pid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `icd9_dx_code`
@@ -2258,7 +2679,7 @@ CREATE TABLE `icd9_dx_code` (
   KEY `active` (`active`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `icd9_sg_code`
@@ -2278,7 +2699,7 @@ CREATE TABLE `icd9_sg_code` (
   KEY `active` (`active`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `icd9_dx_long_code`
@@ -2293,7 +2714,7 @@ CREATE TABLE `icd9_dx_long_code` (
   `revision` int default 0
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `icd9_sg_long_code`
@@ -2308,7 +2729,7 @@ CREATE TABLE `icd9_sg_long_code` (
   `revision` int default 0
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `icd10_dx_order_code`
@@ -2328,7 +2749,7 @@ CREATE TABLE `icd10_dx_order_code` (
   KEY `active` (`active`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `icd10_pcs_order_code`
@@ -2347,7 +2768,7 @@ CREATE TABLE `icd10_pcs_order_code` (
   KEY `active` (`active`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `icd10_gem_pcs_9_10`
@@ -2363,7 +2784,7 @@ CREATE TABLE `icd10_gem_pcs_9_10` (
   `revision` int default 0
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `icd10_gem_pcs_10_9`
@@ -2379,7 +2800,7 @@ CREATE TABLE `icd10_gem_pcs_10_9` (
   `revision` int default 0
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `icd10_gem_dx_9_10`
@@ -2395,7 +2816,7 @@ CREATE TABLE `icd10_gem_dx_9_10` (
   `revision` int default 0
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `icd10_gem_dx_10_9`
@@ -2411,7 +2832,7 @@ CREATE TABLE `icd10_gem_dx_10_9` (
   `revision` int default 0
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `icd10_reimbr_dx_9_10`
@@ -2432,7 +2853,7 @@ CREATE TABLE `icd10_reimbr_dx_9_10` (
   `revision` int default 0
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `icd10_reimbr_pcs_9_10`
@@ -2453,7 +2874,7 @@ CREATE TABLE `icd10_reimbr_pcs_9_10` (
   `revision` int default 0
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `immunizations`
@@ -2462,6 +2883,7 @@ CREATE TABLE `icd10_reimbr_pcs_9_10` (
 DROP TABLE IF EXISTS `immunizations`;
 CREATE TABLE `immunizations` (
   `id` bigint(20) NOT NULL auto_increment,
+  `uuid` binary(16) DEFAULT NULL,
   `patient_id` bigint(20) default NULL,
   `administered_date` datetime default NULL,
   `immunization_id` int(11) default NULL,
@@ -2489,10 +2911,11 @@ CREATE TABLE `immunizations` (
   `refusal_reason` VARCHAR(31) DEFAULT NULL,
   `ordering_provider` INT(11) DEFAULT NULL,
   PRIMARY KEY  (`id`),
-  KEY `patient_id` (`patient_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+  KEY `patient_id` (`patient_id`),
+  UNIQUE KEY `uuid` (`uuid`)
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `insurance_companies`
@@ -2514,7 +2937,7 @@ CREATE TABLE `insurance_companies` (
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `insurance_data`
@@ -2547,16 +2970,16 @@ CREATE TABLE `insurance_data` (
   `subscriber_employer_country` varchar(255) default NULL,
   `subscriber_employer_city` varchar(255) default NULL,
   `copay` varchar(255) default NULL,
-  `date` date NOT NULL default '0000-00-00',
+  `date` date NULL,
   `pid` bigint(20) NOT NULL default '0',
   `subscriber_sex` varchar(25) default NULL,
   `accept_assignment` varchar(5) NOT NULL DEFAULT 'TRUE',
   `policy_type` varchar(25) NOT NULL default '',
   PRIMARY KEY  (`id`),
   UNIQUE KEY `pid_type_date` (`pid`,`type`,`date`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `insurance_numbers`
@@ -2575,7 +2998,7 @@ CREATE TABLE `insurance_numbers` (
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `issue_encounter`
@@ -2590,7 +3013,7 @@ CREATE TABLE `issue_encounter` (
   PRIMARY KEY  (`pid`,`list_id`,`encounter`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `issue_types`
@@ -2627,7 +3050,7 @@ INSERT INTO issue_types(`ordering`,`category`,`type`,`plural`,`singular`,`abbrev
 INSERT INTO issue_types(`ordering`,`category`,`type`,`plural`,`singular`,`abbreviation`,`style`,`force_show`) VALUES ('50','ippf_specific','ippf_gcac','Abortions','Abortion','A','3','0');
 INSERT INTO issue_types(`ordering`,`category`,`type`,`plural`,`singular`,`abbreviation`,`style`,`force_show`) VALUES ('60','ippf_specific','contraceptive','Contraception','Contraception','C','4','0');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `keys`
@@ -2642,7 +3065,7 @@ CREATE TABLE `keys` (
   UNIQUE KEY (`name`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `lang_constants`
@@ -2654,9 +3077,9 @@ CREATE TABLE `lang_constants` (
   `constant_name` mediumtext BINARY,
   UNIQUE KEY `cons_id` (`cons_id`),
   KEY `constant_name` (`constant_name`(100))
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `lang_definitions`
@@ -2670,9 +3093,9 @@ CREATE TABLE `lang_definitions` (
   `definition` mediumtext,
   UNIQUE KEY `def_id` (`def_id`),
   KEY `cons_id` (`cons_id`)
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `lang_languages`
@@ -2685,7 +3108,7 @@ CREATE TABLE `lang_languages` (
   `lang_description` varchar(100) default NULL,
   `lang_is_rtl` TINYINT DEFAULT 0 COMMENT 'Set this to 1 for RTL languages Arabic, Farsi, Hebrew, Urdu etc.',
   UNIQUE KEY `lang_id` (`lang_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB AUTO_INCREMENT=2;
 
 --
 -- Inserting data for table `lang_languages`
@@ -2693,7 +3116,7 @@ CREATE TABLE `lang_languages` (
 
 INSERT INTO `lang_languages` VALUES (1, 'en', 'English', 0);
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `lang_custom`
@@ -2705,9 +3128,9 @@ CREATE TABLE `lang_custom` (
   `lang_code` char(2) NOT NULL default '',
   `constant_name` mediumtext,
   `definition` mediumtext
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `layout_group_properties`
@@ -2765,7 +3188,7 @@ INSERT INTO layout_group_properties (grp_form_id, grp_group_id, grp_title, grp_m
 INSERT INTO layout_group_properties (grp_form_id, grp_group_id, grp_title, grp_mapping) VALUES ('FACUSR', '' , 'Facility Specific User Information', 'Core');
 INSERT INTO layout_group_properties (grp_form_id, grp_group_id, grp_title, grp_mapping) VALUES ('FACUSR', '1', 'General'                           , ''    );
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `layout_options`
@@ -2845,7 +3268,7 @@ INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`dat
 INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`data_type`,`uor`,`fld_length`,`max_length`,`list_id`,`titlecols`,`datacols`,`default_value`,`edit_options`,`description`,`fld_rows`) VALUES ('DEM', 'allow_imm_info_share', '3', 'Allow Immunization Info Sharing', 11, 1, 1, 0, 0, 'yesno', 1, 1, '', '', '', 0);
 INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`data_type`,`uor`,`fld_length`,`max_length`,`list_id`,`titlecols`,`datacols`,`default_value`,`edit_options`,`description`,`fld_rows`) VALUES ('DEM', 'allow_health_info_ex', '3', 'Allow Health Information Exchange', 12, 1, 1, 0, 0, 'yesno', 1, 1, '', '', '', 0);
 INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`data_type`,`uor`,`fld_length`,`max_length`,`list_id`,`titlecols`,`datacols`,`default_value`,`edit_options`,`description`,`fld_rows`) VALUES ('DEM', 'allow_patient_portal', '3', 'Allow Patient Portal', 13, 1, 1, 0, 0, 'yesno', 1, 1, '', '', '', 0);
-INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`data_type`,`uor`,`fld_length`,`max_length`,`list_id`,`titlecols`,`datacols`,`default_value`,`edit_options`,`description`,`fld_rows`) VALUES ('DEM', 'care_team', '3', 'Care Team', 14, 11, 1, 0, 0, '', 1, 1, '', '', '', 0) ;
+INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`data_type`,`uor`,`fld_length`,`max_length`,`list_id`,`titlecols`,`datacols`,`default_value`,`edit_options`,`description`,`fld_rows`) VALUES ('DEM', 'care_team', '3', 'Care Team', 14, 11, 1, 0, 0, '', 1, 1, '', '', '', 0);
 INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`data_type`,`uor`,`fld_length`,`max_length`,`list_id`,`titlecols`,`datacols`,`default_value`,`edit_options`,`description`,`fld_rows`) VALUES ('DEM', 'cmsportal_login', '3', 'CMS Portal Login', 15, 2, 1, 30, 60, '', 1, 1, '', '', 'CMS Portal Login ID', 0);
 INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`data_type`,`uor`,`fld_length`,`max_length`,`list_id`,`titlecols`,`datacols`,`default_value`,`edit_options`,`description`,`fld_rows`) VALUES ('DEM', 'imm_reg_status'  , '3', 'Immunization Registry Status'  ,16, 1, 1,1,0, 'immunization_registry_status', 1, 1, '', '', 'Immunization Registry Status', 0);
 INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`data_type`,`uor`,`fld_length`,`max_length`,`list_id`,`titlecols`,`datacols`,`default_value`,`edit_options`,`description`,`fld_rows`) VALUES ('DEM', 'imm_reg_stat_effdate'  , '3', 'Immunization Registry Status Effective Date'  ,17, 4, 1,10,10, '', 1, 1, '', '', 'Immunization Registry Status Effective Date', 0);
@@ -2963,8 +3386,10 @@ INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`dat
 INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`data_type`,`uor`,`fld_length`,`max_length`,`list_id`,`titlecols`,`datacols`,`default_value`,`edit_options`,`description`,`fld_rows`) VALUES ('HIS','userarea11'        ,'5','User Defined Area 11',6,3,0,30,0,'',1,3,'','','User Defined', 3);
 INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`data_type`,`uor`,`fld_length`,`max_length`,`list_id`,`titlecols`,`datacols`,`default_value`,`edit_options`,`description`,`fld_rows`) VALUES ('HIS','userarea12'        ,'5','User Defined Area 12',7,3,0,30,0,'',1,3,'','','User Defined', 3);
 INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`data_type`,`uor`,`fld_length`,`max_length`,`list_id`,`titlecols`,`datacols`,`default_value`,`edit_options`,`description`,`fld_rows`) VALUES ('FACUSR', 'provider_id', '1', 'Provider ID', 1, 2, 1, 15, 63, '', 1, 1, '', '', 'Provider ID at Specified Facility', 0);
+INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`data_type`,`uor`,`fld_length`,`max_length`,`list_id`,`titlecols`,`datacols`,`default_value`,`edit_options`,`description`,`fld_rows`) VALUES ('FACUSR', 'role_code', '1', 'Provider Role', 2, 43, 1, 0, 0, 'us-core-provider-role', 1, 1, '', '', 'Provider Role at Specified Facility', 0);
+INSERT INTO `layout_options` (`form_id`,`field_id`,`group_id`,`title`,`seq`,`data_type`,`uor`,`fld_length`,`max_length`,`list_id`,`titlecols`,`datacols`,`default_value`,`edit_options`,`description`,`fld_rows`) VALUES ('FACUSR', 'specialty_code', '1', 'Provider Specialty', 3, 43, 1, 0, 0, 'us-core-provider-specialty', 1, 1, '', '', 'Provider Specialty at Specified Facility', 0);
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `list_options`
@@ -4752,7 +5177,1112 @@ INSERT INTO `list_options` (`list_id`, `option_id`, `title`, `seq`, `is_default`
 INSERT INTO `list_options` (`list_id`, `option_id`, `title`, `seq`, `is_default`, `activity`) VALUES ('Sort_Direction', '0', 'asc', 10, 1, 1);
 INSERT INTO `list_options` (`list_id`, `option_id`, `title`, `seq`, `is_default`, `activity`) VALUES ('Sort_Direction', '1', 'desc', 20, 0, 1);
 
------------------------------------------------------------
+-- ActEncounterCode [FHIR Encounter.class]
+INSERT INTO list_options (list_id, option_id, title, seq) VALUES ('lists', '_ActEncounterCode', 'Value Set ActEncounterCode', 1);
+INSERT INTO list_options(list_id,option_id,title,notes,seq,is_default) VALUES ('_ActEncounterCode', 'AMB', 'Outpatient', 'ambulatory', 10, 1);
+INSERT INTO list_options(list_id,option_id,title,notes,seq) VALUES ('_ActEncounterCode','EMER','Emergency Dept','emergency',20);
+INSERT INTO list_options(list_id,option_id,title,notes,seq) VALUES ('_ActEncounterCode','FLD','Out in Field','field',30);
+INSERT INTO list_options(list_id,option_id,title,notes,seq) VALUES ('_ActEncounterCode','HH','Home Health','home health',40);
+INSERT INTO list_options(list_id,option_id,title,notes,seq) VALUES ('_ActEncounterCode','IMP','Inpatient Encounter','inpatient encounter',50);
+INSERT INTO list_options(list_id,option_id,title,notes,seq) VALUES ('_ActEncounterCode','ACUTE','Inpatient Acute','inpatient acute',60);
+INSERT INTO list_options(list_id,option_id,title,notes,seq) VALUES ('_ActEncounterCode','NONAC','Inpatient Non-Acute','inpatient non-acute',70);
+INSERT INTO list_options(list_id,option_id,title,notes,seq) VALUES ('_ActEncounterCode','OBSENC','Observation Encounter','observation encounter',80);
+INSERT INTO list_options(list_id,option_id,title,notes,seq) VALUES ('_ActEncounterCode','PRENC','Pre-Admission','pre-admission',90);
+INSERT INTO list_options(list_id,option_id,title,notes,seq) VALUES ('_ActEncounterCode','SS','Short Stay','short stay',100);
+INSERT INTO list_options(list_id,option_id,title,notes,seq) VALUES ('_ActEncounterCode','VR','Virtual Encounter','virtual',110);
+
+-- us-core-provider-role [FHIR PractitionerRole.role]
+INSERT INTO `list_options` ( `list_id`, `option_id`, `title`, `seq` ) VALUES ('lists' ,'us-core-provider-role', 'US Core Provider Role', 1);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '102L00000X', 'Psychoanalyst', 20);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '102X00000X', 'Poetry Therapist', 30);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '103G00000X', 'Clinical Neuropsychologist', 40);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '103K00000X', 'Behavior Analyst', 50);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '103T00000X', 'Psychologist', 60);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '104100000X', 'Social Worker', 70);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '106E00000X', 'Assistant Behavior Analyst', 80);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '106H00000X', 'Marriage & Family Therapist', 90);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '106S00000X', 'Behavior Technician', 100);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '111N00000X', 'Chiropractor', 110);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '122300000X', 'Dentist', 120);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '122400000X', 'Denturist', 130);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '124Q00000X', 'Dental Hygienist', 140);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '125J00000X', 'Dental Therapist', 150);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '125K00000X', 'Advanced Practice Dental Therapist', 160);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '125Q00000X', 'Oral Medicinist', 170);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '126800000X', 'Dental Assistant', 180);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '126900000X', 'Dental Laboratory Technician', 190);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '132700000X', 'Dietary Manager', 200);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '133N00000X', 'Nutritionist', 210);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '133V00000X', 'Dietitian, Registered', 220);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '136A00000X', 'Dietetic Technician, Registered', 230);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '146D00000X', 'Personal Emergency Response Attendant', 240);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '146L00000X', 'Emergency Medical Technician, Paramedic', 250);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '146M00000X', 'Emergency Medical Technician, Intermediate', 260);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '146N00000X', 'Emergency Medical Technician, Basic', 270);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '152W00000X', 'Optometrist', 280);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '156F00000X', 'Technician/Technologist', 290);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '163W00000X', 'Registered Nurse', 300);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '164W00000X', 'Licensed Practical Nurse', 310);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '164X00000X', 'Licensed Vocational Nurse', 320);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '167G00000X', 'Licensed Psychiatric Technician', 330);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '170100000X', 'Medical Genetics, Ph.D. Medical Genetics', 340);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '170300000X', 'Genetic Counselor, MS', 350);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '171000000X', 'Military Health Care Provider', 360);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '171100000X', 'Acupuncturist', 370);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '171M00000X', 'Case Manager/Care Coordinator', 380);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '171R00000X', 'Interpreter', 390);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '171W00000X', 'Contractor', 400);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '172A00000X', 'Driver', 410);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '172M00000X', 'Mechanotherapist', 420);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '172P00000X', 'Naprapath', 430);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '172V00000X', 'Community Health Worker', 440);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '173000000X', 'Legal Medicine', 450);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '173C00000X', 'Reflexologist', 460);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '173F00000X', 'Sleep Specialist, PhD', 470);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '174200000X', 'Meals', 480);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '174400000X', 'Specialist', 490);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '174H00000X', 'Health Educator', 500);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '174M00000X', 'Veterinarian', 510);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '174N00000X', 'Lactation Consultant, Non-RN', 520);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '174V00000X', 'Clinical Ethicist', 530);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '175F00000X', 'Naturopath', 540);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '175L00000X', 'Homeopath', 550);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '175M00000X', 'Midwife, Lay', 560);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '175T00000X', 'Peer Specialist', 570);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '176B00000X', 'Midwife', 580);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '176P00000X', 'Funeral Director', 590);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '177F00000X', 'Lodging', 600);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '183500000X', 'Pharmacist', 610);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '183700000X', 'Pharmacy Technician', 620);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '193200000X', 'Multi-Specialty', 630);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '193400000X', 'Single Specialty', 640);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '202C00000X', 'Independent Medical Examiner', 650);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '202K00000X', 'Phlebology', 660);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '204C00000X', 'Neuromusculoskeletal Medicine, Sports Medicine', 670);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '204D00000X', 'Neuromusculoskeletal Medicine & OMM', 680);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '204E00000X', 'Oral & Maxillofacial Surgery', 690);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '204F00000X', 'Transplant Surgery', 700);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '204R00000X', 'Electrodiagnostic Medicine', 710);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '207K00000X', 'Allergy & Immunology', 720);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '207L00000X', 'Anesthesiology', 730);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '207N00000X', 'Dermatology', 740);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '207P00000X', 'Emergency Medicine', 750);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '207Q00000X', 'Family Medicine', 760);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '207R00000X', 'Internal Medicine', 770);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '207T00000X', 'Neurological Surgery', 780);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '207U00000X', 'Nuclear Medicine', 790);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '207V00000X', 'Obstetrics & Gynecology', 800);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '207W00000X', 'Ophthalmology', 810);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '207X00000X', 'Orthopaedic Surgery', 820);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '207Y00000X', 'Otolaryngology', 830);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '208000000X', 'Pediatrics', 840);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '208100000X', 'Physical Medicine & Rehabilitation', 850);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '208200000X', 'Plastic Surgery', 860);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '208600000X', 'Surgery', 870);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '208800000X', 'Urology', 880);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '208C00000X', 'Colon & Rectal Surgery', 890);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '208D00000X', 'General Practice', 900);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '208G00000X', 'Thoracic Surgery (Cardiothoracic Vascular Surgery)', 910);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '208M00000X', 'Hospitalist', 920);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '208U00000X', 'Clinical Pharmacology', 930);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '209800000X', 'Legal Medicine', 940);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '211D00000X', 'Assistant, Podiatric', 950);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '213E00000X', 'Podiatrist', 960);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '221700000X', 'Art Therapist', 970);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '222Q00000X', 'Developmental Therapist', 980);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '222Z00000X', 'Orthotist', 990);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '224900000X', 'Mastectomy Fitter', 1000);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '224L00000X', 'Pedorthist', 1010);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '224P00000X', 'Prosthetist', 1020);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '224Y00000X', 'Clinical Exercise Physiologist', 1030);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '224Z00000X', 'Occupational Therapy Assistant', 1040);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '225000000X', 'Orthotic Fitter', 1050);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '225100000X', 'Physical Therapist', 1060);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '225200000X', 'Physical Therapy Assistant', 1070);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '225400000X', 'Rehabilitation Practitioner', 1080);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '225500000X', 'Specialist/Technologist', 1090);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '225600000X', 'Dance Therapist', 1100);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '225700000X', 'Massage Therapist', 1110);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '225800000X', 'Recreation Therapist', 1120);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '225A00000X', 'Music Therapist', 1130);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '225B00000X', 'Pulmonary Function Technologist', 1140);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '225C00000X', 'Rehabilitation Counselor', 1150);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '225X00000X', 'Occupational Therapist', 1160);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '226000000X', 'Recreational Therapist Assistant', 1170);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '226300000X', 'Kinesiotherapist', 1180);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '227800000X', 'Respiratory Therapist, Certified', 1190);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '227900000X', 'Respiratory Therapist, Registered', 1200);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '229N00000X', 'Anaplastologist', 1210);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '231H00000X', 'Audiologist', 1220);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '235500000X', 'Specialist/Technologist', 1230);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '235Z00000X', 'Speech-Language Pathologist', 1240);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '237600000X', 'Audiologist-Hearing Aid Fitter', 1250);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '237700000X', 'Hearing Instrument Specialist', 1260);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '242T00000X', 'Perfusionist', 1270);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '243U00000X', 'Radiology Practitioner Assistant', 1280);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '246Q00000X', 'Specialist/Technologist, Pathology', 1290);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '246R00000X', 'Technician, Pathology', 1300);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '246W00000X', 'Technician, Cardiology', 1310);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '246X00000X', 'Specialist/Technologist Cardiovascular', 1320);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '246Y00000X', 'Specialist/Technologist, Health Information', 1330);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '246Z00000X', 'Specialist/Technologist, Other', 1340);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '247000000X', 'Technician, Health Information', 1350);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '247100000X', 'Radiologic Technologist', 1360);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '247200000X', 'Technician, Other', 1370);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '251300000X', 'Local Education Agency (LEA)', 1380);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '251B00000X', 'Case Management', 1390);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '251C00000X', 'Day Training, Developmentally Disabled Services', 1400);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '251E00000X', 'Home Health', 1410);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '251F00000X', 'Home Infusion', 1420);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '251G00000X', 'Hospice Care, Community Based', 1430);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '251J00000X', 'Nursing Care', 1440);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '251K00000X', 'Public Health or Welfare', 1450);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '251S00000X', 'Community/Behavioral Health', 1460);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '251T00000X', 'Program of All-Inclusive Care for the Elderly (PACE) Provider Organization', 1470);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '251V00000X', 'Voluntary or Charitable', 1480);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '251X00000X', 'Supports Brokerage', 1490);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '252Y00000X', 'Early Intervention Provider Agency', 1500);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '253J00000X', 'Foster Care Agency', 1510);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '253Z00000X', 'In Home Supportive Care', 1520);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '261Q00000X', 'Clinic/Center', 1530);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '273100000X', 'Epilepsy Unit', 1540);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '273R00000X', 'Psychiatric Unit', 1550);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '273Y00000X', 'Rehabilitation Unit', 1560);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '275N00000X', 'Medicare Defined Swing Bed Unit', 1570);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '276400000X', 'Rehabilitation, Substance Use Disorder Unit', 1580);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '281P00000X', 'Chronic Disease Hospital', 1590);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '282E00000X', 'Long Term Care Hospital', 1600);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '282J00000X', 'Religious Nonmedical Health Care Institution', 1610);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '282N00000X', 'General Acute Care Hospital', 1620);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '283Q00000X', 'Psychiatric Hospital', 1630);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '283X00000X', 'Rehabilitation Hospital', 1640);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '284300000X', 'Special Hospital', 1650);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '286500000X', 'Military Hospital', 1660);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '287300000X', 'Christian Science Sanitorium', 1670);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '291900000X', 'Military Clinical Medical Laboratory', 1680);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '291U00000X', 'Clinical Medical Laboratory', 1690);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '292200000X', 'Dental Laboratory', 1700);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '293D00000X', 'Physiological Laboratory', 1710);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '302F00000X', 'Exclusive Provider Organization', 1720);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '302R00000X', 'Health Maintenance Organization', 1730);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '305R00000X', 'Preferred Provider Organization', 1740);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '305S00000X', 'Point of Service', 1750);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '310400000X', 'Assisted Living Facility', 1760);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '310500000X', 'Intermediate Care Facility, Mental Illness', 1770);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '311500000X', 'Alzheimer Center (Dementia Center)', 1780);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '311Z00000X', 'Custodial Care Facility', 1790);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '313M00000X', 'Nursing Facility/Intermediate Care Facility', 1800);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '314000000X', 'Skilled Nursing Facility', 1810);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '315D00000X', 'Hospice, Inpatient', 1820);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '315P00000X', 'Intermediate Care Facility, Mentally Retarded', 1830);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '317400000X', 'Christian Science Facility', 1840);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '320600000X', 'Residential Treatment Facility, Mental Retardation and/or Developmental Disabilities', 1850);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '320700000X', 'Residential Treatment Facility, Physical Disabilities', 1860);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '320800000X', 'Community Based Residential Treatment Facility, Mental Illness', 1870);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '320900000X', 'Community Based Residential Treatment Facility, Mental Retardation and/or Developmental Disabilities', 1880);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '322D00000X', 'Residential Treatment Facility, Emotionally Disturbed Children', 1890);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '323P00000X', 'Psychiatric Residential Treatment Facility', 1900);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '324500000X', 'Substance Abuse Rehabilitation Facility', 1910);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '331L00000X', 'Blood Bank', 1920);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '332000000X', 'Military/U.S. Coast Guard Pharmacy', 1930);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '332100000X', 'Department of Veterans Affairs (VA) Pharmacy', 1940);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '332800000X', 'Indian Health Service/Tribal/Urban Indian Health (I/T/U) Pharmacy', 1950);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '332900000X', 'Non-Pharmacy Dispensing Site', 1960);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '332B00000X', 'Durable Medical Equipment & Medical Supplies', 1970);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '332G00000X', 'Eye Bank', 1980);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '332H00000X', 'Eyewear Supplier', 1990);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '332S00000X', 'Hearing Aid Equipment', 2000);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '332U00000X', 'Home Delivered Meals', 2010);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '333300000X', 'Emergency Response System Companies', 2020);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '333600000X', 'Pharmacy', 2030);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '335E00000X', 'Prosthetic/Orthotic Supplier', 2040);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '335G00000X', 'Medical Foods Supplier', 2050);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '335U00000X', 'Organ Procurement Organization', 2060);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '335V00000X', 'Portable X-ray and/or Other Portable Diagnostic Imaging Supplier', 2070);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '341600000X', 'Ambulance', 2080);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '341800000X', 'Military/U.S. Coast Guard Transport', 2090);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '343800000X', 'Secured Medical Transport (VAN)', 2100);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '343900000X', 'Non-emergency Medical Transport (VAN)', 2110);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '344600000X', 'Taxi', 2120);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '344800000X', 'Air Carrier', 2130);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '347B00000X', 'Bus', 2140);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '347C00000X', 'Private Vehicle', 2150);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '347D00000X', 'Train', 2160);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '347E00000X', 'Transportation Broker', 2170);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '363A00000X', 'Physician Assistant', 2180);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '363L00000X', 'Nurse Practitioner', 2190);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '364S00000X', 'Clinical Nurse Specialist', 2200);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '367500000X', 'Nurse Anesthetist, Certified Registered', 2210);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '367A00000X', 'Advanced Practice Midwife', 2220);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '367H00000X', 'Anesthesiologist Assistant', 2230);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '372500000X', 'Chore Provider', 2240);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '372600000X', 'Adult Companion', 2250);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '373H00000X', 'Day Training/Habilitation Specialist', 2260);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '374700000X', 'Technician', 2270);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '374J00000X', 'Doula', 2280);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '374K00000X', 'Religious Nonmedical Practitioner', 2290);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '374T00000X', 'Religious Nonmedical Nursing Personnel', 2300);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '374U00000X', 'Home Health Aide', 2310);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '376G00000X', 'Nursing Home Administrator', 2320);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '376J00000X', 'Homemaker', 2330);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '376K00000X', 'Nurse\'s Aide', 2340);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '385H00000X', 'Respite Care', 2350);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '390200000X', 'Student in an Organized Health Care Education/Training Program', 2360);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '405300000X', 'Prevention Professional', 2370);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('us-core-provider-role', '101Y00000X', 'Counselor', 2380);
+
+-- us-core-provider-specialty [FHIR PractitionerRole.specialty]
+INSERT INTO `list_options` ( `list_id`, `option_id`, `title`, `seq` ) VALUES ('lists' ,'us-core-provider-specialty', 'US Core Provider Specialty', 1);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "101Y00000X", "Counselor", 10);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "101YA0400X", "Addiction (Substance Use Disorder)", 20);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "101YM0800X", "Mental Health", 30);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "101YP1600X", "Pastoral", 40);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "101YP2500X", "Professional", 50);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "101YS0200X", "School", 60);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "102L00000X", "Psychoanalyst", 70);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "102X00000X", "Poetry Therapist", 80);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103G00000X", "Clinical Neuropsychologist", 90);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103GC0700X", "Clinical", 100);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103K00000X", "Behavioral Analyst", 110);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103T00000X", "Psychologist", 120);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TA0400X", "Addiction (Substance Use Disorder)", 130);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TA0700X", "Adult Development & Aging", 140);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TB0200X", "Cognitive & Behavioral", 150);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TC0700X", "Clinical", 160);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TC1900X", "Counseling", 170);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TC2200X", "Clinical Child & Adolescent", 180);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TE1000X", "Educational", 190);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TE1100X", "Exercise & Sports", 200);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TF0000X", "Family", 210);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TF0200X", "Forensic", 220);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TH0004X", "Health", 230);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TH0100X", "Health Service", 240);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TM1700X", "Men & Masculinity", 250);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TM1800X", "Mental Retardation & Developmental Disabilities", 260);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TP0016X", "Prescribing (Medical)", 270);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TP0814X", "Psychoanalysis", 280);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TP2700X", "Psychotherapy", 290);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TP2701X", "Group Psychotherapy", 300);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TR0400X", "Rehabilitation", 310);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TS0200X", "School", 320);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "103TW0100X", "Women", 330);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "104100000X", "Social Worker", 340);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1041C0700X", "Clinical", 350);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1041S0200X", "School", 360);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "106E00000X", "Assistant Behavior Analyst", 370);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "106H00000X", "Marriage & Family Therapist", 380);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "106S00000X", "Behavior Technician", 390);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "111N00000X", "Chiropractor", 400);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "111NI0013X", "Independent Medical Examiner", 410);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "111NI0900X", "Internist", 420);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "111NN0400X", "Neurology", 430);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "111NN1001X", "Nutrition", 440);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "111NP0017X", "Pediatric Chiropractor", 450);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "111NR0200X", "Radiology", 460);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "111NR0400X", "Rehabilitation", 470);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "111NS0005X", "Sports Physician", 480);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "111NT0100X", "Thermography", 490);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "111NX0100X", "Occupational Health", 500);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "111NX0800X", "Orthopedic", 510);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "122300000X", "Dentist", 520);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1223D0001X", "Dental Public Health", 530);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1223D0004X", "Dentist Anesthesiologist", 540);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1223E0200X", "Endodontics", 550);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1223G0001X", "General Practice", 560);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1223P0106X", "Oral and Maxillofacial Pathology", 570);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1223P0221X", "Pediatric Dentistry", 580);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1223P0300X", "Periodontics", 590);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1223P0700X", "Prosthodontics", 600);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1223S0112X", "Oral and Maxillofacial Surgery", 610);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1223X0008X", "Oral and Maxillofacial Radiology", 620);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1223X0400X", "Orthodontics and Dentofacial Orthopedics", 630);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "122400000X", "Denturist", 640);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "124Q00000X", "Dental Hygienist", 650);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "125J00000X", "Dental Therapist", 660);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "125K00000X", "Advanced Practice Dental Therapist", 670);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "125Q00000X", "Oral Medicinist", 680);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "126800000X", "Dental Assistant", 690);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "126900000X", "Dental Laboratory Technician", 700);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "132700000X", "Dietary Manager", 710);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "133N00000X", "Nutritionist", 720);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "133NN1002X", "Nutrition, Education", 730);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "133V00000X", "Dietitian, Registered", 740);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "133VN1004X", "Nutrition, Pediatric", 750);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "133VN1005X", "Nutrition, Renal", 760);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "133VN1006X", "Nutrition, Metabolic", 770);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "136A00000X", "Dietetic Technician, Registered", 780);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "146D00000X", "Personal Emergency Response Attendant", 790);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "146L00000X", "Emergency Medical Technician, Paramedic", 800);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "146M00000X", "Emergency Medical Technician, Intermediate", 810);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "146N00000X", "Emergency Medical Technician, Basic", 820);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "152W00000X", "Optometrist", 830);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "152WC0802X", "Corneal and Contact Management", 840);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "152WL0500X", "Low Vision Rehabilitation", 850);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "152WP0200X", "Pediatrics", 860);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "152WS0006X", "Sports Vision", 870);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "152WV0400X", "Vision Therapy", 880);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "152WX0102X", "Occupational Vision", 890);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "156F00000X", "Technician/Technologist", 900);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "156FC0800X", "Contact Lens", 910);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "156FC0801X", "Contact Lens Fitter", 920);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "156FX1100X", "Ophthalmic", 930);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "156FX1101X", "Ophthalmic Assistant", 940);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "156FX1201X", "Optometric Assistant", 950);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "156FX1202X", "Optometric Technician", 960);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "156FX1700X", "Ocularist", 970);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "156FX1800X", "Optician", 980);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "156FX1900X", "Orthoptist", 990);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163W00000X", "Registered Nurse", 1000);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WA0400X", "Addiction (Substance Use Disorder)", 1010);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WA2000X", "Administrator", 1020);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WC0200X", "Critical Care Medicine", 1030);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WC0400X", "Case Management", 1040);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WC1400X", "College Health", 1050);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WC1500X", "Community Health", 1060);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WC1600X", "Continuing Education/Staff Development", 1070);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WC2100X", "Continence Care", 1080);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WC3500X", "Cardiac Rehabilitation", 1090);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WD0400X", "Diabetes Educator", 1100);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WD1100X", "Dialysis, Peritoneal", 1110);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WE0003X", "Emergency", 1120);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WE0900X", "Enterostomal Therapy", 1130);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WF0300X", "Flight", 1140);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WG0000X", "General Practice", 1150);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WG0100X", "Gastroenterology", 1160);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WG0600X", "Gerontology", 1170);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WH0200X", "Home Health", 1180);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WH0500X", "Hemodialysis", 1190);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WH1000X", "Hospice", 1200);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WI0500X", "Infusion Therapy", 1210);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WI0600X", "Infection Control", 1220);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WL0100X", "Lactation Consultant", 1230);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WM0102X", "Maternal Newborn", 1240);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WM0705X", "Medical-Surgical", 1250);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WM1400X", "Nurse Massage Therapist (NMT)", 1260);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WN0002X", "Neonatal Intensive Care", 1270);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WN0003X", "Neonatal, Low-Risk", 1280);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WN0300X", "Nephrology", 1290);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WN0800X", "Neuroscience", 1300);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WN1003X", "Nutrition Support", 1310);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WP0000X", "Pain Management", 1320);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WP0200X", "Pediatrics", 1330);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WP0218X", "Pediatric Oncology", 1340);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WP0807X", "Psych/Mental Health, Child & Adolescent", 1350);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WP0808X", "Psych/Mental Health", 1360);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WP0809X", "Psych/Mental Health, Adult", 1370);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WP1700X", "Perinatal", 1380);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WP2201X", "Ambulatory Care", 1390);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WR0006X", "Registered Nurse First Assistant", 1400);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WR0400X", "Rehabilitation", 1410);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WR1000X", "Reproductive Endocrinology/Infertility", 1420);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WS0121X", "Plastic Surgery", 1430);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WS0200X", "School", 1440);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WU0100X", "Urology", 1450);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WW0000X", "Wound Care", 1460);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WW0101X", "Women's Health Care, Ambulatory", 1470);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WX0002X", "Obstetric, High-Risk", 1480);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WX0003X", "Obstetric, Inpatient", 1490);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WX0106X", "Occupational Health", 1500);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WX0200X", "Oncology", 1510);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WX0601X", "Otorhinolaryngology & Head-Neck", 1520);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WX0800X", "Orthopedic", 1530);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WX1100X", "Ophthalmic", 1540);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "163WX1500X", "Ostomy Care", 1550);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "164W00000X", "Licensed Practical Nurse", 1560);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "164X00000X", "Licensed Vocational Nurse", 1570);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "167G00000X", "Licensed Psychiatric Technician", 1580);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "170100000X", "Medical Genetics, Ph.D. Medical Genetics", 1590);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "170300000X", "Genetic Counselor, MS", 1600);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "171000000X", "Military Health Care Provider", 1610);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1710I1002X", "Independent Duty Corpsman", 1620);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1710I1003X", "Independent Duty Medical Technicians", 1630);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "171100000X", "Acupuncturist", 1640);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "171M00000X", "Case Manager/Care Coordinator", 1650);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "171R00000X", "Interpreter", 1660);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "171W00000X", "Contractor", 1670);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "171WH0202X", "Home Modifications", 1680);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "171WV0202X", "Vehicle Modifications", 1690);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "172A00000X", "Driver", 1700);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "172M00000X", "Mechanotherapist", 1710);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "172P00000X", "Naprapath", 1720);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "172V00000X", "Community Health Worker", 1730);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "173000000X", "Legal Medicine", 1740);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "173C00000X", "Reflexologist", 1750);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "173F00000X", "Sleep Specialist, PhD", 1760);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "174200000X", "Meals", 1770);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "174400000X", "Specialist", 1780);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1744G0900X", "Graphics Designer", 1790);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1744P3200X", "Prosthetics Case Management", 1800);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1744R1102X", "Research Study", 1810);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1744R1103X", "Research Data Abstracter/Coder", 1820);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "174H00000X", "Health Educator", 1830);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "174M00000X", "Veterinarian", 1840);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "174MM1900X", "Medical Research", 1850);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "174N00000X", "Lactation Consultant, Non-RN", 1860);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "174V00000X", "Clinical Ethicist", 1870);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "175F00000X", "Naturopath", 1880);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "175L00000X", "Homeopath", 1890);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "175M00000X", "Midwife, Lay", 1900);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "175T00000X", "Peer Specialist", 1910);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "176B00000X", "Midwife", 1920);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "176P00000X", "Funeral Director", 1930);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "177F00000X", "Lodging", 1940);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "183500000X", "Pharmacist", 1950);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1835C0205X", "Critical Care", 1960);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1835G0000X", "General Practice", 1970);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1835G0303X", "Geriatric", 1980);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1835N0905X", "Nuclear", 1990);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1835N1003X", "Nutrition Support", 2000);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1835P0018X", "Pharmacist Clinician (PhC)/ Clinical Pharmacy Specialist", 2010);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1835P0200X", "Pediatrics", 2020);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1835P1200X", "Pharmacotherapy", 2030);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1835P1300X", "Psychiatric", 2040);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1835P2201X", "Ambulatory Care", 2050);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "1835X0200X", "Oncology", 2060);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "183700000X", "Pharmacy Technician", 2070);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "193200000X", "Multi-Specialty", 2080);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "193400000X", "Single Specialty", 2090);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "202C00000X", "Independent Medical Examiner", 2100);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "202K00000X", "Phlebology", 2110);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "204C00000X", "Neuromusculoskeletal Medicine, Sports Medicine", 2120);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "204D00000X", "Neuromusculoskeletal Medicine & OMM", 2130);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "204E00000X", "Oral & Maxillofacial Surgery", 2140);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "204F00000X", "Transplant Surgery", 2150);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "204R00000X", "Electrodiagnostic Medicine", 2160);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207K00000X", "Allergy & Immunology", 2170);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207KA0200X", "Allergy", 2180);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207KI0005X", "Clinical & Laboratory Immunology", 2190);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207L00000X", "Anesthesiology", 2200);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207LA0401X", "Addiction Medicine", 2210);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207LC0200X", "Critical Care Medicine", 2220);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207LH0002X", "Hospice and Palliative Medicine", 2230);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207LP2900X", "Pain Medicine", 2240);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207LP3000X", "Pediatric Anesthesiology", 2250);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207N00000X", "Dermatology", 2260);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ND0101X", "MOHS-Micrographic Surgery", 2270);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ND0900X", "Dermatopathology", 2280);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207NI0002X", "Clinical & Laboratory Dermatological Immunology", 2290);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207NP0225X", "Pediatric Dermatology", 2300);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207NS0135X", "Procedural Dermatology", 2310);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207P00000X", "Emergency Medicine", 2320);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207PE0004X", "Emergency Medical Services", 2330);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207PE0005X", "Undersea and Hyperbaric Medicine", 2340);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207PH0002X", "Hospice and Palliative Medicine", 2350);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207PP0204X", "Pediatric Emergency Medicine", 2360);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207PS0010X", "Sports Medicine", 2370);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207PT0002X", "Medical Toxicology", 2380);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207Q00000X", "Family Medicine", 2390);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207QA0000X", "Adolescent Medicine", 2400);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207QA0401X", "Addiction Medicine", 2410);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207QA0505X", "Adult Medicine", 2420);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207QB0002X", "Obesity Medicine", 2430);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207QG0300X", "Geriatric Medicine", 2440);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207QH0002X", "Hospice and Palliative Medicine", 2450);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207QS0010X", "Sports Medicine", 2460);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207QS1201X", "Sleep Medicine", 2470);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207R00000X", "Internal Medicine", 2480);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RA0000X", "Adolescent Medicine", 2490);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RA0001X", "Advanced Heart Failure and Transplant Cardiology", 2500);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RA0201X", "Allergy & Immunology", 2510);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RA0401X", "Addiction Medicine", 2520);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RB0002X", "Obesity Medicine", 2530);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RC0000X", "Cardiovascular Disease", 2540);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RC0001X", "Clinical Cardiac Electrophysiology", 2550);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RC0200X", "Critical Care Medicine", 2560);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RE0101X", "Endocrinology, Diabetes & Metabolism", 2570);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RG0100X", "Gastroenterology", 2580);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RG0300X", "Geriatric Medicine", 2590);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RH0000X", "Hematology", 2600);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RH0002X", "Hospice and Palliative Medicine", 2610);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RH0003X", "Hematology & Oncology", 2620);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RH0005X", "Hypertension Specialist", 2630);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RI0001X", "Clinical & Laboratory Immunology", 2640);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RI0008X", "Hepatology", 2650);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RI0011X", "Interventional Cardiology", 2660);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RI0200X", "Infectious Disease", 2670);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RM1200X", "Magnetic Resonance Imaging (MRI)", 2680);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RN0300X", "Nephrology", 2690);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RP1001X", "Pulmonary Disease", 2700);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RR0500X", "Rheumatology", 2710);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RS0010X", "Sports Medicine", 2720);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RS0012X", "Sleep Medicine", 2730);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RT0003X", "Transplant Hepatology", 2740);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207RX0202X", "Medical Oncology", 2750);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207SC0300X", "Medical Genetics", 2760);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207SG0201X", "Clinical Genetics (M.D.)", 2770);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207SG0202X", "Clinical Biochemical Genetics", 2780);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207SG0203X", "Clinical Molecular Genetics", 2790);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207SG0205X", "Ph.D. Medical Genetics", 2800);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207SM0001X", "Molecular Genetic Pathology", 2810);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207T00000X", "Neurological Surgery", 2820);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207U00000X", "Nuclear Medicine", 2830);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207UN0901X", "Nuclear Cardiology", 2840);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207UN0902X", "Nuclear Imaging & Therapy", 2850);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207UN0903X", "In Vivo & In Vitro Nuclear Medicine", 2860);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207V00000X", "Obstetrics & Gynecology", 2870);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207VB0002X", "Obesity Medicine", 2880);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207VC0200X", "Critical Care Medicine", 2890);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207VE0102X", "Reproductive Endocrinology", 2900);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207VF0040X", "Female Pelvic Medicine and Reconstructive Surgery", 2910);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207VG0400X", "Gynecology", 2920);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207VH0002X", "Hospice and Palliative Medicine", 2930);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207VM0101X", "Maternal & Fetal Medicine", 2940);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207VX0000X", "Obstetrics", 2950);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207VX0201X", "Gynecologic Oncology", 2960);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207W00000X", "Ophthalmology", 2970);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207WX0200X", "Ophthalmic Plastic and Reconstructive Surgery", 2980);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207X00000X", "Orthopaedic Surgery", 2990);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207XP3100X", "Pediatric Orthopaedic Surgery", 3000);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207XS0106X", "Hand Surgery", 3010);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207XS0114X", "Adult Reconstructive Orthopaedic Surgery", 3020);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207XS0117X", "Orthopaedic Surgery of the Spine", 3030);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207XX0004X", "Foot and Ankle Surgery", 3040);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207XX0005X", "Sports Medicine", 3050);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207XX0801X", "Orthopaedic Trauma", 3060);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207Y00000X", "Otolaryngology", 3070);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207YP0228X", "Pediatric Otolaryngology", 3080);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207YS0012X", "Sleep Medicine", 3090);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207YS0123X", "Facial Plastic Surgery", 3100);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207YX0007X", "Plastic Surgery within the Head & Neck", 3110);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207YX0602X", "Otolaryngic Allergy", 3120);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207YX0901X", "Otology & Neurotology", 3130);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207YX0905X", "Otolaryngology/Facial Plastic Surgery", 3140);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZB0001X", "Pathology", 3150);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZC0006X", "Clinical Pathology", 3160);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZC0008X", "Clinical Informatics", 3170);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZC0500X", "Cytopathology", 3180);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZD0900X", "Dermatopathology", 3190);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZF0201X", "Forensic Pathology", 3200);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZH0000X", "Hematology", 3210);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZI0100X", "Immunopathology", 3220);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZM0300X", "Medical Microbiology", 3230);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZN0500X", "Neuropathology", 3240);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZP0007X", "Molecular Genetic Pathology", 3250);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZP0101X", "Anatomic Pathology", 3260);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZP0102X", "Anatomic Pathology & Clinical Pathology", 3270);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZP0104X", "Chemical Pathology", 3280);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZP0105X", "Clinical Pathology/Laboratory Medicine", 3290);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "207ZP0213X", "Pediatric Pathology", 3300);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "208000000X", "Pediatrics", 3310);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080A0000X", "Adolescent Medicine", 3320);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080B0002X", "Obesity Medicine", 3330);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080C0008X", "Child Abuse Pediatrics", 3340);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080H0002X", "Hospice and Palliative Medicine", 3350);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080I0007X", "Clinical & Laboratory Immunology", 3360);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080N0001X", "Neonatal-Perinatal Medicine", 3370);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080P0006X", "Developmental � Behavioral Pediatrics", 3380);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080P0008X", "Neurodevelopmental Disabilities", 3390);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080P0201X", "Pediatric Allergy/Immunology", 3400);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080P0202X", "Pediatric Cardiology", 3410);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080P0203X", "Pediatric Critical Care Medicine", 3420);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080P0204X", "Pediatric Emergency Medicine", 3430);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080P0205X", "Pediatric Endocrinology", 3440);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080P0206X", "Pediatric Gastroenterology", 3450);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080P0207X", "Pediatric Hematology-Oncology", 3460);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080P0208X", "Pediatric Infectious Diseases", 3470);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080P0210X", "Pediatric Nephrology", 3480);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080P0214X", "Pediatric Pulmonology", 3490);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080P0216X", "Pediatric Rheumatology", 3500);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080S0010X", "Sports Medicine", 3510);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080S0012X", "Sleep Medicine", 3520);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080T0002X", "Medical Toxicology", 3530);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2080T0004X", "Pediatric Transplant Hepatology", 3540);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "208100000X", "Physical Medicine & Rehabilitation", 3550);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2081H0002X", "Hospice and Palliative Medicine", 3560);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2081N0008X", "Neuromuscular Medicine", 3570);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2081P0004X", "Spinal Cord Injury Medicine", 3580);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2081P0010X", "Pediatric Rehabilitation Medicine", 3590);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2081P0301X", "Brain Injury Medicine", 3600);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2081P2900X", "Pain Medicine", 3610);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2081S0010X", "Sports Medicine", 3620);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "208200000X", "Plastic Surgery", 3630);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2082S0099X", "Plastic Surgery Within the Head and Neck", 3640);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2082S0105X", "Surgery of the Hand", 3650);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2083A0100X", "Preventive Medicine", 3660);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2083B0002X", "Obesity Medicine", 3670);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2083C0008X", "Clinical Informatics", 3680);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2083P0011X", "Undersea and Hyperbaric Medicine", 3690);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2083P0500X", "Preventive Medicine/Occupational Environmental Medicine", 3700);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2083P0901X", "Public Health & General Preventive Medicine", 3710);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2083S0010X", "Sports Medicine", 3720);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2083T0002X", "Medical Toxicology", 3730);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2083X0100X", "Occupational Medicine", 3740);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084A0401X", "Psychiatry & Neurology", 3750);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084A2900X", "Neurocritical Care", 3760);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084B0002X", "Obesity Medicine", 3770);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084B0040X", "Behavioral Neurology & Neuropsychiatry", 3780);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084D0003X", "Diagnostic Neuroimaging", 3790);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084F0202X", "Forensic Psychiatry", 3800);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084H0002X", "Hospice and Palliative Medicine", 3810);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084N0008X", "Neuromuscular Medicine", 3820);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084N0400X", "Neurology", 3830);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084N0402X", "Neurology with Special Qualifications in Child Neurology", 3840);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084N0600X", "Clinical Neurophysiology", 3850);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084P0005X", "Neurodevelopmental Disabilities", 3860);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084P0015X", "Psychosomatic Medicine", 3870);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084P0301X", "Brain Injury Medicine", 3880);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084P0800X", "Psychiatry", 3890);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084P0802X", "Addiction Psychiatry", 3900);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084P0804X", "Child & Adolescent Psychiatry", 3910);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084P0805X", "Geriatric Psychiatry", 3920);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084P2900X", "Pain Medicine", 3930);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084S0010X", "Sports Medicine", 3940);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084S0012X", "Sleep Medicine", 3950);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2084V0102X", "Vascular Neurology", 3960);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2085B0100X", "Radiology", 3970);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2085D0003X", "Diagnostic Neuroimaging", 3980);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2085H0002X", "Hospice and Palliative Medicine", 3990);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2085N0700X", "Neuroradiology", 4000);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2085N0904X", "Nuclear Radiology", 4010);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2085P0229X", "Pediatric Radiology", 4020);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2085R0001X", "Radiation Oncology", 4030);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2085R0202X", "Diagnostic Radiology", 4040);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2085R0203X", "Therapeutic Radiology", 4050);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2085R0204X", "Vascular & Interventional Radiology", 4060);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2085R0205X", "Radiological Physics", 4070);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2085U0001X", "Diagnostic Ultrasound", 4080);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "208600000X", "Surgery", 4090);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2086H0002X", "Hospice and Palliative Medicine", 4100);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2086S0102X", "Surgical Critical Care", 4110);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2086S0105X", "Surgery of the Hand", 4120);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2086S0120X", "Pediatric Surgery", 4130);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2086S0122X", "Plastic and Reconstructive Surgery", 4140);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2086S0127X", "Trauma Surgery", 4150);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2086S0129X", "Vascular Surgery", 4160);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2086X0206X", "Surgical Oncology", 4170);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "208800000X", "Urology", 4180);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2088F0040X", "Female Pelvic Medicine and Reconstructive Surgery", 4190);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2088P0231X", "Pediatric Urology", 4200);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "208C00000X", "Colon & Rectal Surgery", 4210);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "208D00000X", "General Practice", 4220);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "208G00000X", "Thoracic Surgery (Cardiothoracic Vascular Surgery)", 4230);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "208M00000X", "Hospitalist", 4240);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "208U00000X", "Clinical Pharmacology", 4250);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "208VP0000X", "Pain Medicine", 4260);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "208VP0014X", "Interventional Pain Medicine", 4270);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "209800000X", "Legal Medicine", 4280);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "211D00000X", "Assistant, Podiatric", 4290);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "213E00000X", "Podiatrist", 4300);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "213EG0000X", "General Practice", 4310);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "213EP0504X", "Public Medicine", 4320);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "213EP1101X", "Primary Podiatric Medicine", 4330);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "213ER0200X", "Radiology", 4340);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "213ES0000X", "Sports Medicine", 4350);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "213ES0103X", "Foot & Ankle Surgery", 4360);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "213ES0131X", "Foot Surgery", 4370);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "221700000X", "Art Therapist", 4380);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "222Q00000X", "Developmental Therapist", 4390);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "222Z00000X", "Orthotist", 4400);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "224900000X", "Mastectomy Fitter", 4410);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "224L00000X", "Pedorthist", 4420);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "224P00000X", "Prosthetist", 4430);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "224Y00000X", "Clinical Exercise Physiologist", 4440);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "224Z00000X", "Occupational Therapy Assistant", 4450);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "224ZE0001X", "Environmental Modification", 4460);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "224ZF0002X", "Feeding, Eating & Swallowing", 4470);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "224ZL0004X", "Low Vision", 4480);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "224ZR0403X", "Driving and Community Mobility", 4490);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225000000X", "Orthotic Fitter", 4500);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225100000X", "Physical Therapist", 4510);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2251C2600X", "Cardiopulmonary", 4520);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2251E1200X", "Ergonomics", 4530);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2251E1300X", "Electrophysiology, Clinical", 4540);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2251G0304X", "Geriatrics", 4550);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2251H1200X", "Hand", 4560);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2251H1300X", "Human Factors", 4570);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2251N0400X", "Neurology", 4580);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2251P0200X", "Pediatrics", 4590);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2251S0007X", "Sports", 4600);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2251X0800X", "Orthopedic", 4610);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225200000X", "Physical Therapy Assistant", 4620);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225400000X", "Rehabilitation Practitioner", 4630);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225500000X", "Specialist/Technologist", 4640);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2255A2300X", "Athletic Trainer", 4650);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2255R0406X", "Rehabilitation, Blind", 4660);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225600000X", "Dance Therapist", 4670);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225700000X", "Massage Therapist", 4680);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225800000X", "Recreation Therapist", 4690);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225A00000X", "Music Therapist", 4700);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225B00000X", "Pulmonary Function Technologist", 4710);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225C00000X", "Rehabilitation Counselor", 4720);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225CA2400X", "Assistive Technology Practitioner", 4730);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225CA2500X", "Assistive Technology Supplier", 4740);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225CX0006X", "Orientation and Mobility Training Provider", 4750);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225X00000X", "Occupational Therapist", 4760);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225XE0001X", "Environmental Modification", 4770);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225XE1200X", "Ergonomics", 4780);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225XF0002X", "Feeding, Eating & Swallowing", 4790);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225XG0600X", "Gerontology", 4800);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225XH1200X", "Hand", 4810);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225XH1300X", "Human Factors", 4820);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225XL0004X", "Low Vision", 4830);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225XM0800X", "Mental Health", 4840);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225XN1300X", "Neurorehabilitation", 4850);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225XP0019X", "Physical Rehabilitation", 4860);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225XP0200X", "Pediatrics", 4870);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "225XR0403X", "Driving and Community Mobility", 4880);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "226000000X", "Recreational Therapist Assistant", 4890);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "226300000X", "Kinesiotherapist", 4900);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "227800000X", "Respiratory Therapist, Certified", 4910);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2278C0205X", "Critical Care", 4920);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2278E0002X", "Emergency Care", 4930);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2278E1000X", "Educational", 4940);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2278G0305X", "Geriatric Care", 4950);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2278G1100X", "General Care", 4960);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2278H0200X", "Home Health", 4970);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2278P1004X", "Pulmonary Diagnostics", 4980);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2278P1005X", "Pulmonary Rehabilitation", 4990);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2278P1006X", "Pulmonary Function Technologist", 5000);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2278P3800X", "Palliative/Hospice", 5010);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2278P3900X", "Neonatal/Pediatrics", 5020);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2278P4000X", "Patient Transport", 5030);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2278S1500X", "SNF/Subacute Care", 5040);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "227900000X", "Respiratory Therapist, Registered", 5050);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2279C0205X", "Critical Care", 5060);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2279E0002X", "Emergency Care", 5070);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2279E1000X", "Educational", 5080);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2279G0305X", "Geriatric Care", 5090);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2279G1100X", "General Care", 5100);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2279H0200X", "Home Health", 5110);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2279P1004X", "Pulmonary Diagnostics", 5120);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2279P1005X", "Pulmonary Rehabilitation", 5130);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2279P1006X", "Pulmonary Function Technologist", 5140);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2279P3800X", "Palliative/Hospice", 5150);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2279P3900X", "Neonatal/Pediatrics", 5160);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2279P4000X", "Patient Transport", 5170);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2279S1500X", "SNF/Subacute Care", 5180);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "229N00000X", "Anaplastologist", 5190);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "231H00000X", "Audiologist", 5200);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "231HA2400X", "Assistive Technology Practitioner", 5210);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "231HA2500X", "Assistive Technology Supplier", 5220);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "235500000X", "Specialist/Technologist", 5230);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2355A2700X", "Audiology Assistant", 5240);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2355S0801X", "Speech-Language Assistant", 5250);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "235Z00000X", "Speech-Language Pathologist", 5260);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "237600000X", "Audiologist-Hearing Aid Fitter", 5270);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "237700000X", "Hearing Instrument Specialist", 5280);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "242T00000X", "Perfusionist", 5290);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "243U00000X", "Radiology Practitioner Assistant", 5300);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246Q00000X", "Spec/Tech, Pathology", 5310);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246QB0000X", "Blood Banking", 5320);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246QC1000X", "Chemistry", 5330);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246QC2700X", "Cytotechnology", 5340);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246QH0000X", "Hematology", 5350);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246QH0401X", "Hemapheresis Practitioner", 5360);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246QH0600X", "Histology", 5370);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246QI0000X", "Immunology", 5380);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246QL0900X", "Laboratory Management", 5390);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246QL0901X", "Laboratory Management, Diplomate", 5400);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246QM0706X", "Medical Technologist", 5410);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246QM0900X", "Microbiology", 5420);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246R00000X", "Technician, Pathology", 5430);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246RH0600X", "Histology", 5440);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246RM2200X", "Medical Laboratory", 5450);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246RP1900X", "Phlebotomy", 5460);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246W00000X", "Technician, Cardiology", 5470);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246X00000X", "Spec/Tech, Cardiovascular", 5480);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246XC2901X", "Cardiovascular Invasive Specialist", 5490);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246XC2903X", "Vascular Specialist", 5500);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246XS1301X", "Sonography", 5510);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246Y00000X", "Spec/Tech, Health Info", 5520);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246YC3301X", "Coding Specialist, Hospital Based", 5530);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246YC3302X", "Coding Specialist, Physician Office Based", 5540);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246YR1600X", "Registered Record Administrator", 5550);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246Z00000X", "Specialist/Technologist, Other", 5560);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246ZA2600X", "Art, Medical", 5570);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246ZB0301X", "Biomedical Engineering", 5580);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246ZB0302X", "Biomedical Photographer", 5590);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246ZB0500X", "Biochemist", 5600);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246ZB0600X", "Biostatistician", 5610);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246ZC0007X", "Surgical Assistant", 5620);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246ZE0500X", "EEG", 5630);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246ZE0600X", "Electroneurodiagnostic", 5640);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246ZG0701X", "Graphics Methods", 5650);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246ZG1000X", "Geneticist, Medical (PhD)", 5660);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246ZI1000X", "Illustration, Medical", 5670);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246ZN0300X", "Nephrology", 5680);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246ZS0410X", "Surgical Technologist", 5690);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "246ZX2200X", "Orthopedic Assistant", 5700);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "247000000X", "Technician, Health Information", 5710);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2470A2800X", "Assistant Record Technician", 5720);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "247100000X", "Radiologic Technologist", 5730);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2471B0102X", "Bone Densitometry", 5740);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2471C1101X", "Cardiovascular-Interventional Technology", 5750);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2471C1106X", "Cardiac-Interventional Technology", 5760);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2471C3401X", "Computed Tomography", 5770);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2471C3402X", "Radiography", 5780);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2471M1202X", "Magnetic Resonance Imaging", 5790);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2471M2300X", "Mammography", 5800);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2471N0900X", "Nuclear Medicine Technology", 5810);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2471Q0001X", "Quality Management", 5820);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2471R0002X", "Radiation Therapy", 5830);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2471S1302X", "Sonography", 5840);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2471V0105X", "Vascular Sonography", 5850);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2471V0106X", "Vascular-Interventional Technology", 5860);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "247200000X", "Technician, Other", 5870);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2472B0301X", "Biomedical Engineering", 5880);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2472D0500X", "Darkroom", 5890);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2472E0500X", "EEG", 5900);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2472R0900X", "Renal Dialysis", 5910);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2472V0600X", "Veterinary", 5920);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "247ZC0005X", "Pathology", 5930);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "251300000X", "Local Education Agency (LEA)", 5940);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "251B00000X", "Case Management", 5950);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "251C00000X", "Day Training, Developmentally Disabled Services", 5960);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "251E00000X", "Home Health", 5970);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "251F00000X", "Home Infusion", 5980);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "251G00000X", "Hospice Care, Community Based", 5990);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "251J00000X", "Nursing Care", 6000);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "251K00000X", "Public Health or Welfare", 6010);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "251S00000X", "Community/Behavioral Health", 6020);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "251T00000X", "PACE Provider Organization", 6030);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "251V00000X", "Voluntary or Charitable", 6040);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "251X00000X", "Supports Brokerage", 6050);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "252Y00000X", "Early Intervention Provider Agency", 6060);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "253J00000X", "Foster Care Agency", 6070);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "253Z00000X", "In Home Supportive Care", 6080);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261Q00000X", "Clinic/Center", 6090);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QA0005X", "Ambulatory Family Planning Facility", 6100);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QA0006X", "Ambulatory Fertility Facility", 6110);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QA0600X", "Adult Day Care", 6120);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QA0900X", "Amputee", 6130);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QA1903X", "Ambulatory Surgical", 6140);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QA3000X", "Augmentative Communication", 6150);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QB0400X", "Birthing", 6160);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QC0050X", "Critical Access Hospital", 6170);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QC1500X", "Community Health", 6180);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QC1800X", "Corporate Health", 6190);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QD0000X", "Dental", 6200);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QD1600X", "Developmental Disabilities", 6210);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QE0002X", "Emergency Care", 6220);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QE0700X", "End-Stage Renal Disease (ESRD) Treatment", 6230);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QE0800X", "Endoscopy", 6240);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QF0050X", "Family Planning, Non-Surgical", 6250);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QF0400X", "Federally Qualified Health Center (FQHC)", 6260);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QG0250X", "Genetics", 6270);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QH0100X", "Health Service", 6280);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QH0700X", "Hearing and Speech", 6290);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QI0500X", "Infusion Therapy", 6300);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QL0400X", "Lithotripsy", 6310);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QM0801X", "Mental Health (Including Community Mental Health Center)", 6320);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QM0850X", "Adult Mental Health", 6330);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QM0855X", "Adolescent and Children Mental Health", 6340);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QM1000X", "Migrant Health", 6350);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QM1100X", "Military/U.S. Coast Guard Outpatient", 6360);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QM1101X", "Military and U.S. Coast Guard Ambulatory Procedure", 6370);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QM1102X", "Military Outpatient Operational (Transportable) Component", 6380);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QM1103X", "Military Ambulatory Procedure Visits Operational (Transportable)", 6390);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QM1200X", "Magnetic Resonance Imaging (MRI)", 6400);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QM1300X", "Multi-Specialty", 6410);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QM2500X", "Medical Specialty", 6420);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QM2800X", "Methadone Clinic", 6430);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QM3000X", "Medically Fragile Intants and Children Day Care", 6440);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QP0904X", "Public Health, Federal", 6450);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QP0905X", "Public Health, State or Local", 6460);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QP1100X", "Podiatric", 6470);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QP2000X", "Physical Therapy", 6480);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QP2300X", "Primary Care", 6490);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QP2400X", "Prison Health", 6500);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QP3300X", "Pain", 6510);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QR0200X", "Radiology", 6520);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QR0206X", "Radiology, Mammography", 6530);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QR0207X", "Radiology, Mobile Mammography", 6540);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QR0208X", "Radiology, Mobile", 6550);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QR0400X", "Rehabilitation", 6560);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QR0401X", "Rehabilitation, Comprehensive Outpatient Rehabilitation Facility (CORF)", 6570);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QR0404X", "Rehabilitation, Cardiac Facilities", 6580);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QR0405X", "Rehabilitation, Substance Use Disorder", 6590);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QR0800X", "Recovery Care", 6600);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QR1100X", "Research", 6610);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QR1300X", "Rural Health", 6620);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QS0112X", "Oral and Maxillofacial Surgery", 6630);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QS0132X", "Ophthalmologic Surgery", 6640);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QS1000X", "Student Health", 6650);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QS1200X", "Sleep Disorder Diagnostic", 6660);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QU0200X", "Urgent Care", 6670);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QV0200X", "VA", 6680);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QX0100X", "Occupational Medicine", 6690);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QX0200X", "Oncology", 6700);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "261QX0203X", "Oncology, Radiation", 6710);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "273100000X", "Epilepsy Unit", 6720);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "273R00000X", "Psychiatric Unit", 6730);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "273Y00000X", "Rehabilitation Unit", 6740);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "275N00000X", "Medicare Defined Swing Bed Unit", 6750);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "276400000X", "Rehabilitation, Substance Use Disorder Unit", 6760);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "281P00000X", "Chronic Disease Hospital", 6770);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "281PC2000X", "Children", 6780);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "282E00000X", "Long Term Care Hospital", 6790);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "282J00000X", "Religious Nonmedical Health Care Institution", 6800);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "282N00000X", "General Acute Care Hospital", 6810);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "282NC0060X", "Critical Access", 6820);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "282NC2000X", "Children", 6830);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "282NR1301X", "Rural", 6840);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "282NW0100X", "Women", 6850);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "283Q00000X", "Psychiatric Hospital", 6860);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "283X00000X", "Rehabilitation Hospital", 6870);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "283XC2000X", "Children", 6880);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "284300000X", "Special Hospital", 6890);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "286500000X", "Military Hospital", 6900);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2865C1500X", "Community Health", 6910);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2865M2000X", "Military General Acute Care Hospital", 6920);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "2865X1600X", "Military General Acute Care Hospital. Operational (Transportable)", 6930);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "287300000X", "Christian Science Sanitorium", 6940);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "291900000X", "Military Clinical Medical Laboratory", 6950);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "291U00000X", "Clinical Medical Laboratory", 6960);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "292200000X", "Dental Laboratory", 6970);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "293D00000X", "Physiological Laboratory", 6980);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "302F00000X", "Exclusive Provider Organization", 6990);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "302R00000X", "Health Maintenance Organization", 7000);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "305R00000X", "Preferred Provider Organization", 7010);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "305S00000X", "Point of Service", 7020);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "310400000X", "Assisted Living Facility", 7030);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3104A0625X", "Assisted Living, Mental Illness", 7040);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3104A0630X", "Assisted Living, Behavioral Disturbances", 7050);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "310500000X", "Intermediate Care Facility, Mental Illness", 7060);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "311500000X", "Alzheimer Center (Dementia Center)", 7070);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "311Z00000X", "Custodial Care Facility", 7080);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "311ZA0620X", "Adult Care Home", 7090);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "313M00000X", "Nursing Facility/Intermediate Care Facility", 7100);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "314000000X", "Skilled Nursing Facility", 7110);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3140N1450X", "Nursing Care, Pediatric", 7120);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "315D00000X", "Hospice, Inpatient", 7130);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "315P00000X", "Intermediate Care Facility, Mentally Retarded", 7140);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "317400000X", "Christian Science Facility", 7150);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "320600000X", "Residential Treatment Facility, Mental Retardation and/or Developmental Disabilities", 7160);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "320700000X", "Residential Treatment Facility, Physical Disabilities", 7170);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "320800000X", "Community Based Residential Treatment Facility, Mental Illness", 7180);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "320900000X", "Community Based Residential Treatment, Mental Retardation and/or Developmental Disabilities", 7190);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "322D00000X", "Residential Treatment Facility, Emotionally Disturbed Children", 7200);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "323P00000X", "Psychiatric Residential Treatment Facility", 7210);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "324500000X", "Substance Abuse Rehabilitation Facility", 7220);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3245S0500X", "Substance Abuse Treatment, Children", 7230);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "331L00000X", "Blood Bank", 7240);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "332000000X", "Military/U.S. Coast Guard Pharmacy", 7250);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "332100000X", "Department of Veterans Affairs (VA) Pharmacy", 7260);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "332800000X", "Indian Health Service/Tribal/Urban Indian Health (I/T/U) Pharmacy", 7270);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "332900000X", "Non-Pharmacy Dispensing Site", 7280);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "332B00000X", "Durable Medical Equipment & Medical Supplies", 7290);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "332BC3200X", "Customized Equipment", 7300);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "332BD1200X", "Dialysis Equipment & Supplies", 7310);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "332BN1400X", "Nursing Facility Supplies", 7320);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "332BP3500X", "Parenteral & Enteral Nutrition", 7330);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "332BX2000X", "Oxygen Equipment & Supplies", 7340);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "332G00000X", "Eye Bank", 7350);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "332H00000X", "Eyewear Supplier (Equipment, not the service)", 7360);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "332S00000X", "Hearing Aid Equipment", 7370);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "332U00000X", "Home Delivered Meals", 7380);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "333300000X", "Emergency Response System Companies", 7390);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "333600000X", "Pharmacy", 7400);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3336C0002X", "Clinic Pharmacy", 7410);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3336C0003X", "Community/Retail Pharmacy", 7420);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3336C0004X", "Compounding Pharmacy", 7430);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3336H0001X", "Home Infusion Therapy Pharmacy", 7440);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3336I0012X", "Institutional Pharmacy", 7450);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3336L0003X", "Long Term Care Pharmacy", 7460);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3336M0002X", "Mail Order Pharmacy", 7470);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3336M0003X", "Managed Care Organization Pharmacy", 7480);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3336N0007X", "Nuclear Pharmacy", 7490);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3336S0011X", "Specialty Pharmacy", 7500);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "335E00000X", "Prosthetic/Orthotic Supplier", 7510);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "335G00000X", "Medical Foods Supplier", 7520);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "335U00000X", "Organ Procurement Organization", 7530);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "335V00000X", "Portable X-ray and/or Other Portable Diagnostic Imaging Supplier", 7540);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "341600000X", "Ambulance", 7550);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3416A0800X", "Air Transport", 7560);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3416L0300X", "Land Transport", 7570);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3416S0300X", "Water Transport", 7580);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "341800000X", "Military/U.S. Coast Guard Transport", 7590);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3418M1110X", "Military or U.S. Coast Guard Ambulance, Ground Transport", 7600);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3418M1120X", "Military or U.S. Coast Guard Ambulance, Air Transport", 7610);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3418M1130X", "Military or U.S. Coast Guard Ambulance, Water Transport", 7620);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "343800000X", "Secured Medical Transport (VAN)", 7630);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "343900000X", "Non-emergency Medical Transport (VAN)", 7640);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "344600000X", "Taxi", 7650);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "344800000X", "Air Carrier", 7660);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "347B00000X", "Bus", 7670);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "347C00000X", "Private Vehicle", 7680);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "347D00000X", "Train", 7690);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "347E00000X", "Transportation Broker", 7700);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363A00000X", "Physician Assistant", 7710);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363AM0700X", "Medical", 7720);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363AS0400X", "Surgical Technologist", 7730);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363L00000X", "Nurse Practitioner", 7740);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LA2100X", "Acute Care", 7750);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LA2200X", "Adult Health", 7760);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LC0200X", "Critical Care Medicine", 7770);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LC1500X", "Community Health", 7780);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LF0000X", "Family", 7790);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LG0600X", "Gerontology", 7800);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LN0000X", "Neonatal", 7810);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LN0005X", "Neonatal, Critical Care", 7820);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LP0200X", "Pediatrics", 7830);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LP0222X", "Pediatrics, Critical Care", 7840);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LP0808X", "Psych/Mental Health", 7850);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LP1700X", "Perinatal", 7860);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LP2300X", "Primary Care", 7870);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LS0200X", "School", 7880);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LW0102X", "Women's Health", 7890);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LX0001X", "Obstetrics & Gynecology", 7900);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "363LX0106X", "Occupational Health", 7910);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364S00000X", "Clinical Nurse Specialist", 7920);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SA2100X", "Acute Care", 7930);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SA2200X", "Adult Health", 7940);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SC0200X", "Critical Care Medicine", 7950);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SC1501X", "Community Health/Public Health", 7960);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SC2300X", "Chronic Care", 7970);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SE0003X", "Emergency", 7980);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SE1400X", "Ethics", 7990);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SF0001X", "Family Health", 8000);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SG0600X", "Gerontology", 8010);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SH0200X", "Home Health", 8020);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SH1100X", "Holistic", 8030);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SI0800X", "Informatics", 8040);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SL0600X", "Long-Term Care", 8050);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SM0705X", "Medical-Surgical", 8060);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SN0000X", "Neonatal", 8070);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SN0800X", "Neuroscience", 8080);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SP0200X", "Pediatrics", 8090);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SP0807X", "Psych/Mental Health, Child & Adolescent", 8100);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SP0808X", "Psych/Mental Health", 8110);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SP0809X", "Psych/Mental Health, Adult", 8120);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SP0810X", "Psych/Mental Health, Child & Family", 8130);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SP0811X", "Psych/Mental Health, Chronically Ill", 8140);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SP0812X", "Psych/Mental Health, Community", 8150);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SP0813X", "Psych/Mental Health, Geropsychiatric", 8160);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SP1700X", "Perinatal", 8170);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SP2800X", "Perioperative", 8180);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SR0400X", "Rehabilitation", 8190);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SS0200X", "School", 8200);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364ST0500X", "Transplantation", 8210);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SW0102X", "Women's Health", 8220);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SX0106X", "Occupational Health", 8230);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SX0200X", "Oncology", 8240);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "364SX0204X", "Oncology, Pediatrics", 8250);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "367500000X", "Nurse Anesthetist, Certified Registered", 8260);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "367A00000X", "Advanced Practice Midwife", 8270);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "367H00000X", "Anesthesiologist Assistant", 8280);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "372500000X", "Chore Provider", 8290);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "372600000X", "Adult Companion", 8300);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "373H00000X", "Day Training/Habilitation Specialist", 8310);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "374700000X", "Technician", 8320);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3747A0650X", "Attendant Care Provider", 8330);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "3747P1801X", "Personal Care Attendant", 8340);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "374J00000X", "Doula", 8350);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "374K00000X", "Religious Nonmedical Practitioner", 8360);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "374T00000X", "Religious Nonmedical Nursing Personnel", 8370);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "374U00000X", "Home Health Aide", 8380);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "376G00000X", "Nursing Home Administrator", 8390);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "376J00000X", "Homemaker", 8400);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "376K00000X", "Nurse's Aide", 8410);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "385H00000X", "Respite Care", 8420);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "385HR2050X", "Respite Care Camp", 8430);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "385HR2055X", "Respite Care, Mental Illness, Child", 8440);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "385HR2060X", "Respite Care, Mental Retardation and/or Developmental Disabilities, Child", 8450);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "385HR2065X", "Respite Care, Physical Disabilities, Child", 8460);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "390200000X", "Student in an Organized Health Care Education/Training Program", 8470);
+INSERT INTO list_options(list_id,option_id,title,seq) VALUES ("us-core-provider-specialty", "405300000X", "Prevention Professional", 8480);
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `lists`
@@ -4795,9 +6325,9 @@ CREATE TABLE `lists` (
   PRIMARY KEY  (`id`),
   KEY `pid` (`pid`),
   KEY `type` (`type`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `lists_touch`
@@ -4809,9 +6339,9 @@ CREATE TABLE `lists_touch` (
   `type` varchar(255) NOT NULL default '',
   `date` datetime default NULL,
   PRIMARY KEY  (`pid`,`type`)
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `log`
@@ -4835,10 +6365,10 @@ CREATE TABLE `log` (
   `menu_item_id` INT(11) DEFAULT NULL,
   `ccda_doc_id` INT(11) DEFAULT NULL COMMENT 'CCDA document id from ccda',
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `modules`
@@ -4869,7 +6399,7 @@ CREATE TABLE `modules` (
   PRIMARY KEY (`mod_id`,`mod_directory`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `module_acl_group_settings`
@@ -4884,7 +6414,7 @@ CREATE TABLE `module_acl_group_settings` (
   PRIMARY KEY (`module_id`,`group_id`,`section_id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `module_acl_sections`
@@ -4899,7 +6429,7 @@ CREATE TABLE `module_acl_sections` (
   `module_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `module_acl_user_settings`
@@ -4914,7 +6444,7 @@ CREATE TABLE `module_acl_user_settings` (
   PRIMARY KEY (`module_id`,`user_id`,`section_id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `module_configuration`
@@ -4929,7 +6459,7 @@ CREATE TABLE `module_configuration` (
   PRIMARY KEY (`module_config_id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `modules_hooks_settings`
@@ -4944,7 +6474,7 @@ CREATE TABLE `modules_hooks_settings` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `modules_settings`
@@ -4959,7 +6489,7 @@ CREATE TABLE `modules_settings` (
   `path` VARCHAR(255) DEFAULT NULL
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `notes`
@@ -4979,7 +6509,7 @@ CREATE TABLE `notes` (
   KEY `date` (`date`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `onotes`
@@ -4994,9 +6524,9 @@ CREATE TABLE `onotes` (
   `groupname` varchar(255) default NULL,
   `activity` tinyint(4) default NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `onsite_documents`
@@ -5012,11 +6542,11 @@ CREATE TABLE `onsite_documents` (
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `doc_type` varchar(255) NOT NULL,
   `patient_signed_status` smallint(5) UNSIGNED NOT NULL,
-  `patient_signed_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `patient_signed_time` datetime NULL,
   `authorize_signed_time` datetime DEFAULT NULL,
   `accept_signed_status` smallint(5) NOT NULL,
   `authorizing_signator` varchar(50) NOT NULL,
-  `review_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `review_date` datetime NULL,
   `denial_reason` varchar(255) NOT NULL,
   `authorized_signature` text,
   `patient_signature` text,
@@ -5024,10 +6554,10 @@ CREATE TABLE `onsite_documents` (
   `file_name` varchar(255) NOT NULL,
   `file_path` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `onsite_mail`
@@ -5059,9 +6589,9 @@ CREATE TABLE `onsite_mail` (
   `is_msg_encrypted` tinyint(2) DEFAULT '0' COMMENT 'Whether messsage encrypted 0-Not encrypted, 1-Encrypted',
   PRIMARY KEY (`id`),
   KEY `pid` (`owner`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `onsite_messages`
@@ -5077,9 +6607,9 @@ CREATE TABLE `onsite_messages` (
   `sender_id` VARCHAR(64) NULL COMMENT 'who sent id',
   `recip_id` varchar(255) NOT NULL COMMENT 'who to id array',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB COMMENT='Portal messages' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB COMMENT='Portal messages' AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `onsite_online`
@@ -5095,7 +6625,7 @@ CREATE TABLE `onsite_online` (
   PRIMARY KEY (`hash`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `onsite_portal_activity`
@@ -5119,9 +6649,9 @@ CREATE TABLE `onsite_portal_activity` (
   `checksum` longtext,
   PRIMARY KEY (`id`),
   KEY `date` (`date`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `onsite_signatures`
@@ -5147,9 +6677,9 @@ CREATE TABLE `onsite_signatures` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `pid` (`pid`,`user`),
   KEY `encounter` (`encounter`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `openemr_module_vars`
@@ -5164,7 +6694,7 @@ CREATE TABLE `openemr_module_vars` (
   PRIMARY KEY  (`pn_id`),
   KEY `pn_modname` (`pn_modname`),
   KEY `pn_name` (`pn_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=235 ;
+) ENGINE=InnoDB AUTO_INCREMENT=235;
 
 --
 -- Inserting data for table `openemr_module_vars`
@@ -5190,7 +6720,7 @@ INSERT INTO `openemr_module_vars` VALUES (218, 'PostCalendar', 'pcUseInternation
 INSERT INTO `openemr_module_vars` VALUES (217, 'PostCalendar', 'pcEventsOpenInNewWindow', '0');
 INSERT INTO `openemr_module_vars` VALUES (216, 'PostCalendar', 'pcTime24Hours', '0');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `openemr_modules`
@@ -5210,7 +6740,7 @@ CREATE TABLE `openemr_modules` (
   `pn_user_capable` tinyint(1) NOT NULL default '0',
   `pn_state` tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (`pn_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=47 ;
+) ENGINE=InnoDB AUTO_INCREMENT=47;
 
 --
 -- Inserting data for table `openemr_modules`
@@ -5218,7 +6748,7 @@ CREATE TABLE `openemr_modules` (
 
 INSERT INTO `openemr_modules` VALUES (46, 'PostCalendar', 2, 'PostCalendar', 'PostNuke Calendar Module', 0, 'PostCalendar', '4.0.0', 1, 1, 3);
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `openemr_postcalendar_categories`
@@ -5248,7 +6778,7 @@ CREATE TABLE `openemr_postcalendar_categories` (
   PRIMARY KEY  (`pc_catid`),
   UNIQUE KEY (`pc_constant_id`),
   KEY `basic_cat` (`pc_catname`,`pc_catcolor`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 ;
+) ENGINE=InnoDB AUTO_INCREMENT=11;
 
 --
 -- Inserting data for table `openemr_postcalendar_categories`
@@ -5270,7 +6800,7 @@ INSERT INTO `openemr_postcalendar_categories` VALUES (13,'preventive_care_servic
 INSERT INTO `openemr_postcalendar_categories` VALUES (14,'ophthalmological_services', 'Ophthalmological Services', '#F89219', 'Ophthalmological Services', 0, NULL, 'a:5:{s:17:"event_repeat_freq";s:1:"0";s:22:"event_repeat_freq_type";s:1:"0";s:19:"event_repeat_on_num";s:1:"1";s:19:"event_repeat_on_day";s:1:"0";s:20:"event_repeat_on_freq";s:1:"0";}', 0, 900, 0, 0, 0, 0, 0,0,1,14,'encounters|notes');
 INSERT INTO `openemr_postcalendar_categories` VALUES (15,'group_therapy', 'Group Therapy' , '#BFBFBF' , 'Group Therapy', 0, NULL, 'a:5:{s:17:"event_repeat_freq";s:1:"0";s:22:"event_repeat_freq_type";s:1:"0";s:19:"event_repeat_on_num";s:1:"1";s:19:"event_repeat_on_day";s:1:"0";s:20:"event_repeat_on_freq";s:1:"0";}', 0, 3600, 0, 0, 0, 0, 0, 3, 1, 15,'encounters|notes');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `openemr_postcalendar_events`
@@ -5319,9 +6849,9 @@ CREATE TABLE `openemr_postcalendar_events` (
   PRIMARY KEY  (`pc_eid`),
   KEY `basic_event` (`pc_catid`,`pc_aid`,`pc_eventDate`,`pc_endDate`,`pc_eventstatus`,`pc_sharing`,`pc_topic`),
   KEY `pc_eventDate` (`pc_eventDate`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 ;
+) ENGINE=InnoDB AUTO_INCREMENT=7;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `patient_access_onsite`
@@ -5336,10 +6866,11 @@ CREATE TABLE `patient_access_onsite`(
   `portal_pwd_status` TINYINT DEFAULT '1' COMMENT '0=>Password Created Through Demographics by The provider or staff. Patient Should Change it at first time it.1=>Pwd updated or created by patient itself',
   `portal_login_username` VARCHAR(100) DEFAULT NULL COMMENT 'User entered username',
   `portal_onetime`  VARCHAR(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pid` (`pid`)
 )ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `patient_data`
@@ -5348,6 +6879,7 @@ CREATE TABLE `patient_access_onsite`(
 DROP TABLE IF EXISTS `patient_data`;
 CREATE TABLE `patient_data` (
   `id` bigint(20) NOT NULL auto_increment,
+  `uuid` binary(16) DEFAULT NULL,
   `title` varchar(255) NOT NULL default '',
   `language` varchar(255) NOT NULL default '',
   `financial` varchar(255) NOT NULL default '',
@@ -5455,9 +6987,10 @@ CREATE TABLE `patient_data` (
   `guardianworkphone` TEXT,
   `guardianemail` TEXT,
   UNIQUE KEY `pid` (`pid`),
+  UNIQUE KEY `uuid` (`uuid`),
   KEY `id` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
------------------------------------------------------------
+) ENGINE=InnoDB AUTO_INCREMENT=1;
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `patient_portal_menu`
@@ -5486,7 +7019,7 @@ INSERT  INTO `patient_portal_menu`(`patient_portal_menu_id`,`patient_portal_menu
 INSERT  INTO `patient_portal_menu`(`patient_portal_menu_id`,`patient_portal_menu_group_id`,`menu_name`,`menu_order`,`menu_status`) VALUES (11,1,'View Health Information',33,1);
 INSERT  INTO `patient_portal_menu`(`patient_portal_menu_id`,`patient_portal_menu_group_id`,`menu_name`,`menu_order`,`menu_status`) VALUES (12,1,'Download Health Information',36,1);
 INSERT  INTO `patient_portal_menu`(`patient_portal_menu_id`,`patient_portal_menu_group_id`,`menu_name`,`menu_order`,`menu_status`) VALUES (13,1,'Transmit Health Information',39,1);
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `patient_reminders`
@@ -5513,24 +7046,7 @@ CREATE TABLE `patient_reminders` (
   KEY (`category`,`item`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
-
---
--- Table structure for table `patient_access_offsite`
---
-
-DROP TABLE IF EXISTS `patient_access_offsite`;
-CREATE TABLE  `patient_access_offsite` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `pid` bigint(20) NOT NULL,
-  `portal_username` varchar(100) NOT NULL,
-  `portal_pwd` varchar(255) NOT NULL,
-  `portal_pwd_status` tinyint(4) DEFAULT '1' COMMENT '0=>Password Created Through Demographics by The provider or staff. Patient Should Change it at first time it.1=>Pwd updated or created by patient itself',
-  `authorize_net_id` VARCHAR(20) COMMENT 'authorize.net profile id',
-  `portal_relation` VARCHAR(100) NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `pid` (`pid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1;
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `patient_tracker`
@@ -5588,9 +7104,9 @@ CREATE TABLE `payments` (
   `posted2` decimal(12,2) NOT NULL default '0.00',
   PRIMARY KEY  (`id`),
   KEY `pid` (`pid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `payment_gateway_details`
@@ -5606,7 +7122,7 @@ CREATE TABLE `payment_gateway_details` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `pharmacies`
@@ -5623,7 +7139,7 @@ CREATE TABLE `pharmacies` (
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `phone_numbers`
@@ -5642,7 +7158,7 @@ CREATE TABLE `phone_numbers` (
   KEY `foreign_id` (`foreign_id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `pnotes`
@@ -5668,9 +7184,9 @@ CREATE TABLE `pnotes` (
   `update_date` DATETIME DEFAULT NULL,
   PRIMARY KEY  (`id`),
   KEY `pid` (`pid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `prescriptions`
@@ -5720,9 +7236,9 @@ CREATE TABLE `prescriptions` (
   `txDate` DATE NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `patient_id` (`patient_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `prices`
@@ -5737,7 +7253,7 @@ CREATE TABLE `prices` (
   PRIMARY KEY  (`pr_id`,`pr_selector`,`pr_level`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `pro_assessments`
@@ -5760,7 +7276,7 @@ CREATE TABLE `pro_assessments` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `registry`
@@ -5782,7 +7298,7 @@ CREATE TABLE `registry` (
   `therapy_group_encounter` TINYINT NOT NULL DEFAULT '0',
   `aco_spec` varchar(63) NOT NULL default 'encounters|notes',
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 ;
+) ENGINE=InnoDB AUTO_INCREMENT=22;
 
 --
 -- Inserting data for table `registry`
@@ -5805,7 +7321,7 @@ INSERT INTO `registry` VALUES ('Eye Exam', 1, 'eye_mag', 21, 1, 1, '2015-10-15 0
 INSERT INTO `registry` VALUES ('Group Attendance Form', 1, 'group_attendance', 22, 1, 1, '2015-10-15 00:00:00', 0, 'Clinical', '',0,1,'encounters|notes');
 INSERT INTO `registry` VALUES ('New Group Encounter Form', 1, 'newGroupEncounter', 23, 1, 1, '2015-10-15 00:00:00', 0, 'Clinical', '',0,1,'patients|appt');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `report_itemized`
@@ -5822,7 +7338,7 @@ CREATE TABLE `report_itemized` (
   KEY (`report_id`,`itemized_test_id`,`numerator_label`,`pass`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `report_results`
@@ -5836,7 +7352,7 @@ CREATE TABLE `report_results` (
   PRIMARY KEY (`report_id`,`field_id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `rule_action`
@@ -5849,7 +7365,7 @@ CREATE TABLE `rule_action` (
   `category` varchar(31) NOT NULL DEFAULT '' COMMENT 'Maps to the category item in the rule_action_item table',
   `item` varchar(31) NOT NULL DEFAULT '' COMMENT 'Maps to the item column in the rule_action_item table',
   KEY  (`id`)
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
 --
 -- Standard clinical rule actions
@@ -5880,7 +7396,7 @@ INSERT INTO `rule_action` ( `id`, `group_id`, `category`, `item` ) VALUES ('rule
 INSERT INTO `rule_action` ( `id`, `group_id`, `category`, `item` ) VALUES ('rule_blood_pressure', 1, 'act_cat_measure', 'act_bp');
 INSERT INTO `rule_action` ( `id`, `group_id`, `category`, `item` ) VALUES ('rule_inr_measure', 1, 'act_cat_measure', 'act_lab_inr');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `rule_action_item`
@@ -5894,7 +7410,7 @@ CREATE TABLE `rule_action_item` (
   `reminder_message` TEXT COMMENT 'Custom message in patient reminder',
   `custom_flag` tinyint(1) NOT NULL default 0 COMMENT '1 indexed to rule_patient_data, 0 indexed within main schema',
   PRIMARY KEY  (`category`,`item`)
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
 INSERT INTO `rule_action_item` ( `category`, `item`, `clin_rem_link`, `reminder_message`, `custom_flag` ) VALUES ('act_cat_measure', 'act_bp', '', '', 0);
 INSERT INTO `rule_action_item` ( `category`, `item`, `clin_rem_link`, `reminder_message`, `custom_flag` ) VALUES ('act_cat_assess', 'act_tobacco', '', '', 0);
@@ -5918,7 +7434,7 @@ INSERT INTO `rule_action_item` ( `category`, `item`, `clin_rem_link`, `reminder_
 INSERT INTO `rule_action_item` ( `category`, `item`, `clin_rem_link`, `reminder_message`, `custom_flag` ) VALUES ('act_cat_assess', 'act_soc_sec', '', '', 0);
 INSERT INTO `rule_action_item` ( `category`, `item`, `clin_rem_link`, `reminder_message`, `custom_flag` ) VALUES ('act_cat_assess', 'act_penicillin_allergy', '', '', 1);
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `rule_filter`
@@ -5933,7 +7449,7 @@ CREATE TABLE `rule_filter` (
   `method_detail` varchar(31) NOT NULL DEFAULT '' COMMENT 'Maps to list_options lists rule__intervals',
   `value` varchar(255) NOT NULL DEFAULT '',
   KEY  (`id`)
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
 --
 -- Standard clinical rule filters
@@ -6281,7 +7797,7 @@ INSERT INTO `rule_filter` ( `id`, `include_flag`, `required_flag`, `method`, `me
 
 INSERT INTO `rule_filter` ( `id`, `include_flag`, `required_flag`, `method`, `method_detail`, `value` ) VALUES ('rule_penicillin_allergy', 1, 0, 'filt_lists', 'allergy', 'penicillin');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `rule_patient_data`
@@ -6299,9 +7815,9 @@ CREATE TABLE `rule_patient_data` (
   PRIMARY KEY  (`id`),
   KEY (`pid`),
   KEY (`category`,`item`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `rule_reminder`
@@ -6314,7 +7830,7 @@ CREATE TABLE `rule_reminder` (
   `method_detail` varchar(31) NOT NULL DEFAULT '' COMMENT 'Maps to list_options list rule_reminder_intervals',
   `value` varchar(255) NOT NULL DEFAULT '',
   KEY  (`id`)
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
 -- Hypertension: Blood Pressure Measurement
 INSERT INTO `rule_reminder` ( `id`, `method`, `method_detail`, `value` ) VALUES ('rule_htn_bp_measure', 'clinical_reminder_pre', 'week', '2');
@@ -6417,7 +7933,7 @@ INSERT INTO `rule_reminder` ( `id`, `method`, `method_detail`, `value` ) VALUES 
 INSERT INTO `rule_reminder` ( `id`, `method`, `method_detail`, `value` ) VALUES ('rule_inr_measure', 'patient_reminder_pre', 'week', '2');
 INSERT INTO `rule_reminder` ( `id`, `method`, `method_detail`, `value` ) VALUES ('rule_inr_measure', 'patient_reminder_post', 'month', '1');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `rule_target`
@@ -6433,7 +7949,7 @@ CREATE TABLE `rule_target` (
   `value` varchar(255) NOT NULL DEFAULT '' COMMENT 'Data is dependent on the method',
   `interval` bigint(20) NOT NULL DEFAULT 0 COMMENT 'Only used in interval entries',
   KEY  (`id`)
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
 --
 -- Standard clinical rule targets
@@ -6518,7 +8034,7 @@ INSERT INTO `rule_target` ( `id`, `group_id`, `include_flag`, `required_flag`, `
 -- INR Measurement
 INSERT INTO `rule_target` ( `id`, `group_id`, `include_flag`, `required_flag`, `method`, `value`, `interval` ) VALUES ('rule_inr_measure', 1, 1, 1, 'target_proc', 'INR::CPT4:85610::::::ge::1', 0);
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `sequences`
@@ -6535,7 +8051,21 @@ CREATE TABLE `sequences` (
 
 INSERT INTO `sequences` VALUES (1);
 
------------------------------------------------------------
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `session_tracker`
+--
+
+DROP TABLE IF EXISTS `session_tracker`;
+CREATE TABLE `session_tracker` (
+  `uuid` binary(16) NOT NULL DEFAULT '',
+  `created` timestamp NULL,
+  `last_updated` timestamp NULL,
+  PRIMARY KEY (`uuid`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `supported_external_dataloads`
@@ -6649,7 +8179,7 @@ INSERT INTO `supported_external_dataloads` (`load_type`, `load_source`, `load_re
 ('ICD10', 'CMS', '2019-10-01', '2020-ICD-10-PCS-Order.zip', '8dc136d780ec60916e9e1fc999837bc8');
 INSERT INTO `supported_external_dataloads` (`load_type`, `load_source`, `load_release_date`, `load_filename`, `load_checksum`) VALUES
 ('CQM_VALUESET', 'NIH_VSAC', '2018-09-17', 'ep_ec_eh_cms_20180917.xml.zip', 'a1e584714b080aced6ca73b4b7b076a1');
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `transactions`
@@ -6666,9 +8196,9 @@ CREATE TABLE `transactions` (
   `authorized`              tinyint(4)   default NULL,
   PRIMARY KEY  (`id`),
   KEY `pid` (`pid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `users`
@@ -6677,6 +8207,7 @@ CREATE TABLE `transactions` (
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` bigint(20) NOT NULL auto_increment,
+  `uuid` binary(16) DEFAULT NULL,
   `username` varchar(255) default NULL,
   `password` longtext,
   `authorized` tinyint(4) default NULL,
@@ -6732,8 +8263,11 @@ CREATE TABLE `users` (
   `physician_type` VARCHAR(50) DEFAULT NULL,
   `main_menu_role` VARCHAR(50) NOT NULL DEFAULT 'standard',
   `patient_menu_role` VARCHAR(50) NOT NULL DEFAULT 'standard',
+  `portal_user` tinyint(1) NOT NULL DEFAULT '0',
+  `supervisor_id` int(11) NOT NULL DEFAULT '0',
+    UNIQUE KEY `uuid` (`uuid`),
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
 --
 -- Inserting data for table `users`
@@ -6742,7 +8276,7 @@ CREATE TABLE `users` (
 --  (so these inserts can be found in the sql/official_additional_users.sql script)
 --
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `user_secure`
@@ -6766,7 +8300,7 @@ CREATE TABLE `users_secure` (
   UNIQUE KEY `USERNAME_ID` (`id`,`username`)
 ) ENGINE=InnoDb;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `user_settings`
@@ -6804,7 +8338,22 @@ INSERT INTO user_settings ( setting_user, setting_label, setting_value ) VALUES 
 INSERT INTO user_settings ( setting_user, setting_label, setting_value ) VALUES (0, 'gacl_protect', '0');
 INSERT INTO user_settings ( setting_user, setting_label, setting_value ) VALUES (1, 'gacl_protect', '1');
 
------------------------------------------------------------
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `uuid_registry`
+--
+
+DROP TABLE IF EXISTS `uuid_registry`;
+CREATE TABLE `uuid_registry` (
+  `uuid` binary(16) NOT NULL DEFAULT '',
+  `table_name` varchar(255) NOT NULL DEFAULT '',
+  `table_vertical` varchar(255) NOT NULL DEFAULT '',
+  `created` timestamp NULL,
+  PRIMARY KEY (`uuid`)
+) ENGINE=InnoDB;
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `voids`
@@ -6827,7 +8376,7 @@ CREATE TABLE `voids` (
   KEY pidenc (patient_id, encounter_id)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `x12_partners`
@@ -6855,7 +8404,7 @@ CREATE TABLE `x12_partners` (
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB;
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `automatic_notification`
@@ -6874,7 +8423,7 @@ CREATE TABLE `automatic_notification` (
   `type` enum('SMS','Email') NOT NULL default 'SMS',
   `notification_sent_date` datetime NOT NULL,
   PRIMARY KEY  (`notification_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB AUTO_INCREMENT=3;
 
 --
 -- Inserting data for table `automatic_notification`
@@ -6883,7 +8432,7 @@ CREATE TABLE `automatic_notification` (
 INSERT INTO `automatic_notification` (`notification_id`, `sms_gateway_type`, `next_app_date`, `next_app_time`, `provider_name`, `message`, `email_sender`, `email_subject`, `type`, `notification_sent_date`) VALUES (1, 'CLICKATELL', '0000-00-00', ':', 'EMR GROUP 1 .. SMS', 'Welcome to EMR GROUP 1.. SMS', '', '', 'SMS', '0000-00-00 00:00:00'),
 (2, '', '2007-10-02', '05:50', 'EMR GROUP', 'Welcome to EMR GROUP . Email', 'EMR Group', 'Welcome to EMR GROUP', 'Email', '2007-09-30 00:00:00');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `notification_log`
@@ -6907,9 +8456,9 @@ CREATE TABLE `notification_log` (
   `pc_endTime` time NOT NULL,
   `dSentDateTime` datetime NOT NULL,
   PRIMARY KEY  (`iLogId`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 ;
+) ENGINE=InnoDB AUTO_INCREMENT=5;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `notification_settings`
@@ -6925,7 +8474,7 @@ CREATE TABLE `notification_settings` (
   `SMS_gateway_apikey` varchar(100) NOT NULL,
   `type` varchar(50) NOT NULL,
   PRIMARY KEY  (`SettingsId`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB AUTO_INCREMENT=2;
 
 --
 -- Inserting data for table `notification_settings`
@@ -6933,7 +8482,7 @@ CREATE TABLE `notification_settings` (
 
 INSERT INTO `notification_settings` (`SettingsId`, `Send_SMS_Before_Hours`, `Send_Email_Before_Hours`, `SMS_gateway_username`, `SMS_gateway_password`, `SMS_gateway_apikey`, `type`) VALUES (1, 150, 150, 'sms username', 'sms password', 'sms api key', 'SMS/Email Settings');
 
-----------------------------------------------------------------------
+-- -------------------------------------------------------------------
 
 --
 -- Table structure for table `chart_tracker`
@@ -6948,7 +8497,7 @@ CREATE TABLE chart_tracker (
   PRIMARY KEY (ct_pid, ct_when)
 ) ENGINE=InnoDB;
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `ar_session`
@@ -6978,7 +8527,7 @@ CREATE TABLE ar_session (
   KEY deposit_date (deposit_date)
 ) ENGINE=InnoDB;
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `ar_activity`
@@ -7004,11 +8553,12 @@ CREATE TABLE ar_activity (
   follow_up_note text,
   account_code varchar(15) NOT NULL,
   reason_code varchar(255) DEFAULT NULL COMMENT 'Use as needed to show the primary payer adjustment reason code',
+  deleted        datetime DEFAULT NULL COMMENT 'NULL if active, otherwise when voided',
   PRIMARY KEY (pid, encounter, sequence_no),
   KEY session_id (session_id)
 ) ENGINE=InnoDB;
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `users_facility`
@@ -7022,7 +8572,7 @@ CREATE TABLE `users_facility` (
   PRIMARY KEY (`tablename`,`table_id`,`facility_id`)
 ) ENGINE=InnoDB COMMENT='joins users or patient_data to facility table';
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `lbf_data`
@@ -7036,7 +8586,7 @@ CREATE TABLE `lbf_data` (
   PRIMARY KEY (`form_id`,`field_id`)
 ) ENGINE=InnoDB COMMENT='contains all data from layout-based forms';
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `lbt_data`
@@ -7050,7 +8600,7 @@ CREATE TABLE `lbt_data` (
   PRIMARY KEY (`form_id`,`field_id`)
 ) ENGINE=InnoDB COMMENT='contains all data from layout-based transactions';
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `gprelations`
@@ -7066,7 +8616,7 @@ CREATE TABLE gprelations (
   KEY key2  (type2,id2)
 ) ENGINE=InnoDB COMMENT='general purpose relations';
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `procedure_providers`
@@ -7094,7 +8644,7 @@ CREATE TABLE `procedure_providers` (
   PRIMARY KEY (`ppid`)
 ) ENGINE=InnoDB;
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `procedure_type`
@@ -7124,7 +8674,7 @@ CREATE TABLE `procedure_type` (
   KEY parent (parent)
 ) ENGINE=InnoDB;
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `procedure_questions`
@@ -7146,7 +8696,7 @@ CREATE TABLE `procedure_questions` (
   PRIMARY KEY (`lab_id`, `procedure_code`, `question_code`)
 ) ENGINE=InnoDB;
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `procedure_order`
@@ -7179,7 +8729,7 @@ CREATE TABLE `procedure_order` (
   KEY `patient_id` (`patient_id`)
 ) ENGINE=InnoDB;
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `procedure_order_code`
@@ -7198,7 +8748,7 @@ CREATE TABLE `procedure_order_code` (
   PRIMARY KEY (`procedure_order_id`, `procedure_order_seq`)
 ) ENGINE=InnoDB;
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `procedure_answers`
@@ -7214,7 +8764,7 @@ CREATE TABLE `procedure_answers` (
   PRIMARY KEY (`procedure_order_id`, `procedure_order_seq`, `question_code`, `answer_seq`)
 ) ENGINE=InnoDB;
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `procedure_report`
@@ -7238,7 +8788,7 @@ CREATE TABLE `procedure_report` (
   KEY procedure_order_id (procedure_order_id)
 ) ENGINE=InnoDB;
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `procedure_result`
@@ -7264,7 +8814,7 @@ CREATE TABLE `procedure_result` (
   KEY procedure_report_id (procedure_report_id)
 ) ENGINE=InnoDB;
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `globals`
@@ -7278,7 +8828,7 @@ CREATE TABLE `globals` (
   PRIMARY KEY (`gl_name`, `gl_index`)
 ) ENGINE=InnoDB;
 
---------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `code_types`
@@ -8923,7 +10473,7 @@ INSERT INTO list_options (`list_id`, `option_id`, `title`, `seq`, `is_default`, 
 ('attendstat', '~', '~ Late Arrival', '40', '0', '0', 'BFBFBF|0', '1'),
 ('attendstat', 'x', 'x Cancelled', '50', '0', '0', 'FEFDCF|0', '0');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `extended_log`
@@ -8940,9 +10490,9 @@ CREATE TABLE `extended_log` (
   `patient_id` bigint(20) default NULL,
   PRIMARY KEY  (`id`),
   KEY `patient_id` (`patient_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `version`
@@ -8965,7 +10515,7 @@ CREATE TABLE version (
 
 INSERT INTO version (v_major, v_minor, v_patch, v_realpatch, v_tag, v_database, v_acl) VALUES (0, 0, 0, 0, '', 0, 0);
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `customlists`
@@ -8995,7 +10545,7 @@ INSERT INTO customlists(cl_list_id,cl_list_type,cl_list_item_long) VALUES (2,2,'
 INSERT INTO customlists(cl_list_id,cl_list_type,cl_list_item_long) VALUES (3,2,'Assessment');
 INSERT INTO customlists(cl_list_id,cl_list_type,cl_list_item_long) VALUES (4,2,'Plan');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `template_users`
@@ -9012,7 +10562,7 @@ CREATE TABLE `template_users` (
   UNIQUE KEY `templateuser` (`tu_user_id`,`tu_template_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `product_warehouse`
@@ -9027,7 +10577,7 @@ CREATE TABLE `product_warehouse` (
   PRIMARY KEY  (`pw_drug_id`,`pw_warehouse`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `misc_address_book`
@@ -9047,7 +10597,7 @@ CREATE TABLE `misc_address_book` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `esign_signatures`
@@ -9067,9 +10617,9 @@ CREATE TABLE `esign_signatures` (
   PRIMARY KEY (`id`),
   KEY `tid` (`tid`),
   KEY `table` (`table`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `log_comment_encrypt`
@@ -9085,7 +10635,7 @@ CREATE TABLE `log_comment_encrypt` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `shared_attributes`
@@ -9102,7 +10652,7 @@ CREATE TABLE `shared_attributes` (
   PRIMARY KEY (`pid`, `encounter`, `field_id`)
 );
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `ccda_components`
@@ -9115,7 +10665,7 @@ CREATE TABLE ccda_components (
   ccda_components_name varchar(100) DEFAULT NULL,
   ccda_type int(11) NOT NULL COMMENT '0=>sections,1=>components',
   PRIMARY KEY (ccda_components_id)
-) ENGINE=InnoDB AUTO_INCREMENT=23 ;
+) ENGINE=InnoDB AUTO_INCREMENT=23;
 
 --
 -- Inserting data for table `ccda_components`
@@ -9144,7 +10694,7 @@ INSERT INTO ccda_components (ccda_components_id, ccda_components_field, ccda_com
 INSERT INTO ccda_components (ccda_components_id, ccda_components_field, ccda_components_name, ccda_type) values ('21','referral','Reason for Referral',1);
 INSERT INTO ccda_components (ccda_components_id, ccda_components_field, ccda_components_name, ccda_type) values ('22','instructions','Instructions',1);
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `ccda_sections`
@@ -9158,7 +10708,7 @@ CREATE TABLE ccda_sections (
   ccda_sections_name varchar(100) DEFAULT NULL,
   ccda_sections_req_mapping tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (ccda_sections_id)
-) ENGINE=InnoDB AUTO_INCREMENT=46 ;
+) ENGINE=InnoDB AUTO_INCREMENT=46;
 
 --
 -- Inserting data for table `ccda_sections`
@@ -9207,7 +10757,7 @@ INSERT INTO ccda_sections (ccda_sections_id, ccda_components_id, ccda_sections_f
 INSERT INTO ccda_sections (ccda_sections_id, ccda_components_id, ccda_sections_field, ccda_sections_name, ccda_sections_req_mapping) values('44','8','procedure_indications','Procedure Indications','0');
 INSERT INTO ccda_sections (ccda_sections_id, ccda_components_id, ccda_sections_field, ccda_sections_name, ccda_sections_req_mapping) values('45','9','unstructured_doc','Document','0');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `ccda_field_mapping`
@@ -9219,9 +10769,9 @@ CREATE TABLE ccda_field_mapping (
   table_id int(11) DEFAULT NULL,
   ccda_field varchar(100) DEFAULT NULL,
   PRIMARY KEY (id)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `ccda`
@@ -9244,9 +10794,9 @@ CREATE TABLE ccda (
   `emr_transfer` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (id),
   UNIQUE KEY unique_key (pid,encounter,time)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `ccda_table_mapping`
@@ -9264,9 +10814,9 @@ CREATE TABLE ccda_table_mapping (
   deleted tinyint(4) NOT NULL DEFAULT '0',
   timestamp timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `external_procedures`
@@ -9286,7 +10836,7 @@ CREATE TABLE `external_procedures` (
   PRIMARY KEY (`ep_id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `external_encounters`
@@ -9304,7 +10854,7 @@ CREATE TABLE `external_encounters` (
   PRIMARY KEY (`ee_id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_care_plan`
@@ -9327,7 +10877,7 @@ CREATE TABLE `form_care_plan` (
   `care_plan_type` varchar(30) DEFAULT NULL
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_functional_cognitive_status`
@@ -9349,7 +10899,7 @@ CREATE TABLE `form_functional_cognitive_status` (
   `external_id` varchar(30) DEFAULT NULL
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_observation`
@@ -9374,7 +10924,7 @@ CREATE TABLE `form_observation` (
   `table_code` varchar(255)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_clinical_instructions`
@@ -9392,7 +10942,7 @@ CREATE TABLE `form_clinical_instructions` (
   PRIMARY KEY (`id`)
 )ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table 'valueset'
@@ -9410,7 +10960,7 @@ CREATE TABLE `valueset` (
   PRIMARY KEY (`nqf_code`,`code`,`valueset`)
 ) ENGINE=InnoDB;
 
----------------------------------------------------------
+-- -------------------------------------------------------
 
 --
 -- Table structure for table `immunization_observation`
@@ -9433,7 +10983,7 @@ CREATE TABLE `immunization_observation` (
   PRIMARY KEY (`imo_id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table 'calendar external'
@@ -9447,7 +10997,7 @@ CREATE TABLE calendar_external (
   `source` VARCHAR(45) NULL,
   PRIMARY KEY (`id`)) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_eye_mag_dispense`
@@ -9514,7 +11064,7 @@ CREATE TABLE `form_eye_mag_dispense` (
   UNIQUE KEY `pid` (`pid`,`encounter`,`id`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_eye_mag_prefs`
@@ -9580,7 +11130,7 @@ INSERT INTO `form_eye_mag_prefs` (`PEZONE`, `LOCATION`, `LOCATION_text`, `id`, `
 ('PREFS', 'W_width', 'Detailed Rx', 2048, 'W_width', 80, '100', NULL, '', '', '', ''),
 ('PREFS', 'MR_width', 'Detailed MR', 2048, 'MR_width', 81, '110', NULL, '', '', '', '');
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_eye_mag_orders`
@@ -9602,7 +11152,7 @@ CREATE TABLE `form_eye_mag_orders` (
   UNIQUE KEY `VISIT_ID` (`pid`,`ORDER_DETAILS`,`ORDER_DATE_PLACED`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_eye_mag_impplan`
@@ -9625,7 +11175,7 @@ CREATE TABLE `form_eye_mag_impplan` (
   UNIQUE KEY `second_index` (`form_id`,`pid`,`title`,`plan`(20))
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_eye_mag_wearing`
@@ -9678,7 +11228,7 @@ CREATE TABLE `form_eye_mag_wearing` (
   UNIQUE KEY `FORM_ID` (`FORM_ID`,`ENCOUNTER`,`PID`,`RX_NUMBER`)
 ) ENGINE=InnoDB;
 
------------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `form_taskman`
@@ -9700,20 +11250,20 @@ CREATE TABLE `form_taskman` (
     PRIMARY KEY (`ID`)
 ) ENGINE=INNODB;
 
--------------------------------------------------------
+-- -----------------------------------------------------
 --
 -- Table structure for table 'product_registration'
 --
 
 DROP TABLE IF EXISTS `product_registration`;
 CREATE TABLE `product_registration` (
-  `registration_id` char(36) NOT NULL DEFAULT '',
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `email` varchar(255) NULL,
   `opt_out` TINYINT(1) NULL,
-  PRIMARY KEY (`registration_id`)
+  PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--------------------------------------------------------
+-- -----------------------------------------------------
 
 --
 -- Table structure for table 'log_validator'
@@ -9726,7 +11276,7 @@ CREATE TABLE `log_validator` (
   PRIMARY KEY (`log_id`)
 ) ENGINE=InnoDB;
 
--------------------------------------------------------
+-- ---------------------------------------------------------
 
 --
 -- Table structure for table 'codes_history'
@@ -9751,7 +11301,7 @@ CREATE TABLE `codes_history` (
    PRIMARY KEY (`log_id`)
 ) ENGINE=InnoDB;
 
--------------------------------------------------------
+-- ---------------------------------------------------------
 
 --
 -- Table structure for table 'multiple_db' to store multiple db connection details
@@ -9771,7 +11321,7 @@ CREATE TABLE `multiple_db` (
      PRIMARY KEY (id)
   ) ENGINE=InnoDB;
 
-----------------------------------------------------------
+-- -- ---------------------------------------------------------
 
 --
 -- Table structure for `therapy_groups`
@@ -9791,7 +11341,7 @@ CREATE TABLE `therapy_groups` (
   PRIMARY KEY  (`group_id`)
 ) ENGINE=InnoDB;
 
-----------------------------------------------------------
+-- --------------------------------------------------------
 
 --
 -- Table structure for `therapy_groups_participants`
@@ -9808,7 +11358,7 @@ CREATE TABLE `therapy_groups_participants` (
   PRIMARY KEY (`group_id`,`pid`)
 ) ENGINE=InnoDB;
 
-----------------------------------------------------------
+-- -- ---------------------------------------------------------
 
 --
 -- Table structure for `therapy_groups_participant_attendance`
@@ -9823,7 +11373,7 @@ CREATE TABLE `therapy_groups_participant_attendance` (
   PRIMARY KEY (`form_id`,`pid`)
 ) ENGINE=InnoDB;
 
-----------------------------------------------------------
+-- -- ---------------------------------------------------------
 
 --
 -- Table structure for `therapy_groups_counselors`
@@ -9836,7 +11386,7 @@ CREATE TABLE `therapy_groups_counselors`(
     PRIMARY KEY (`group_id`,`user_id`)
 ) ENGINE=InnoDB;
 
-----------------------------------------------------------
+-- -- ---------------------------------------------------------
 
 --
 -- Table structure for `form_groups_encounter`
@@ -9871,9 +11421,9 @@ CREATE TABLE `form_groups_encounter` (
   PRIMARY KEY  (`id`),
   KEY `pid_encounter` (`group_id`, `encounter`),
   KEY `encounter_date` (`date`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1;
 
-----------------------------------------------------------
+-- -- ---------------------------------------------------------
 
 --
 -- Table structure for `form_group_attendance`
@@ -9890,9 +11440,9 @@ CREATE TABLE `form_group_attendance` (
   `encounter_id`	int(11),
   activity	tinyint(4),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
-----------------------------------------------------------
+-- -- ---------------------------------------------------------
 
 --
 -- Table structure for `patient_birthday_alert`
@@ -10590,11 +12140,14 @@ CREATE TABLE `login_mfa_registrations` (
 DROP TABLE IF EXISTS `api_token`;
 CREATE TABLE `api_token` (
     `id`           bigint(20) NOT NULL AUTO_INCREMENT,
+    `token_api`    varchar(4),
     `user_id`      bigint(20) NOT NULL,
-    `token`        varchar(256) DEFAULT NULL,
-    `token_auth` varchar(255),
+    `patient_id`   bigint(20) NOT NULL,
+    `token`        varchar(40) DEFAULT NULL,
+    `token_auth`   varchar(255),
     `expiry`       datetime NULL,
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `token` (`token`)
 ) ENGINE = InnoDB;
 
 DROP TABLE IF EXISTS `benefit_eligibility`;

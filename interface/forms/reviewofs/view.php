@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Review of Systems Checks form
  *
@@ -12,7 +13,6 @@
  * @copyright Copyright (c) 2017 Robert Down <robertdown@live.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 
 require_once(__DIR__ . "/../../globals.php");
 require_once("$srcdir/api.inc");
@@ -34,10 +34,8 @@ $obj = formFetch("form_reviewofs", $_GET["id"]);
 <body class="body_top">
     <div class="container">
         <div class="row">
-            <div class="">
-                <div class="page-header">
-                    <h2><?php echo xlt("Review of Systems Checks");?></h2>
-                </div>
+            <div class="col-12">
+                <h2><?php echo xlt("Review of Systems Checks");?></h2>
             </div>
         </div>
         <div class="row">

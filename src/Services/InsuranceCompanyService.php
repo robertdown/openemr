@@ -1,4 +1,5 @@
 <?php
+
 /**
  * InsuranceCompanyService
  *
@@ -10,7 +11,6 @@
  * @copyright Copyright (c) 2018 Brady Miller <brady.g.miller@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 
 namespace OpenEMR\Services;
 
@@ -69,6 +69,13 @@ class InsuranceCompanyService
         }
 
         return $results;
+    }
+
+    public function getOne($id)
+    {
+        $sql = "SELECT * FROM insurance_companies WHERE id=?";
+
+        return sqlQuery($sql, array($id));
     }
 
     public function getInsuranceTypes()

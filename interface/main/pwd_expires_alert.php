@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Display a message indicating that the user's password has/will expire.
  *
@@ -10,7 +11,6 @@
  * @copyright Copyright (c) 2018-2019 Brady Miller <brady.g.miller@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
-
 
 require_once("../globals.php");
 
@@ -53,9 +53,7 @@ if (strtotime($current_date) > strtotime($pwd_expires)) {
 <div class="container">
     <div class="row">
         <div class="col-sm-12">
-            <div class="page-header">
-                <div class="alert alert-danger" role="alert"><?php echo text($msg_alert);?></div>
-            </div>
+            <div class="alert alert-danger" role="alert"><?php echo text($msg_alert);?></div>
         </div>
     </div>
     <div class="row">

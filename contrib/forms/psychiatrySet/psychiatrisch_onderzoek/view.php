@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Psychiatrisch Onderzoek
  * Report of Research psihiatric - Dutch specific form
@@ -112,7 +113,7 @@ if ($_GET["id"]) {
 }
 
 ?>
-<script type="text/javascript">
+<script>
 $(function () {
         autosave();
         $('.datepicker').datetimepicker({
