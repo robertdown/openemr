@@ -57,6 +57,7 @@ Finally, APIs which are integrated with the new `handleProcessingResult` method 
     -   [Practitioner API](API_README.md#get-apipractitioner)
     -   [Patient API](API_README.md#post-apipatient)
     -   [Immunization API](API_README.md#get-apiimmunization)
+    -   [Allergy API](API_README.md#get-apiallergy)
     -   [Insurance API](API_README.md#get-apipatientpidinsurance)
     -   [Appointment API](API_README.md#get-apiappointment)
     -   [Document API](API_README.md#get-apipatientpiddocument)
@@ -67,8 +68,8 @@ Finally, APIs which are integrated with the new `handleProcessingResult` method 
     -   [FHIR Patient API](FHIR_README.md#get-fhirpatient)
     -   [FHIR Encounter API](FHIR_README.md#get-fhirencounter)
     -   [FHIR Practitioner API](API_README.md#get-apipractitioner)
-    -   [FHIR Organization API](FHIR_README.md#get-fhirorganization)
     -   [FHIR AllergyIntolerance API](FHIR_README.md#get-fhirallergyintolerance)
+    -   [FHIR Organization API](FHIR_README.md#get-fhirorganization)
     -   [FHIR Observation API](FHIR_README.md#get-fhirobservation)
     -   [FHIR QuestionnaireResponse API](FHIR_README.md#get-fhirquestionnaireresponse)
     -   [FHIR Immunization API](FHIR_README.md#get-fhirimmunization)
@@ -501,6 +502,7 @@ Response:
     }
 }
 ```
+
 #### GET /api/immunization
 
 Request:
@@ -776,12 +778,44 @@ Request:
 curl -X GET 'http://localhost:8300/apis/api/patient/1/encounter/1/soap_note/1'
 ```
 
-#### POST /api/patient/:pid/medical_problem
+#### GET /api/medical_problem
 
 Request:
 
 ```sh
-curl -X POST 'http://localhost:8300/apis/api/patient/1/medical_problem' -d \
+curl -X GET 'http://localhost:8300/apis/api/medical_problem'
+```
+
+#### GET /api/medical_problem/:muuid
+
+Request:
+
+```sh
+curl -X GET 'http://localhost:8300/apis/api/medical_problem/9109890a-6756-44c1-a82d-bdfac91c7424'
+```
+
+#### GET /api/patient/:puuid/medical_problem	
+
+Request:	
+
+```sh	
+curl -X GET 'http://localhost:8300/apis/api/patient/9101a093-da04-457f-a6a1-46ce93f0d629/medical_problem'	
+```	
+
+#### GET /api/patient/:puuid/medical_problem/:muuid
+
+Request:
+
+```sh
+curl -X GET 'http://localhost:8300/apis/api/patient/9101a093-da04-457f-a6a1-46ce93f0d629/medical_problem/91208832-47ab-4f65-ba44-08f57d4c028e'
+```
+
+#### POST /api/patient/:puuid/medical_problem
+
+Request:
+
+```sh
+curl -X POST 'http://localhost:8300/apis/api/patient/9101a093-da04-457f-a6a1-46ce93f0d629/medical_problem' -d \
 '{
     "title": "Dermatochalasis",
     "begdate": "2010-04-13",
@@ -790,12 +824,12 @@ curl -X POST 'http://localhost:8300/apis/api/patient/1/medical_problem' -d \
 }'
 ```
 
-#### PUT /api/patient/:pid/medical_problem/:mid
+#### PUT /api/patient/:puuid/medical_problem/:muuid
 
 Request:
 
 ```sh
-curl -X PUT 'http://localhost:8300/apis/api/patient/1/medical_problem/1' -d \
+curl -X PUT 'http://localhost:8300/apis/api/patient/9101a093-da04-457f-a6a1-46ce93f0d629/medical_problem/91208832-47ab-4f65-ba44-08f57d4c028e' -d \
 '{
     "title": "Dermatochalasis",
     "begdate": "2010-04-13",
@@ -804,36 +838,52 @@ curl -X PUT 'http://localhost:8300/apis/api/patient/1/medical_problem/1' -d \
 }'
 ```
 
-#### GET /api/patient/:pid/medical_problem
+#### DELETE /api/patient/:puuid/medical_problem/:muuid
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/api/patient/1/medical_problem'
+curl -X DELETE 'http://localhost:8300/apis/api/patient/9101a093-da04-457f-a6a1-46ce93f0d629/medical_problem/91208832-47ab-4f65-ba44-08f57d4c028e'
 ```
 
-#### GET /api/patient/:pid/medical_problem/:mid
+#### GET /api/allergy
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/api/patient/1/medical_problem/1'
+curl -X GET 'http://localhost:8300/apis/api/allergy'
 ```
 
-#### DELETE /api/patient/:pid/medical_problem/:mid
+#### GET /api/allergy/:auuid
 
 Request:
 
 ```sh
-curl -X DELETE 'http://localhost:8300/apis/api/patient/1/medical_problem/1'
+curl -X GET 'http://localhost:8300/apis/api/allergy/90c196f2-51cc-4655-8858-3a80aebff3ef'
 ```
 
-#### POST /api/patient/:pid/allergy
+#### GET /api/patient/:puuid/allergy
 
 Request:
 
 ```sh
-curl -X POST 'http://localhost:8300/apis/api/patient/1/allergy' -d \
+curl -X GET 'http://localhost:8300/apis/api/patient/90c196f2-51cc-4655-8858-3a80aebff3ef/allergy'
+```
+
+#### GET /api/patient/:puuid/allergy/:auuid
+
+Request:
+
+```sh
+curl -X GET 'http://localhost:8300/apis/api/patient/90c196f2-51cc-4655-8858-3a80aebff3ef/allergy/90c196f2-51cc-4655-8858-3a80aebff3ef'
+```
+
+#### POST /api/patient/:puuid/allergy
+
+Request:
+
+```sh
+curl -X POST 'http://localhost:8300/apis/api/patient/90c196f2-51cc-4655-8858-3a80aebff3ef/allergy' -d \
 '{
     "title": "Iodine",
     "begdate": "2010-10-13",
@@ -841,12 +891,12 @@ curl -X POST 'http://localhost:8300/apis/api/patient/1/allergy' -d \
 }'
 ```
 
-#### PUT /api/patient/:pid/allergy/:aid
+#### PUT /api/patient/:puuid/allergy/:auuid
 
 Request:
 
 ```sh
-curl -X PUT 'http://localhost:8300/apis/api/patient/1/allergy/1' -d \
+curl -X PUT 'http://localhost:8300/apis/api/patient/90c196f2-51cc-4655-8858-3a80aebff3ef/allergy/90c196f2-51cc-4655-8858-3a80aebff3ef' -d \
 '{
     "title": "Iodine",
     "begdate": "2012-10-13",
@@ -854,28 +904,12 @@ curl -X PUT 'http://localhost:8300/apis/api/patient/1/allergy/1' -d \
 }'
 ```
 
-#### GET /api/patient/:pid/allergy
+#### DELETE /api/patient/:puuid/allergy/:auuid
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/api/patient/1/allergy'
-```
-
-#### GET /api/patient/:pid/allergy/:aid
-
-Request:
-
-```sh
-curl -X GET 'http://localhost:8300/apis/api/patient/1/allergy/1'
-```
-
-#### DELETE /api/patient/:pid/allergy/:aid
-
-Request:
-
-```sh
-curl -X DELETE 'http://localhost:8300/apis/api/patient/1/allergy/1'
+curl -X DELETE 'http://localhost:8300/apis/api/patient/90c196f2-51cc-4655-8858-3a80aebff3ef/allergy/90c196f2-51cc-4655-8858-3a80aebff3ef'
 ```
 
 #### POST /api/patient/:pid/medication
