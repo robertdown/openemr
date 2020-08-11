@@ -74,6 +74,10 @@
 --    argument: table_name
 --    behavior: this will add and populate a uuid column into table
 
+--  #IfUuidNeedUpdateId
+--    argument: table_name primary_id
+--    behavior: this will add and populate a uuid column into table
+
 --  #IfUuidNeedUpdateVertical
 --    argument: table_name table_columns
 --    behavior: this will add and populate a uuid column into vertical table for combinations of table_columns given
@@ -550,6 +554,10 @@ CREATE TABLE `uuid_registry` (
 
 #IfMissingColumn uuid_registry table_id
 ALTER TABLE `uuid_registry` ADD `table_id` varchar(255) NOT NULL DEFAULT '';
+#EndIf
+
+#IfMissingColumn uuid_registry couchdb
+ALTER TABLE `uuid_registry` ADD `couchdb` varchar(255) NOT NULL DEFAULT '';
 #EndIf
 
 #IfMissingColumn patient_data uuid
@@ -1935,4 +1943,52 @@ INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('condition-verific
 INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('condition-verification', 'unconfirmed', 'Unconfirmed', 20);
 INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('condition-verification', 'refuted', 'Refuted', 30);
 INSERT INTO list_options(list_id,option_id,title,seq) VALUES ('condition-verification', 'entered-in-error', 'Entered in Error', 40);
+#EndIf
+
+#IfMissingColumn procedure_order uuid
+ALTER TABLE `procedure_order` ADD `uuid` binary(16) DEFAULT NULL;
+#EndIf
+
+#IfUuidNeedUpdateId procedure_order procedure_order_id
+#EndIf
+
+#IfNotIndex procedure_order uuid
+CREATE UNIQUE INDEX `uuid` ON `procedure_order` (`uuid`);
+#EndIf
+
+UPDATE `globals` SET `gl_value`='0.625' WHERE `gl_name`='font-size' AND `gl_value`='0.625rem';
+UPDATE `globals` SET `gl_value`='0.75' WHERE `gl_name`='font-size' AND `gl_value`='0.75rem';
+UPDATE `globals` SET `gl_value`='0.875' WHERE `gl_name`='font-size' AND `gl_value`='0.875rem';
+UPDATE `globals` SET `gl_value`='1.0' WHERE `gl_name`='font-size' AND `gl_value`='1rem';
+UPDATE `globals` SET `gl_value`='1.125' WHERE `gl_name`='font-size' AND `gl_value`='1.125rem';
+
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#dee2e6' WHERE `pc_constant_id`='no_show' AND `pc_catcolor`='#DDDDDD';
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#cce5ff' WHERE `pc_constant_id`='in_office' AND `pc_catcolor`='#99CCFF';
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#fdb172' WHERE `pc_constant_id`='out_of_office' AND `pc_catcolor`='#99FFFF';
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#e9ecef' WHERE `pc_constant_id`='vacation' AND `pc_catcolor`='#EFEFEF';
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#ffecb4' WHERE `pc_constant_id`='office_visit' AND `pc_catcolor`='#FFFFCC';
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#8663ba' WHERE `pc_constant_id`='holidays' AND `pc_catcolor`='#9676DB';
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#2374ab' WHERE `pc_constant_id`='closed' AND `pc_catcolor`='#2374AB';
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#ffd351' WHERE `pc_constant_id`='lunch' AND `pc_catcolor`='#FFFF33';
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#93d3a2' WHERE `pc_constant_id`='established_patient' AND `pc_catcolor`='#CCFF33';
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#a2d9e2' WHERE `pc_constant_id`='new_patient' AND `pc_catcolor`='#CCFFFF';
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#b02a37' WHERE `pc_constant_id`='reserved' AND `pc_catcolor`='#FF7777';
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#ced4da' WHERE `pc_constant_id`='health_and_behavioral_assessment' AND `pc_catcolor`='#C7C7C7';
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#d3c6ec' WHERE `pc_constant_id`='preventive_care_services' AND `pc_catcolor`='#CCCCFF';
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#febe89' WHERE `pc_constant_id`='ophthalmological_services' AND `pc_catcolor`='#F89219';
+UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#adb5bd' WHERE `pc_constant_id`='group_therapy' AND `pc_catcolor`='#BFBFBF';
+
+#IfMissingColumn drugs uuid
+ALTER TABLE `drugs` ADD `uuid` binary(16) DEFAULT NULL;
+#EndIf
+
+#IfUuidNeedUpdateId drugs drug_id
+#EndIf
+
+#IfNotIndex drugs uuid
+CREATE UNIQUE INDEX `uuid` ON `drugs` (`uuid`);
+#EndIf
+
+#IfMissingColumn ccda encrypted
+ALTER TABLE `ccda` ADD `encrypted` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0->No,1->Yes';
 #EndIf

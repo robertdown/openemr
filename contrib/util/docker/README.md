@@ -103,11 +103,11 @@ options to choose from:
 **Step 4.** Setup up OpenEMR. The first time you run OpenEMR (and whenever you clear and replace your
 synchronized openemr directory and restart the development docker). On the main
 setup input screen:
- - for `Server Host`, use either `mariadb` or `mysql` or `mariadb-very-old` or
+ - for `Server Host`, use either `mariadb` or `mariadb-ssl` or `mysql` or `mariadb-very-old` or
    `mariadb-very-very-old` or `mysql-old` (you have all
    mariadb/mysql/mariadb-\*/mysql-\* dockers ready to go to make testing either one easy;
    `mysql` is version 8.0; `mysql-old` is version 5.7;
-   `mariadb` is version 10.5; `mariadb-old` is version 10.4; `mariadb-very-old` is
+   `mariadb` is version 10.5; `mariadb-ssl` is version 10.5 with support for ssl; `mariadb-old` is version 10.4; `mariadb-very-old` is
    version 10.3; `mariadb-very-very-old` is version 10.2)
  - for `Root Pass`, use `root`
  - for `User Hostname`, use `%`
@@ -275,13 +275,14 @@ build tools can simply `bash` into the OpenEMR container and use them as expecte
 ##### CouchDB
 In OpenEMR, CouchDB is an option for the patients document storage. For this reason, a CouchDB
 docker is included in this OpenEMR docker development environment. You can visit the CouchDB
-GUI directly via http://localhost:5984/_utils/ with username `admin` and password `password`.
-You can configure OpenEMR to use this CouchDB docker for patient document storage in OpenEMR
-at Administration->Globals->Documents:
+GUI directly via http://localhost:5984/_utils/ or https://localhost:6984/_utils/ with
+username `admin` and password `password`. You can configure OpenEMR to use this CouchDB
+docker for patient document storage in OpenEMR at Administration->Globals->Documents:
 - Document Storage Method->CouchDB
 - CouchDB HostName->couchdb
 - CouchDB UserName->admin
 - CouchDB Password->password
+- CouchDB Port->6984
 - CouchDB Database can be set to any name you want
 
 ##### OpenLDAP
