@@ -291,22 +291,7 @@ function getCodeDescriptions($codes)
 }
 
 // Write one option line to the form.
-//
-function writeOptionLine(
-    $option_id,
-    $title,
-    $seq,
-    $default,
-    $value,
-    $mapping = '',
-    $notes = '',
-    $codes = '',
-    $tog1 = '',
-    $tog2 = '',
-    $active = '1',
-    $subtype = ''
-) {
-
+function writeOptionLine($option_id, $title, $seq, $default, $value, $mapping = '', $notes = '', $codes = '', $tog1 = '', $tog2 = '', $active = '1', $subtype = '') {
     global $opt_line_no, $list_id;
     ++$opt_line_no;
     $bgcolor = "#" . (($opt_line_no & 1) ? "ddddff" : "ffdddd");
@@ -760,7 +745,6 @@ function writeITLine($it_array)
 
 ?>
 <html>
-
 <head>
     <?php echo Header::setupHeader(['select2', 'jscolor']); ?>
     <title><?php echo xlt('List Editor'); ?></title>
@@ -1017,11 +1001,8 @@ function writeITLine($it_array)
             }
             f.submit();
         }
-
     </script>
-
 </head>
-
 <body class="body_top">
 <form method='post' name='theform' id='theform' action='edit_list.php'>
     <input type="hidden" name="csrf_token_form" value="<?php echo attr(CsrfUtils::collectCsrfToken()); ?>" />
@@ -1029,8 +1010,8 @@ function writeITLine($it_array)
     <input type="hidden" id="list_to" name="list_to" value="<?php echo attr($list_to);?>"/>
     <nav class="navbar navbar-light bg-light navbar-expand-md fixed-top">
         <div class="container-fluid">
-              <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-list" aria-controls="navbar-list" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                <a class="navbar-brand" href="#"><?php echo xlt('Manage Lists'); ?></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-list" aria-controls="navbar-list" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <a class="navbar-brand" href="#"><?php echo xlt('Manage Lists'); ?></a>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="navbar-list">
@@ -1131,7 +1112,6 @@ function writeITLine($it_array)
         </div><!-- /.navbar-collapse -->
     </div>
 </nav>
-
 <table class="table table-striped table-sm" style="margin-top: 55px;">
     <thead>
     <tr>
@@ -1222,7 +1202,7 @@ function writeITLine($it_array)
                 <th class="font-weight-bold">&nbsp;&nbsp;&nbsp;&nbsp;<?php echo xlt('Default Sort Direction'); ?></th>
             <?php }
             if ($GLOBALS['ippf_specific']) { ?>
-    <th class="font-weight-bold"><?php echo xlt('Global ID'); ?></th>
+                <th class="font-weight-bold"><?php echo xlt('Global ID'); ?></th>
             <?php } ?>
             <th class="font-weight-bold"><?php
             if ($list_id == 'language') {
