@@ -105,6 +105,11 @@
 --    arguments: none
 --    behavior: can take a long time.
 
+--  #IfDocumentNamingNeeded
+--    desc: populate name field with document names.
+--    arguments: none
+
+
 #IfMissingColumn facility iban
 ALTER TABLE `facility` ADD `iban` varchar(50) default NULL;
 #EndIf
@@ -562,6 +567,10 @@ ALTER TABLE `uuid_registry` ADD `couchdb` varchar(255) NOT NULL DEFAULT '';
 
 #IfMissingColumn uuid_registry mapped
 ALTER TABLE `uuid_registry` ADD `mapped` tinyint(4) NOT NULL DEFAULT '0';
+#EndIf
+
+#IfMissingColumn uuid_registry document_drive
+ALTER TABLE `uuid_registry` ADD `document_drive` tinyint(4) NOT NULL DEFAULT '0';
 #EndIf
 
 #IfMissingColumn patient_data uuid
@@ -1960,12 +1969,6 @@ ALTER TABLE `procedure_order` ADD `uuid` binary(16) DEFAULT NULL;
 CREATE UNIQUE INDEX `uuid` ON `procedure_order` (`uuid`);
 #EndIf
 
-UPDATE `globals` SET `gl_value`='0.625' WHERE `gl_name`='font-size' AND `gl_value`='0.625rem';
-UPDATE `globals` SET `gl_value`='0.75' WHERE `gl_name`='font-size' AND `gl_value`='0.75rem';
-UPDATE `globals` SET `gl_value`='0.875' WHERE `gl_name`='font-size' AND `gl_value`='0.875rem';
-UPDATE `globals` SET `gl_value`='1.0' WHERE `gl_name`='font-size' AND `gl_value`='1rem';
-UPDATE `globals` SET `gl_value`='1.125' WHERE `gl_name`='font-size' AND `gl_value`='1.125rem';
-
 UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#dee2e6' WHERE `pc_constant_id`='no_show' AND `pc_catcolor`='#DDDDDD';
 UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#cce5ff' WHERE `pc_constant_id`='in_office' AND `pc_catcolor`='#99CCFF';
 UPDATE `openemr_postcalendar_categories` SET `pc_catcolor`='#fdb172' WHERE `pc_constant_id`='out_of_office' AND `pc_catcolor`='#99FFFF';
@@ -2026,6 +2029,18 @@ CREATE TABLE `uuid_mapping` (
   KEY `table` (`table`),
   KEY `target_uuid` (`target_uuid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
+#EndIf
+
+#IfColumn automatic_notification next_app_date
+ALTER TABLE `automatic_notification` DROP COLUMN `next_app_date`;
+#EndIf
+
+#IfColumn automatic_notification next_app_time
+ALTER TABLE `automatic_notification` DROP COLUMN `next_app_time`;
+#EndIf
+
+#IfColumn automatic_notification notification_sent_date
+ALTER TABLE `automatic_notification` DROP COLUMN `notification_sent_date`;
 #EndIf
 
 #IfMissingColumn procedure_result uuid
@@ -2119,4 +2134,22 @@ ALTER TABLE `form_bronchitis` MODIFY `diagnosis1_bronchitis_form` text;
 ALTER TABLE `form_bronchitis` MODIFY `diagnosis2_bronchitis_form` text;
 ALTER TABLE `form_bronchitis` MODIFY `diagnosis3_bronchitis_form` text;
 ALTER TABLE `form_bronchitis` MODIFY `diagnosis4_bronchitis_form` text;
+#EndIf
+
+DELETE FROM `globals` WHERE `gl_name`='font-size';
+DELETE FROM `globals` WHERE `gl_name`='font-family';
+
+#IfMissingColumn documents name
+ALTER TABLE `documents` ADD `name` varchar(255) DEFAULT NULL;
+#EndIf
+
+#IfMissingColumn documents drive_uuid
+ALTER TABLE `documents` ADD `drive_uuid` binary(16) DEFAULT NULL;
+#EndIf
+
+#IfNotIndex documents drive_uuid
+CREATE UNIQUE INDEX `drive_uuid` ON `documents` (`drive_uuid`);
+#EndIf
+
+#IfDocumentNamingNeeded
 #EndIf
