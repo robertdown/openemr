@@ -69,6 +69,10 @@ class DataDriverMySQLi implements IDataDriver
         $host = $hostAndPort [0];
         $port = count($hostAndPort) > 1 ? $hostAndPort [1] : null;
 
+        if (!empty($GLOBALS["enable_database_connection_pooling"]) && empty($GLOBALS['connection_pooling_off'])) {
+            $host = "p:" . $host;
+        }
+
         $connection = @mysqli_init();
         if (is_null($connection)) {
             throw new DatabaseException("Error connecting to database: " . mysqli_connect_error(), DatabaseException::$CONNECTION_ERROR);
@@ -148,7 +152,7 @@ class DataDriverMySQLi implements IDataDriver
             }
         }
 
-        if ($GLOBALS['debug_ssl_mysql_connection']) {
+        if (!empty($GLOBALS['debug_ssl_mysql_connection'])) {
             $sslTestCipher = mysqli_query($connection, "SHOW STATUS LIKE 'Ssl_cipher';");
             error_log("CHECK SSL CIPHER IN PATIENT PORTAL MYSQLI: " . htmlspecialchars(print_r(mysqli_fetch_assoc($sslTestCipher), true), ENT_QUOTES));
             mysqli_free_result($sslTestCipher);

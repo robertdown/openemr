@@ -293,11 +293,6 @@ try {
     die();
 }
 
-// Should Doctrine make use of connection pooling? Database connection pooling is a method
-// used to keep database connections open so they can be reused by others. (The only reason
-// to not use connection pooling is if your server has limited resources.)
-$GLOBALS["doctrine_connection_pooling"] = true;
-
 // Defaults for specific applications.
 $GLOBALS['weight_loss_clinic'] = false;
 $GLOBALS['ippf_specific'] = false;
@@ -528,13 +523,13 @@ if (!empty($version)) {
     $patch_appending = "";
     //Collected below function call to a variable, since unable to directly include
     // function calls within empty() in php versions < 5.5 .
-    $version_getrealpatch = $version->getRealPatch();
-    if (($version->getRealPatch() != '0') && (!(empty($version_getrealpatch)))) {
-        $patch_appending = " (" . $version->getRealPatch() . ")";
+    $version_getrealpatch = $version['v_realpatch'];
+    if (($version['v_realpatch'] != '0') && (!(empty($version_getrealpatch)))) {
+        $patch_appending = " (" . $version['v_realpatch'] . ")";
     }
 
-    $openemr_version = $version->getMajor() . "." . $version->getMinor() . "." . $version->getPatch();
-    $openemr_version .= $version->getTag() . $patch_appending;
+    $openemr_version = $version['v_major'] . "." . $version['v_minor'] . "." . $version['v_patch'];
+    $openemr_version .= $version['v_tag'] . $patch_appending;
 } else {
     $openemr_version = xl('Unknown version');
 }
