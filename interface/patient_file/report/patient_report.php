@@ -329,7 +329,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                                                 echo attr($ierow['encounter']) . "/";
                                             }
 
-                                            echo "' />$disptitle</td>\n";
+                                            echo "' />" . text($disptitle) . "</td>\n";
                                             echo "     <td>" . text($prow['begdate']);
 
                                             if ($prow['enddate']) {
@@ -432,7 +432,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                                                         }
                                                     }
                                                 }
-                                                if (!is_array($html_strings[$form_name])) {
+                                                if (empty($html_strings[$form_name]) || !is_array($html_strings[$form_name])) {
                                                     $html_strings[$form_name] = array();
                                                 }
                                                 array_push($html_strings[$form_name], "<input type='checkbox' " .
@@ -445,9 +445,11 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                                         }
 
                                         foreach ($registry_form_name as $var) {
-                                            if ($toprint = $html_strings[$var]) {
-                                                foreach ($toprint as $var) {
-                                                    print $var;
+                                            if (!empty($html_strings[$var])) {
+                                                if ($toprint = $html_strings[$var]) {
+                                                    foreach ($toprint as $var) {
+                                                        print $var;
+                                                    }
                                                 }
                                             }
                                         }
@@ -522,7 +524,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                         $sql = "SELECT d.id, d.url, d.name as document_name, c.name, c.aco_spec FROM documents AS d " .
                                 "LEFT JOIN categories_to_documents AS ctd ON d.id=ctd.document_id " .
                                 "LEFT JOIN categories AS c ON c.id = ctd.category_id WHERE " .
-                                "d.foreign_id = ?";
+                                "d.foreign_id = ? AND d.deleted = 0";
                         $result = $db->Execute($sql, array($pid));
                         if ($db->ErrorMsg()) {
                             echo $db->ErrorMsg();
@@ -563,7 +565,7 @@ $(function () {
     $(".genreport").click(function() { top.restoreSession(); document.report_form.pdf.value = 0; $("#report_form").submit(); });
     $(".genpdfrep").click(function() { top.restoreSession(); document.report_form.pdf.value = 1; $("#report_form").submit(); });
     $(".genportal").click(function() { top.restoreSession(); document.report_form.pdf.value = 2; $("#report_form").submit(); });
-    $("#genfullreport").click(function() { location.href='<?php echo "$rootdir/patient_file/encounter/$returnurl";?>'; });
+    $("#genfullreport").click(function() { location.href='<?php echo "$rootdir/patient_file/encounter/" . ($returnurl ?? ''); ?>'; });
     //$("#printform").click(function() { PrintForm(); });
     $(".issuecheckbox").click(function() { issueClick(this); });
 
@@ -741,17 +743,17 @@ $(function () {
 // select/deselect the Forms related to the selected Encounter
 // (it ain't pretty code folks)
 var SelectForms = function (selectedEncounter) {
-    if ($(selectedEncounter).attr("checked")) {
+    if ($(selectedEncounter).prop("checked")) {
         $(selectedEncounter).parent().children().each(function(i, obj) {
             $(this).children().each(function(i, obj) {
-                $(this).attr("checked", "checked");
+                $(this).prop("checked", true);
             });
         });
     }
     else {
         $(selectedEncounter).parent().children().each(function(i, obj) {
             $(this).children().each(function(i, obj) {
-                $(this).removeAttr("checked");
+                $(this).prop("checked", false);
             });
         });
     }

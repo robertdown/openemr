@@ -51,7 +51,7 @@ class FhirPractitionerRestController
         }
 
         $processingResult = $this->fhirPractitionerService->insert($fhirJson);
-        return RestControllerHelper::handleProcessingResult($processingResult, 201);
+        return RestControllerHelper::handleFhirProcessingResult($processingResult, 201);
     }
 
     /**
@@ -68,7 +68,7 @@ class FhirPractitionerRestController
         }
 
         $processingResult = $this->fhirPractitionerService->update($fhirId, $fhirJson);
-        return RestControllerHelper::handleProcessingResult($processingResult, 200);
+        return RestControllerHelper::handleFhirProcessingResult($processingResult, 200);
     }
 
     /**
@@ -79,7 +79,7 @@ class FhirPractitionerRestController
     public function getOne($fhirId)
     {
         $processingResult = $this->fhirPractitionerService->getOne($fhirId, true);
-        return RestControllerHelper::handleProcessingResult($processingResult, 200);
+        return RestControllerHelper::handleFhirProcessingResult($processingResult, 200);
     }
 
     /**
@@ -104,7 +104,7 @@ class FhirPractitionerRestController
         $bundleEntries = array();
         foreach ($processingResult->getData() as $index => $searchResult) {
             $bundleEntry = [
-                'fullUrl' =>  \RestConfig::$REST_FULL_URL . '/' . $searchResult->getId(),
+                'fullUrl' =>  $GLOBALS['site_addr_oath'] . ($_SERVER['REDIRECT_URL'] ?? '') . '/' . $searchResult->getId(),
                 'resource' => $searchResult
             ];
             $fhirBundleEntry = new FHIRBundleEntry($bundleEntry);

@@ -104,7 +104,7 @@ if (!empty($_GET)) {
                         $err_message = 1;
                     }
 
-                    if ($_GET["form_patient"]) {
+                    if (!empty($_GET["form_patient"])) {
                         $form_patient = isset($_GET["form_patient"]) ? $_GET["form_patient"] : "";
                     }
 
@@ -113,7 +113,7 @@ if (!empty($_GET)) {
                     $form_user = isset($_REQUEST['form_user']) ? $_REQUEST['form_user'] : '';
                     $form_pid = isset($_REQUEST['form_pid']) ? $_REQUEST['form_pid'] : '';
 
-                    if ($form_patient == '') {
+                    if (empty($form_patient)) {
                         $form_pid = '';
                     }
 
@@ -151,7 +151,7 @@ if (!empty($_GET)) {
                                 </div>
                                 <label class="col-sm-1 col-form-label" for="end_date"><?php echo xlt('Patient'); ?>:</label>
                                 <div class="col-sm-3">
-                                    <input type='text' size='20' class='form-control' name='form_patient' id='form_patient' style='cursor:pointer;' value='<?php echo $form_patient ? attr($form_patient) : xla('Click To Select'); ?>' onclick='sel_patient()' title='<?php echo xla('Click to select patient'); ?>' />
+                                    <input type='text' size='20' class='form-control' name='form_patient' id='form_patient' style='cursor:pointer;' value='<?php echo (!empty($form_patient)) ? attr($form_patient) : xla('Click To Select'); ?>' onclick='sel_patient()' title='<?php echo xla('Click to select patient'); ?>' />
                                     <input type='hidden' name='form_pid' value='<?php echo attr($form_pid); ?>' />
                                 </div>
                             </div>
@@ -270,15 +270,9 @@ if (!empty($_GET)) {
                                     </select>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <?php $check_sum = isset($_GET['check_sum']) ? $_GET['check_sum'] : ''; ?>
-                                <input type="checkbox" name="check_sum" id="check_sum" <?php echo ($check_sum == 'on') ? "checked" : ""; ?> />
-                                <label for="check_sum"><?php echo xlt('Include Checksum'); ?></label>
-                                <input type="hidden" name="event" value="<?php echo attr($event); ?>" />
-                            </div>
+                            <input type="hidden" name="event" value="<?php echo attr($event ?? ''); ?>" />
                             <div class="btn-group" role="group">
                                 <a href="javascript:document.theform.submit();" class="btn btn-secondary btn-save"><?php echo xlt('Submit'); ?></a>
-                                <button type="button" id="valid_button" class="btn btn-secondary btn-transmit" onclick="validatelog();" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> <?php echo xla("Processing..."); ?>"><?php echo xlt('Validate'); ?></button>
                             </div>
                         </form>
 
@@ -300,10 +294,8 @@ if (!empty($_GET)) {
                     <th id="sortby_group" class="sortby" title="<?php echo xla('Sort by Group'); ?>"><?php echo xlt('Group'); ?></th>
                     <th id="sortby_pid" class="sortby" title="<?php echo xla('Sort by PatientID'); ?>"><?php echo xlt('Patient ID'); ?></th>
                     <th id="sortby_success" class="sortby" title="<?php echo xla('Sort by Success'); ?>"><?php echo xlt('Success'); ?></th>
+                    <th title="<?php echo xla('API logging'); ?>"><?php echo xlt('API logging'); ?></th>
                     <th id="sortby_comments" class="sortby" title="<?php echo xla('Sort by Comments'); ?>"><?php echo xlt('Comments'); ?></th>
-                        <?php  if ($check_sum) {?>
-                    <th id="sortby_checksum" class="sortby" title="<?php echo xla('Sort by Checksum'); ?>"><?php echo xlt('Checksum'); ?></th>
-                        <?php } ?>
                     </tr>
                         <?php
                         ?>
@@ -330,23 +322,30 @@ if (!empty($_GET)) {
                             // Set up crypto object (object will increase performance since caches used keys)
                             $cryptoGen = new CryptoGen();
 
-                            foreach ($ret as $iter) {
+                            while ($iter = sqlFetchArray($ret)) {
+                                if (empty($iter['id'])) {
+                                    //skip empty log items (this means they were deleted and will show up as deleted in the audit log tamper script)
+                                    continue;
+                                }
+
                                 //translate comments
                                 $patterns = array ('/^success/','/^failure/','/ encounter/');
                                 $replace = array ( xl('success'), xl('failure'), xl('encounter', '', ' '));
 
-                                $log_id = $iter['id'];
-                                $commentEncrStatus = "No";
-                                $encryptVersion = 0;
-                                $logEncryptData = EventAuditLogger::instance()->logCommentEncryptData($log_id);
-                                if (count($logEncryptData) > 0) {
-                                    $commentEncrStatus = $logEncryptData['encrypt'];
-                                    $encryptVersion = $logEncryptData['version'];
+                                if (!empty($iter['encrypt'])) {
+                                    $commentEncrStatus = $iter['encrypt'];
+                                } else {
+                                    $commentEncrStatus = "No";
+                                }
+                                if (!empty($iter['version'])) {
+                                    $encryptVersion = $iter['version'];
+                                } else {
+                                    $encryptVersion = 0;
                                 }
 
-                                //July 1, 2014: Ensoftek: Decrypt comment data if encrypted
+                                // Decrypt comment data if encrypted
                                 if ($commentEncrStatus == "Yes") {
-                                    if ($encryptVersion == 3) {
+                                    if ($encryptVersion >= 3) {
                                         // Use new openssl method
                                         if (extension_loaded('openssl')) {
                                             $trans_comments = $cryptoGen->decryptStandard($iter["comments"]);
@@ -386,6 +385,11 @@ if (!empty($_GET)) {
                                         }
                                     }
                                 } else {
+                                    // base64 decode if applicable (note the $encryptVersion is a misnomer here, we have added in base64 encoding
+                                    //  of comments in OpenEMR 6.0.0 and greater when the comments are not encrypted since they hold binary (uuid) elements)
+                                    if ($encryptVersion >= 4) {
+                                        $iter["comments"] = base64_decode($iter["comments"]);
+                                    }
                                     $trans_comments = preg_replace($patterns, $replace, $iter["comments"]);
                                 }
                                 ?>
@@ -398,10 +402,17 @@ if (!empty($_GET)) {
                         <td><?php echo text($iter["groupname"]); ?></td>
                         <td><?php echo text($iter["patient_id"]); ?></td>
                         <td><?php echo text($iter["success"]); ?></td>
-                        <td><?php echo nl2br(text(preg_replace('/^select/i', 'Query', $trans_comments))); //Convert select term to Query for MU2 requirements ?></td>
-                                <?php  if ($check_sum) { ?>
-                    <td><?php echo text($iter["checksum"]); ?></td>
+                                <?php if (!empty($iter["ip_address"])) { ?>
+                            <td><?php echo text($iter["ip_address"]) . ", " . text($iter["method"]) . ", " . text($iter["request"]); ?></td>
+                        <?php } else { ?>
+                            <td> </td>
                         <?php } ?>
+                        <td><?php
+                            // Convert select term to Query for MU2 requirements
+                            // Also using mb_convert_encoding to change binary stuff (uuid) to just be '?' characters
+                            echo nl2br(text(preg_replace('/^select/i', 'Query', mb_convert_encoding($trans_comments, 'UTF-8', 'UTF-8'))));
+                        ?>
+                        </td>
                         </tr>
 
                                 <?php
@@ -411,7 +422,7 @@ if (!empty($_GET)) {
                         if (($eventname == "disclosure") || ($gev == "")) {
                             $eventname = "disclosure";
                             if ($ret = EventAuditLogger::instance()->getEvents(array('sdate' => $start_date,'edate' => $end_date, 'user' => $form_user, 'patient' => $form_pid, 'sortby' => $_GET['sortby'], 'event' => $eventname))) {
-                                foreach ($ret as $iter) {
+                                while ($iter = sqlFetchArray($ret)) {
                                     $comments = xl('Recipient Name') . ":" . $iter["recipient"] . ";" . xl('Disclosure Info') . ":" . $iter["description"];
                                     ?>
                                 <tr>
@@ -423,10 +434,8 @@ if (!empty($_GET)) {
                             <td><?php echo text($iter["groupname"]); ?></td>
                             <td><?php echo text($iter["patient_id"]); ?></td>
                             <td><?php echo text($iter["success"]); ?></td>
+                            <td> </td>
                             <td><?php echo text($comments); ?></td>
-                                    <?php  if ($check_sum) { ?>
-                                    <td><?php echo text($iter["checksum"]); ?></td>
-                                <?php } ?>
                         </tr>
                                     <?php
                                 }
@@ -499,7 +508,6 @@ $(function () {
     $("#sortby_pid").click(function() { set_sort_direction(); $("#sortby").val("patient_id"); $("#theform").submit(); });
     $("#sortby_success").click(function() { set_sort_direction(); $("#sortby").val("success"); $("#theform").submit(); });
     $("#sortby_comments").click(function() { set_sort_direction(); $("#sortby").val("comments"); $("#theform").submit(); });
-    $("#sortby_checksum").click(function() { set_sort_direction(); $("#sortby").val("checksum"); $("#theform").submit(); });
 
     $('.datetimepicker').datetimepicker({
         <?php $datetimepicker_timepicker = true; ?>
@@ -515,29 +523,6 @@ function set_sort_direction(){
         $('#direction').val('desc');
     else
         $('#direction').val('asc');
-}
-
-function validatelog(){
-    var this_button = $("#valid_button").button();
-    this_button.button('loading');
-
-    $.ajax({
-        url:"../../library/log_validation.php",
-        data: {
-            csrf_token_form: <?php echo js_escape(CsrfUtils::collectCsrfToken()); ?>
-        },
-        asynchronous : true,
-        method: "post",
-        success :function(response){
-            alert(response);
-            this_button.button('reset');
-        },
-        failure :function(){
-            alert(<?php echo xlj("Audit Log Validation Failed"); ?>);
-            this_button.button('reset');
-        }
-    });
-
 }
 </script>
 

@@ -33,7 +33,7 @@ use OpenEMR\Core\Header;
 </script>
 <?php
 
-if ($_POST['form_save']) {
+if (!empty($_POST['form_save'])) {
     if (!CsrfUtils::verifyCsrfToken($_POST["csrf_token_form"])) {
         CsrfUtils::csrfNotVerified();
     }
@@ -44,7 +44,7 @@ if ($_POST['form_save']) {
     $thispid = $_POST['thispid'];
     $thisenc = $_POST['thisenc'];
 } else {
-    $issue = $_REQUEST['issue'];
+    $issue = $_REQUEST['issue'] ?? null;
     $thispid = 0 + (empty($_REQUEST['thispid']) ? $pid : $_REQUEST['thispid']);
     // A nonempty thisenc means we are to link the issue to the encounter.
     $thisenc = 0 + (empty($_REQUEST['thisenc']) ? 0 : $_REQUEST['thisenc']);
@@ -216,7 +216,7 @@ function ActiveIssueCodeRecycleFn($thispid2, $ISSUE_TYPES2)
 
 // If we are saving, then save and close the window.
 //
-if ($_POST['form_save']) {
+if (!empty($_POST['form_save'])) {
     if (!CsrfUtils::verifyCsrfToken($_POST["csrf_token_form"])) {
         CsrfUtils::csrfNotVerified();
     }
@@ -232,8 +232,8 @@ if ($_POST['form_save']) {
     $form_begin = ($_POST['form_begin']) ? DateToYYYYMMDD($_POST['form_begin']) : '';
     $form_end   = ($_POST['form_end']) ? DateToYYYYMMDD($_POST['form_end']) : '';
 
-    $form_injury_part = $_POST['form_medical_system'];
-    $form_injury_type = $_POST['form_medical_type'];
+    $form_injury_part = $_POST['form_medical_system'] ?? '';
+    $form_injury_type = $_POST['form_medical_type'] ?? '';
 
     if ($issue) {
         $query = "UPDATE lists SET " .
@@ -242,13 +242,13 @@ if ($_POST['form_save']) {
             "comments = '"    . add_escape_custom($_POST['form_comments'])     . "', " .
             "begdate = "      . QuotedOrNull($form_begin)   . ", "  .
             "enddate = "      . QuotedOrNull($form_end)     . ", "  .
-            "returndate = "   . QuotedOrNull($form_return)  . ", "  .
+            "returndate = "   . QuotedOrNull($form_return ?? null)  . ", "  .
             "diagnosis = '"   . add_escape_custom($_POST['form_diagnosis'])    . "', " .
             "occurrence = '"  . add_escape_custom($_POST['form_occur'])        . "', " .
             "classification = '" . add_escape_custom($_POST['form_classification']) . "', " .
-            "reinjury_id = '" . add_escape_custom($_POST['form_reinjury_id'])  . "', " .
+            "reinjury_id = '" . add_escape_custom($_POST['form_reinjury_id'] ?? '')  . "', " .
             "referredby = '"  . add_escape_custom($_POST['form_referredby'])   . "', " .
-            "injury_grade = '" . add_escape_custom($_POST['form_injury_grade']) . "', " .
+            "injury_grade = '" . add_escape_custom($_POST['form_injury_grade'] ?? '') . "', " .
             "injury_part = '" . add_escape_custom($form_injury_part)           . "', " .
             "injury_type = '" . add_escape_custom($form_injury_type)           . "', " .
             "outcome = '"     . add_escape_custom($_POST['form_outcome'])      . "', " .
@@ -286,17 +286,17 @@ if ($_POST['form_save']) {
             "'" . add_escape_custom($_POST['form_comments'])    . "', " .
             QuotedOrNull($form_begin)        . ", "  .
             QuotedOrNull($form_end)        . ", "  .
-            QuotedOrNull($form_return)       . ", "  .
+            QuotedOrNull($form_return ?? null)       . ", "  .
             "'" . add_escape_custom($_POST['form_diagnosis'])   . "', " .
             "'" . add_escape_custom($_POST['form_occur'])       . "', " .
             "'" . add_escape_custom($_POST['form_classification']) . "', " .
             "'" . add_escape_custom($_POST['form_referredby'])  . "', " .
-            "'" . add_escape_custom($$_SESSION['authUser'])     . "', " .
-            "'" . add_escape_custom($$_SESSION['authProvider']) . "', " .
+            "'" . add_escape_custom($_SESSION['authUser'])     . "', " .
+            "'" . add_escape_custom($_SESSION['authProvider']) . "', " .
             "'" . add_escape_custom($_POST['form_outcome'])     . "', " .
             "'" . add_escape_custom($_POST['form_destination']) . "', " .
-            "'" . add_escape_custom($_POST['form_reinjury_id']) . "', " .
-            "'" . add_escape_custom($_POST['form_injury_grade']) . "', " .
+            "'" . add_escape_custom($_POST['form_reinjury_id'] ?? '') . "', " .
+            "'" . add_escape_custom($_POST['form_injury_grade'] ?? '') . "', " .
             "'" . add_escape_custom($form_injury_part)          . "', " .
             "'" . add_escape_custom($form_injury_type)          . "', " .
             "'" . add_escape_custom($_POST['form_reaction'])         . "', " .
@@ -503,7 +503,7 @@ function getCodeText($code)
                 document.getElementById('row_referredby').style.display = (f.form_referredby.value) ? '' : comdisp;
             });
             <?php
-            if ($ISSUE_TYPES['ippf_gcac'] && !$_POST['form_save']) {
+            if (!empty($ISSUE_TYPES['ippf_gcac']) && empty($_POST['form_save'])) {
                 // Generate more of these for gcac and contraceptive fields.
                 if (empty($issue) || $irow['type'] == 'ippf_gcac') {
                     issue_ippf_gcac_newtype();
@@ -533,17 +533,6 @@ function getCodeText($code)
                     addSelectedCode(codes[i], codeTexts.has(codes[i]) ? codeTexts.get(codes[i]) : codes[i])
                 }
             }
-        }
-
-        // Process click on Delete link.
-        function deleteme() {
-            dlgopen('../deleter.php?issue=' + <?php echo js_url($issue); ?> + '&csrf_token_form=' + <?php echo js_url(CsrfUtils::collectCsrfToken()); ?>, '_blank', 500, 450);
-            return false;
-        }
-
-        // Called by the deleteme.php window on a successful delete.
-        function imdeleted() {
-            closeme();
         }
 
         function closeme() {
@@ -622,16 +611,16 @@ function getCodeText($code)
         function onAddCode() {
             <?php
             $url = '../encounter/select_codes.php?codetype=';
-            if ($irow['type'] == 'medical_problem') {
+            if (!empty($irow['type']) && ($irow['type'] == 'medical_problem')) {
                 $url .= urlencode(collect_codetypes("medical_problem", "csv"));
             } else {
                 $url .= urlencode(collect_codetypes("diagnosis", "csv"));
                 $tmp  = urlencode(collect_codetypes("drug", "csv"));
-                if ($irow['type'] == 'allergy') {
+                if (!empty($irow['type']) && ($irow['type'] == 'allergy')) {
                     if ($tmp) {
                         $url .= ",$tmp";
                     }
-                } elseif ($irow['type'] == 'medication') {
+                } elseif (!empty($irow['type']) && ($irow['type'] == 'medication')) {
                     if ($tmp) {
                         $url .= ",$tmp&default=$tmp";
                     }
@@ -759,7 +748,7 @@ function getCodeText($code)
                                 if ($issue || $thistype) {
                                     if ($index == $type_index) {
                                         echo text($value[1]);
-                                        echo "<input type='hidden' name='form_type' value='" . attr($index) . "'>\n";
+                                        echo "<input type='hidden' name='form_type' value='" . attr($index) . "' />\n";
                                     }
                                 } else {
                                     echo "   <input type='radio' name='form_type' value='" . attr($index) . "' onclick='newtype(" . attr_js($index) . ")'";
@@ -785,20 +774,20 @@ function getCodeText($code)
                         </div>
                         <div class="form-group col-12">
                             <label class="col-form-label" for="title_diagnosis"><?php echo xlt('Title'); ?>:</label>
-                            <input type='text' class="form-control" name='form_title' id='form_title' value='<?php echo attr($irow['title']) ?>'>
-                            <input type='hidden' name='form_title_id' value='<?php echo attr($irow['list_option_id']) ?>'>
+                            <input type='text' class="form-control" name='form_title' id='form_title' value='<?php echo attr($irow['title'] ?? '') ?>' />
+                            <input type='hidden' name='form_title_id' value='<?php echo attr($irow['list_option_id'] ?? '') ?>'>
                         </div>
                         <div class="form-group col-12" id='row_active_codes'>
                             <label for="form_active_codes" class="col-form-label"><?php echo xlt('Active Issue Codes'); ?>:</label>
                             <select name='form_active_codes' id='form_active_codes' class= "form-control" size='4'
-                                onchange="onActiveCodeSelected()" style="width:100%;"></select>
+                                onchange="onActiveCodeSelected()"></select>
                         </div>
                         <div class="form-group col-12" id='row_selected_codes'>
                             <label for="form_selected_codes" class="col-form-label"><?php echo xlt('Coding'); ?>:</label>
                             <select name='form_selected_codes' id='form_selected_codes' class= "form-control" multiple size='4'
-                                onchange="onCodeSelectionChange()" style="width:100%;">
+                                onchange="onCodeSelectionChange()">
                             <?php
-                            if ($irow['diagnosis'] != "") {
+                            if (!empty($irow['diagnosis'])) {
                                 $codes = explode(";", $irow['diagnosis']);
                                 foreach ($codes as $code) {
                                     echo "   <option value='" . attr($code) . "'>" . text(getCodeText($code)) . "</option>\n";
@@ -807,26 +796,26 @@ function getCodeText($code)
                             ?>
                             </select>
                             <div class="btn-group" style="margin-top:3px;">
-                                <button type="button" class="btn btn-secondary btn-sm" style="margin-right:5px;" onclick='onAddCode()'><?php echo xlt('Add');?></button>
+                                <button type="button" class="btn btn-primary btn-sm" style="margin-right:5px;" onclick='onAddCode()'><?php echo xlt('Add');?></button>
                                 <button type="button" id="rem_selected_code" class="btn btn-secondary btn-sm" onclick='onRemoveCode()'><?php echo xlt('Remove');?></button>
                             </div>
                             <input type='hidden' class="form-control" name='form_diagnosis' id='form_diagnosis'
-                                   value='<?php echo attr($irow['diagnosis']) ?>' onclick='onAddCode()'
+                                   value='<?php echo attr($irow['diagnosis'] ?? '') ?>' onclick='onAddCode()'
                                    title='<?php echo xla('Click to select or change coding'); ?>' readonly >
                         </div>
                         <div class="form-group col-12">
                             <label class="col-form-label" for="form_begin"><?php echo xlt('Begin Date'); ?>:</label>
-                            <input type='text' class='datepicker form-control' name='form_begin' id='form_begin' value='<?php echo attr(oeFormatShortDate($irow['begdate'])) ?>' title='<?php echo xla('yyyy-mm-dd date of onset, surgery or start of medication'); ?>'>
+                            <input type='text' class='datepicker form-control' name='form_begin' id='form_begin' value='<?php echo attr(oeFormatShortDate($irow['begdate'] ?? '')) ?>' title='<?php echo xla('yyyy-mm-dd date of onset, surgery or start of medication'); ?>' />
                         </div>
                         <div class="form-group col-12" id='row_enddate'>
                             <label class="col-form-label" for="form_begin"><?php echo xlt('End Date'); ?>:</label>
-                            <input type='text' class='datepicker form-control' name='form_end' id='form_end' value='<?php echo attr(oeFormatShortDate($irow['enddate'])) ?>' title='<?php echo xla('yyyy-mm-dd date of recovery or end of medication'); ?>' />
+                            <input type='text' class='datepicker form-control' name='form_end' id='form_end' value='<?php echo attr(oeFormatShortDate($irow['enddate'] ?? '')) ?>' title='<?php echo xla('yyyy-mm-dd date of recovery or end of medication'); ?>' />
                             &nbsp;(<?php echo xlt('leave blank if still active'); ?>)
                         </div>
                         <div class="form-group col-12" id='row_active'>
                             <label class="col-form-label" for="form_active"><?php echo xlt('Active{{Issue}}'); ?>: </label>
                             <div class="checkbox">
-                                <label><input type='checkbox' name='form_active' id=='form_active' value='1' <?php echo ($irow['enddate']) ? "" : "checked"; ?> onclick='activeClicked(this);' title='<?php echo xla('Indicates if this issue is currently active'); ?>'></label>
+                                <label><input type='checkbox' name='form_active' id=='form_active' value='1' <?php echo (!empty($irow['enddate'])) ? "" : "checked"; ?> onclick='activeClicked(this);' title='<?php echo xla('Indicates if this issue is currently active'); ?>'></label>
                             </div>
                         </div>
                         <div class="form-group" id='row_returndate'>
@@ -838,7 +827,7 @@ function getCodeText($code)
                             <label class="col-form-label" for="form_occur"><?php echo xlt('Occurrence'); ?>:</label>
                             <?php
                             // Modified 6/2009 by BM to incorporate the occurrence items into the list_options listings
-                            generate_form_field(array('data_type' => 1, 'field_id' => 'occur', 'list_id' => 'occurrence', 'empty_title' => 'SKIP'), $irow['occurrence']);
+                            generate_form_field(array('data_type' => 1, 'field_id' => 'occur', 'list_id' => 'occurrence', 'empty_title' => 'SKIP'), ($irow['occurrence'] ?? null));
                             ?>
                         </div>
                         <div class="form-group col-12" id='row_classification'>
@@ -847,7 +836,7 @@ function getCodeText($code)
                                 <?php
                                 foreach ($ISSUE_CLASSIFICATIONS as $key => $value) {
                                     echo "   <option value='" . attr($key) . "'";
-                                    if ($key == $irow['classification']) {
+                                    if (!empty($irow['classification']) && ($key == $irow['classification'])) {
                                         echo " selected";
                                     }
                                     echo ">" . text($value) . "\n";
@@ -859,14 +848,14 @@ function getCodeText($code)
                         <div class="form-group col-12" id='row_severity'>
                             <label class="col-form-label" for="form_severity_id"><?php echo xlt('Severity'); ?>:</label>
                             <?php
-                            $severity = $irow['severity_al'];
+                            $severity = $irow['severity_al'] ?? null;
                             generate_form_field(array('data_type' => 1, 'field_id' => 'severity_id', 'list_id' => 'severity_ccda', 'empty_title' => 'SKIP'), $severity);
                             ?>
                         </div>
                         <div class="form-group col-12" id='row_reaction'>
                             <label class="col-form-label" for="form_reaction"><?php echo xlt('Reaction'); ?>:</label>
                             <?php
-                            echo generate_select_list('form_reaction', 'reaction', $irow['reaction'], '', '', '', '');
+                            echo generate_select_list('form_reaction', 'reaction', ($irow['reaction'] ?? null), '', '', '', '');
                             ?>
                         </div>
                         <!-- End of reaction -->
@@ -875,17 +864,17 @@ function getCodeText($code)
                             <label class="col-form-label" for="form_verification"><?php echo xlt('Verification Status'); ?>:</label>
                             <?php
                             $codeListName = ($thistype == 'medical_problem') ? 'condition-verification' : 'allergyintolerance-verification';
-                            echo generate_select_list('form_verification', $codeListName, $irow['verification'], '', '', '', '');
+                            echo generate_select_list('form_verification', $codeListName, ($irow['verification'] ?? null), '', '', '', '');
                             ?>
                         </div>
                         <!-- End of Verification Status -->
                         <div class="form-group col-12" id='row_referredby'>
                             <label class="col-form-label" for="form_referredby"><?php echo xlt('Referred by'); ?>:</label>
-                            <input type='text' name='form_referredby' id='form_referredby' class='form-control' value='<?php echo attr($irow['referredby']) ?>' title='<?php echo xla('Referring physician and practice'); ?>' />
+                            <input type='text' name='form_referredby' id='form_referredby' class='form-control' value='<?php echo attr($irow['referredby'] ?? '') ?>' title='<?php echo xla('Referring physician and practice'); ?>' />
                         </div>
                         <div class="form-group col-12" id='row_comments'>
                             <label class="col-form-label" for="form_comments"><?php echo xlt('Comments'); ?>:</label>
-                            <textarea class="form-control" name='form_comments' id='form_comments' rows="4" id='form_comments'><?php echo text($irow['comments']) ?></textarea>
+                            <textarea class="form-control" name='form_comments' id='form_comments' rows="4" id='form_comments'><?php echo text($irow['comments'] ?? '') ?></textarea>
                         </div>
                         <div class="form-group col-12" <?php
                         if ($GLOBALS['ippf_specific']) {
@@ -893,7 +882,7 @@ function getCodeText($code)
                         } ?>>
                             <label class="col-form-label" for="form_outcome"><?php echo xlt('Outcome'); ?>:</label>
                             <?php
-                            echo generate_select_list('form_outcome', 'outcome', $irow['outcome'], '', '', '', 'outcomeClicked(this);');
+                            echo generate_select_list('form_outcome', 'outcome', ($irow['outcome'] ?? null), '', '', '', 'outcomeClicked(this);');
                             ?>
                         </div>
                         <div class="form-group col-12" <?php
@@ -902,7 +891,7 @@ function getCodeText($code)
                         } ?>>
                             <label class="col-form-label" for="form_destination"><?php echo xlt('Destination'); ?>:</label>
                             <?php if (true) { ?>
-                                <input type='text' class='form-control' name='form_destination' id='form_destination' value='<?php echo attr($irow['destination']) ?>' style='width:100%' title='GP, Secondary care specialist, etc.' />
+                                <input type='text' class='form-control' name='form_destination' id='form_destination' value='<?php echo attr($irow['destination'] ?? '') ?>' style='width:100%' title='GP, Secondary care specialist, etc.' />
                             <?php } else { // leave this here for now, please -- Rod
                                 ?>
                                 <?php echo rbinput('form_destination', '1', 'GP', 'destination') ?>&nbsp;
@@ -919,16 +908,11 @@ function getCodeText($code)
                                 <div class="btn-group" role="group">
                                     <button type='submit' name='form_save' class="btn btn-primary btn-save" value='<?php echo xla('Save'); ?>'><?php echo xlt('Save'); ?></button>
                                     <button type="button" class="btn btn-secondary btn-cancel" onclick='closeme();'><?php echo xlt('Cancel'); ?></button>
-                                    <?php
-                                    if ($issue && AclMain::aclCheckCore('admin', 'super')) { ?>
-                                        <button type='submit' name='form_delete' class="btn btn-danger btn-cancel btn-delete" onclick='deleteme()' value='<?php echo xla('Delete'); ?>'><?php echo xlt('Delete'); ?></button>
-                                        <?php
-                                    } ?>
                                 </div>
                             </div>
                         </div>
                         <?php
-                        if ($ISSUE_TYPES['ippf_gcac']) {
+                        if (!empty($ISSUE_TYPES['ippf_gcac'])) {
                             if (empty($issue) || $irow['type'] == 'ippf_gcac') {
                                 issue_ippf_gcac_form($issue, $thispid);
                             }

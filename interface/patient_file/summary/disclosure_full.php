@@ -32,7 +32,7 @@ if (isset($_POST["mode"]) and  $_POST["mode"] == "disclosure") {
     $event = trim($_POST['form_disclosure_type']);
     $recipient_name = trim($_POST['recipient_name']);
     $disclosure_desc = trim($_POST['desc_disc']);
-    $disclosure_id = trim($_POST['disclosure_id']);
+    $disclosure_id = trim($_POST['disclosure_id'] ?? '');
     if (isset($_POST["updatemode"]) and $_POST["updatemode"] == "disclosure_update") {
         //update the recorded disclosure in the extended_log table.
         EventAuditLogger::instance()->updateRecordedDisclosure($dates, $event, $recipient_name, $disclosure_desc, $disclosure_id);
@@ -81,10 +81,7 @@ if (isset($_GET['deletelid'])) {
         <div class="col-12 jumbotron mt-3 p-4">
             <?php
             $N = 15;
-            $offset = $_REQUEST['offset'];
-            if (!isset($offset)) {
-                $offset = 0;
-            }
+            $offset = $_REQUEST['offset'] ?? 0;
 
             $disclQry = " SELECT el.id, el.event, el.recipient, el.description, el.date, CONCAT(u.fname, ' ', u.lname) as user_fullname FROM extended_log el" .
             " LEFT JOIN users u ON u.username = el.user " .

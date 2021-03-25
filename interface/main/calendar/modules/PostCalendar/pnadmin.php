@@ -676,7 +676,7 @@ function postcalendar_admin_categories($msg = '', $e = '', $args = array())
         $tpl->assign('FormHidden', $form_hidden);
     }
     $form_submit = '<input type=hidden name="form_action" value="commit"/>
-				   ' . text($authkey) . '<input class="btn btn-primary" type="submit" name="submit" value="' . xla('go') . '">';
+				   ' . text($authkey) . '<input class="btn btn-primary" type="submit" name="submit" value="' . xla('Save') . '">';
     $tpl->assign('FormSubmit', $form_submit);
 
     $output->Text($tpl->fetch($template_name . '/admin/submit_category.html'));
@@ -847,7 +847,7 @@ function postcalendar_admin_testSystem()
 
     if (AclMain::aclCheckCore('admin', 'super')) {
         $header = "<head><title>" . xlt("Diagnostics") . "</title></head><body>";
-        $output .= $header;
+        $output = $header;
         $output .= '<div class="container mt-3"><div class="row"><div class="col-sm-12"><div class="clearfix">';
         $output .= '<h2>' . xlt('Diagnostics') . '</h2>';
         $output .= '</div></div></div>';

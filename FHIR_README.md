@@ -10,10 +10,11 @@ FHIR endpoints are defined in the [primary routes file](_rest_routes.inc.php). T
 endpoint to the OpenEMR FHIR controller which handles the request, and also handles the JSON data conversions.
 
 ```php
-"POST /fhir/Patient" => function () {
+"GET /fhir/Patient" => function () {
     RestConfig::authorization_check("patients", "demo");
-    $data = (array)(json_decode(file_get_contents("php://input"), true));
-    return (new FhirPatientRestController())->post($data);
+    $return = (new FhirPatientRestController())->getAll($_GET);
+    RestConfig::apiLog($return);
+    return $return;
 }
 ```
 
@@ -30,31 +31,41 @@ Database Result -> Service Component -> FHIR Service Component -> Parse OpenEMR 
 ```
 
 ### Sections
-
+-   [Authorization](API_README.md#authorization)
+    -   [Scopes](API_README.md#scopes)
+    -   [Registration](API_README.md#registration)
+        -   [SMART on FHIR Registration](API_README.md#smart-on-fhir-registration)
+    -   [Authorization Code Grant](API_README.md#authorization-code-grant)
+    -   [Refresh Token Grant](API_README.md#refresh-token-grant)
+    -   [Password Grant](API_README.md#password-grant)
+    -   [Client Credentials Grant](API_README.md#client-credentials-grant)
+    -   [Logout](API_README.md#logout)
+    -   [More Details](API_README.md#more-details)
 -   [FHIR API Endpoints](FHIR_README.md#fhir-endpoints)
-    -   [FHIR Patient API](FHIR_README.md#get-fhirpatient)
-    -   [FHIR Encounter API](FHIR_README.md#get-fhirencounter)
-    -   [FHIR Practitioner API](FHIR_README.md#get-fhirpractitioner)
-    -   [FHIR PractitionerRole API](FHIR_README.md#get-fhirpractitionerrole)
-    -   [FHIR Immunization API](FHIR_README.md#get-fhirimmunization)
-    -   [FHIR AllergyIntolerance API](FHIR_README.md#get-fhirallergyintolerance)
-    -   [FHIR Procedure API](FHIR_README.md#get-fhirprocedure)
-    -   [FHIR Organization API](FHIR_README.md#get-fhirorganization)
-    -   [FHIR Observation API](FHIR_README.md#get-fhirobservation)
-    -   [FHIR QuestionnaireResponse API](FHIR_README.md#get-fhirquestionnaireresponse)
-    -   [FHIR Condition API](FHIR_README.md#get-fhircondition)
-    -   [FHIR MedicationRequest API](FHIR_README.md#get-fhirmedicationrequest)
-    -   [FHIR Medication API](FHIR_README.md#get-fhirmedication)
-    -   [FHIR Location API](FHIR_README.md#get-fhirlocation)
-    -   [FHIR CareTeam API](FHIR_README.md#get-fhircareteam)
--   [Portal FHIR API Endpoints](FHIR_README.md#portalfhir-endpoints)
-    -   [Patient API](FHIR_README.md#get-portalfhirpatient)
--   [Todos](FHIR_README.md#project-management)
+    -   [Capability Statement](FHIR_README.md#capability-statement)
+    -   [Patient](FHIR_README.md#patient-resource)
+    -   [Coverage](FHIR_README.md#coverage-resource)
+    -   [Encounter](FHIR_README.md#encounter-resource)
+    -   [Practitioner](FHIR_README.md#practitioner-resource)
+    -   [PractitionerRole](FHIR_README.md#practitionerrole-resource)
+    -   [Immunization](FHIR_README.md#immunization-resource)
+    -   [AllergyIntolerance](FHIR_README.md#allergyintolerance-resource)
+    -   [Organization](FHIR_README.md#organization-resource)
+    -   [Observation](FHIR_README.md#observation-resource)
+    -   [Condition](FHIR_README.md#condition-resource)
+    -   [Procedure](FHIR_README.md#procedure-resource)
+    -   [MedicationRequest](FHIR_README.md#medicationrequest-resource)
+    -   [Medication](FHIR_README.md#medication-resource)
+    -   [Location](FHIR_README.md#location-resource)
+    -   [CareTeam](FHIR_README.md#careTeam-resource)
+    -   [Provenance](FHIR_README.md#Provenance-resources)
+    -   [System Export](FHIR_README.md#SystemExport-resource)
+    -   [Patient Export](FHIR_README.md#PatientExport-resource)
+    -   [Group Export](FHIR_README.md#GroupExport-resource)
 
 ### Prerequisite
 
 Enable the Standard FHIR service (/fhir/ endpoints) in OpenEMR menu: Administration->Globals->Connectors->"Enable OpenEMR Standard FHIR REST API"
-Enable the Patient Portal FHIR service (/portalfhir/ endpoints) in OpenEMR menu: Administration->Globals->Connectors->"Enable OpenEMR Patient Portal FHIR REST API"
 
 ### Using FHIR API Internally
 
@@ -62,44 +73,25 @@ There are several ways to make API calls from an authorized session and maintain
 
 -   See the script at tests/api/InternalApiTest.php for examples of internal API use cases.
 
-## FHIR Endpoints
+### Multisite Support
 
-Standard FHIR endpoints Use `http://localhost:8300/apis/fhir as base URI.`
+Multisite is supported by including the site in the endpoint. When not using multisite or using the `default` multisite site, then a typical path would look like `apis/default/fhir/patient`. If you were using multisite and using a site called `alternate`, then the path would look like `apis/alternate/fhir/patient`.
 
-_Example:_ `http://localhost:8300/apis/fhir/Patient` returns a Patient's bundle resource, etc
+### Authorization
 
-### FHIR Authorization
+OpenEMR uses OIDC compliant authorization for API. SSL is required and setting baseurl at Administration->Globals->Connectors->'Site Address (required for OAuth2 and FHIR)' is required.
 
-#### POST [base]/auth
+See [Authorization](API_README.md#authorization) for more details.
 
-The OpenEMR FHIR API utilizes the OAuth2 password credential flow for authentication. To obtain an API token, submit your login credentials and requested scope. The scope must match a site that has been setup in OpenEMR, in the /sites/ directory. If additional sites have not been created, set the scope to 'default'.
+### FHIR Endpoints
 
-Request:
+Standard FHIR endpoints Use `http://localhost:8300/apis/default/fhir as base URI.`
 
-```sh
-curl -X POST -H 'Content-Type: application/json' 'http://localhost:8300/apis/fhir/auth' \
--d '{
-    "grant_type":"password",
-    "username": "ServiceUser",
-    "password": "password",
-    "scope":"site id"
-}'
-```
+Note that the `default` component can be changed to the name of the site when using OpenEMR's multisite feature.
 
-Response:
+_Example:_ `http://localhost:8300/apis/default/fhir/Patient` returns a Patient's bundle resource, etc
 
-```json
-{
-    "token_type": "Bearer",
-    "access_token": "eyJ0b2tlbiI6IjAwNmZ4TWpsNWhsZmNPelZicXBEdEZVUlNPQUY5KzdzR1Jjejc4WGZyeGFjUjY2QlhaaEs4eThkU3cxbTd5VXFBeTVyeEZpck9mVzBQNWc5dUlidERLZ0trUElCME5wRDVtTVk5bE9WaE5DTHF5RnRnT0Q0OHVuaHRvbXZ6OTEyNmZGUmVPUllSYVJORGoyZTkzTDA5OWZSb0ZRVGViTUtWUFd4ZW5cL1piSzhIWFpJZUxsV3VNcUdjQXR5dmlLQXRXNDAiLCJzaXRlX2lkIjoiZGVmYXVsdCIsImFwaSI6Im9lbXIifQ==",
-    "expires_in": "3600",
-    "user_data": {
-        "user_id": "1"
-    }
-}
-```
-
-The Bearer token is required for each OpenEMR API request, and is conveyed using an Authorization header.
+The Bearer token is required for each OpenEMR FHIR request (except for the Capability Statement), and is conveyed using an Authorization header. Note that the Bearer token is the access_token that is obtained in the [Authorization](API_README.md#authorization) section.
 
 Request:
 
@@ -108,24 +100,36 @@ curl -X GET 'http://localhost:8300/apis/fhir/Patient' \
   -H 'Authorization: Bearer eyJ0b2tlbiI6IjAwNnZ3eGJZYmFrOXlxUjF4U290Y1g4QVVDd3JOcG5yYXZEaFlqaHFjWXJXRGNDQUtFZmJONkh2cElTVkJiaWFobHBqOTBYZmlNRXpiY2FtU01pSHk1UzFlMmgxNmVqZEhcL1ZENlNtaVpTRFRLMmtsWDIyOFRKZzNhQmxMdUloZmNJM3FpMGFKZ003OXdtOGhYT3dpVkx5b3BFRXQ1TlNYNTE3UW5TZ0dsUVdQbG56WjVxOVYwc21tdDlSQ3RvcDV3TEkiLCJzaXRlX2lkIjoiZGVmYXVsdCIsImFwaSI6ImZoaXIifQ=='
 ```
 
-### Patient Resource
+---
+
+### Capability Statement
+
+#### GET fhir/metadata
+
+This will return the Capability Statement.
+
+```sh
+curl -X GET 'http://localhost:8300/apis/default/fhir/metadata'
+```
 
 ---
 
-#### GET [base]/Patient
+### Patient Resource
+
+#### GET fhir/Patient
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Patient'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Patient'
 ```
 
-#### GET [base]/Patient[id]
+#### GET fhir/Patient[id]
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Patient/90a8923c-0b1c-4d0a-9981-994b143381a7'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Patient/90a8923c-0b1c-4d0a-9981-994b143381a7'
 ```
 
 -   Supported Search Parameters
@@ -142,12 +146,12 @@ curl -X GET 'http://localhost:8300/apis/fhir/Patient/90a8923c-0b1c-4d0a-9981-994
     -   phone
     -   telecom
 
-#### POST [base]/Patient
+#### POST fhir/Patient
 
 Request:
 
 ```sh
-curl -X POST -H 'Content-Type: application/fhir+json' 'http://localhost:8300/apis/fhir/Patient' -d \
+curl -X POST -H 'Content-Type: application/fhir+json' 'http://localhost:8300/apis/default/fhir/Patient' -d \
 '{
   "resourceType": "Patient",
   "identifier": [ { "system": "urn:oid:1.2.36.146.595.217.0.1", "value": "12345" } ],
@@ -160,12 +164,12 @@ curl -X POST -H 'Content-Type: application/fhir+json' 'http://localhost:8300/api
 }'
 ```
 
-#### PUT [base]/Patient/[id]
+#### PUT fhir/Patient/[id]
 
 Request:
 
 ```sh
-curl -X PUT -H 'Content-Type: application/fhir+json' 'http://localhost:8300/apis/fhir/Patient/90a8923c-0b1c-4d0a-9981-994b143381a7' -d \
+curl -X PUT -H 'Content-Type: application/fhir+json' 'http://localhost:8300/apis/default/fhir/Patient/90a8923c-0b1c-4d0a-9981-994b143381a7' -d \
 '{
   "resourceType": "Patient",
   "id": "1",
@@ -185,12 +189,12 @@ curl -X PUT -H 'Content-Type: application/fhir+json' 'http://localhost:8300/apis
 }'
 ```
 
-#### PATCH [base]/Patient/[id]
+#### PUT fhir/Patient/[id]
 
 Request:
 
 ```sh
-curl -X PATCH -H 'Content-Type: application/fhir+json' 'http://localhost:8300/apis/fhir/Patient/90a8923c-0b1c-4d0a-9981-994b143381a7' -d \
+curl -X PUT -H 'Content-Type: application/fhir+json' 'http://localhost:8300/apis/default/fhir/Patient/90a8923c-0b1c-4d0a-9981-994b143381a7' -d \
 '[
  {
    "op": "replace",
@@ -205,24 +209,50 @@ curl -X PATCH -H 'Content-Type: application/fhir+json' 'http://localhost:8300/ap
 ]'
 ```
 
-### Encounter Resource
+---
+
+### Coverage Resource
+
+#### GET fhir/Coverage
+
+Request:
+
+```sh
+curl -X GET 'http://localhost:8300/apis/default/fhir/Coverage'
+```
+
+#### GET fhir/Coverage[id]
+
+Request:
+
+```sh
+curl -X GET 'http://localhost:8300/apis/default/fhir/Coverage/926c051b-9eaf-4753-b5d3-65c3f329e656'
+```
+
+-   Supported Search Parameters
+    -   \_id
+    -   patient
+    -   payor
+
 
 ---
 
-#### GET [base]/Encounter
+### Encounter Resource
+
+#### GET fhir/Encounter
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Encounter'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Encounter'
 ```
 
-#### GET [base]/Encounter[id]
+#### GET fhir/Encounter[id]
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Encounter/90c196f2-51cc-4655-8858-3a80aebff3ef'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Encounter/90c196f2-51cc-4655-8858-3a80aebff3ef'
 ```
 
 -   Supported Search Parameters
@@ -230,24 +260,24 @@ curl -X GET 'http://localhost:8300/apis/fhir/Encounter/90c196f2-51cc-4655-8858-3
     -   patient
     -   date {gt|lt|ge|le}
 
-### Practitioner Resource
-
 ---
 
-#### GET [base]/Practitioner
+### Practitioner Resource
+
+#### GET fhir/Practitioner
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Practitioner'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Practitioner'
 ```
 
-#### GET [base]/Practitioner[id]
+#### GET fhir/Practitioner[id]
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Practitioner/90a8923c-0b1c-4d0a-9981-994b143381a7'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Practitioner/90a8923c-0b1c-4d0a-9981-994b143381a7'
 ```
 
 -   Supported Search Parameters
@@ -263,12 +293,12 @@ curl -X GET 'http://localhost:8300/apis/fhir/Practitioner/90a8923c-0b1c-4d0a-998
     -   phone
     -   telecom
 
-#### POST [base]/Practitioner
+#### POST fhir/Practitioner
 
 Request:
 
 ```sh
-curl -X POST -H 'Content-Type: application/fhir+json' 'http://localhost:8300/apis/fhir/Practitioner' -d \
+curl -X POST -H 'Content-Type: application/fhir+json' 'http://localhost:8300/apis/default/fhir/Practitioner' -d \
 '{
   "resourceType": "Practitioner",
   "identifier": [ { "system": "http://hl7.org/fhir/sid/us-npi", "value": "1122334499" } ],
@@ -280,12 +310,12 @@ curl -X POST -H 'Content-Type: application/fhir+json' 'http://localhost:8300/api
 }'
 ```
 
-#### PATCH [base]/Practitioner/[id]
+#### PUT fhir/Practitioner/[id]
 
 Request:
 
 ```sh
-curl -X PATCH -H 'Content-Type: application/fhir+json' 'http://localhost:8300/apis/fhir/Practitioner/90a8923c-0b1c-4d0a-9981-994b143381a7' -d \
+curl -X PUT -H 'Content-Type: application/fhir+json' 'http://localhost:8300/apis/default/fhir/Practitioner/90a8923c-0b1c-4d0a-9981-994b143381a7' -d \
 '{
   "resourceType": "Practitioner",
   "identifier": [ { "system": "http://hl7.org/fhir/sid/us-npi", "value": "1155667799" } ],
@@ -303,67 +333,83 @@ curl -X PATCH -H 'Content-Type: application/fhir+json' 'http://localhost:8300/ap
 }'
 ```
 
-#### GET [base]/PractitionerRole
+---
+
+### PractitionerRole Resource
+
+#### GET fhir/PractitionerRole
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/PractitionerRole'
+curl -X GET 'http://localhost:8300/apis/default/fhir/PractitionerRole'
 ```
 
-#### GET [base]/PractitionerRole/[id]
+#### GET fhir/PractitionerRole/[id]
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/PractitionerRole/90de091a-91e9-4bbe-9a81-75ed623f65bf'
+curl -X GET 'http://localhost:8300/apis/default/fhir/PractitionerRole/90de091a-91e9-4bbe-9a81-75ed623f65bf'
 ```
 
 -   Supported Search Parameters
     -   speciality
     -   practitioner
 
-#### GET [base]/Immunization
+---
+
+### Immunization Resource
+
+#### GET fhir/Immunization
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Immunization'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Immunization'
 ```
 
-#### GET [base]/Immunization/[id]
+#### GET fhir/Immunization/[id]
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Immunization/90feaaa2-4097-4437-966e-c425d1958dd6'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Immunization/90feaaa2-4097-4437-966e-c425d1958dd6'
 ```
 
 -   Supported Search Parameters
     -   patient
 
-#### GET [base]/AllergyIntolerance
+---
+
+### AllergyIntolerance Resource
+
+#### GET fhir/AllergyIntolerance
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/AllergyIntolerance'
+curl -X GET 'http://localhost:8300/apis/default/fhir/AllergyIntolerance'
 ```
 
-#### GET [base]/AllergyIntolerance/[id]
+#### GET fhir/AllergyIntolerance/[id]
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/AllergyIntolerance//90feaaa2-4097-4437-966e-c425d1958dd6'
+curl -X GET 'http://localhost:8300/apis/default/fhir/AllergyIntolerance/90feaaa2-4097-4437-966e-c425d1958dd6'
 ```
+
+---
+
+### Organization Resource
 
 #### GET /fhir/Organization
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Organization'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Organization'
 ```
 
 #### GET /fhir/Organization/:id
@@ -371,15 +417,19 @@ curl -X GET 'http://localhost:8300/apis/fhir/Organization'
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Organization/1'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Organization/1'
 ```
+
+---
+
+### Observation Resource
 
 #### GET /fhir/Observation
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Observation'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Observation'
 ```
 
 #### GET /fhir/Observation/:uuid
@@ -387,15 +437,19 @@ curl -X GET 'http://localhost:8300/apis/fhir/Observation'
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Observation/9150635b-0705-4a27-8820-df8b56cf07eb'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Observation/9150635b-0705-4a27-8820-df8b56cf07eb'
 ```
+
+---
+
+### QuestionnaireResponse Resource
 
 #### POST /fhir/QuestionnaireResponse
 
 Request:
 
 ```sh
-curl -X POST -H 'Content-Type: application/fhir+json' 'http://localhost:8300/apis/fhir/QuestionnaireResponse' -d \
+curl -X POST -H 'Content-Type: application/fhir+json' 'http://localhost:8300/apis/default/fhir/QuestionnaireResponse' -d \
 '{
   "resourceType": "QuestionnaireResponse",
   "id": "697485",
@@ -423,28 +477,36 @@ curl -X POST -H 'Content-Type: application/fhir+json' 'http://localhost:8300/api
 }'
 ```
 
-#### GET [base]/Condition
+---
+
+### Condition Resource
+
+#### GET fhir/Condition
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Condition'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Condition'
 ```
 
-#### GET [base]/Condition/[id]
+#### GET fhir/Condition/[id]
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Condition/9109890a-6756-44c1-a82d-bdfac91c7424'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Condition/9109890a-6756-44c1-a82d-bdfac91c7424'
 ```
+
+---
+
+### Procedure Resource
 
 #### GET /fhir/Procedure
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Procedure'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Procedure'
 ```
 
 #### GET /fhir/Procedure/:uuid
@@ -452,15 +514,19 @@ curl -X GET 'http://localhost:8300/apis/fhir/Procedure'
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Procedure/9109890a-6756-44c1-a82d-bdfac91c7424'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Procedure/9109890a-6756-44c1-a82d-bdfac91c7424'
 ```
+
+---
+
+### MedicationRequest Resource
 
 #### GET /fhir/MedicationRequest
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/MedicationRequest'
+curl -X GET 'http://localhost:8300/apis/default/fhir/MedicationRequest'
 ```
 
 #### GET /fhir/MedicationRequest/:uuid
@@ -468,15 +534,19 @@ curl -X GET 'http://localhost:8300/apis/fhir/MedicationRequest'
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/MedicationRequest/9128a1ec-95be-4649-8a66-d3686b7ab0ca'
+curl -X GET 'http://localhost:8300/apis/default/fhir/MedicationRequest/9128a1ec-95be-4649-8a66-d3686b7ab0ca'
 ```
+
+---
+
+### Medication Resource
 
 #### GET /fhir/Medication
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Medication'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Medication'
 ```
 
 #### GET /fhir/Medication/:uuid
@@ -484,15 +554,19 @@ curl -X GET 'http://localhost:8300/apis/fhir/Medication'
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Medication/9109890a-6756-44c1-a82d-bdfac91c7424'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Medication/9109890a-6756-44c1-a82d-bdfac91c7424'
 ```
+
+---
+
+### Location Resource
 
 #### GET /fhir/Location
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Location'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Location'
 ```
 
 #### GET /fhir/Location/:uuid
@@ -500,15 +574,19 @@ curl -X GET 'http://localhost:8300/apis/fhir/Location'
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/Location/90f3d0e9-2a19-453b-84bd-1fa2b533f96c'
+curl -X GET 'http://localhost:8300/apis/default/fhir/Location/90f3d0e9-2a19-453b-84bd-1fa2b533f96c'
 ```
+
+---
+
+### CareTeam Resource
 
 #### GET /fhir/CareTeam
 
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/CareTeam'
+curl -X GET 'http://localhost:8300/apis/default/fhir/CareTeam'
 ```
 
 #### GET /fhir/CareTeam/:uuid
@@ -516,58 +594,66 @@ curl -X GET 'http://localhost:8300/apis/fhir/CareTeam'
 Request:
 
 ```sh
-curl -X GET 'http://localhost:8300/apis/fhir/CareTeam/915e8fb4-86b2-4365-a420-d46fc07d5aed'
+curl -X GET 'http://localhost:8300/apis/default/fhir/CareTeam/915e8fb4-86b2-4365-a420-d46fc07d5aed'
 ```
 
-### /portalfhir/ Endpoints
+---
 
-OpenEMR patient portal fhir endpoints Use `http://localhost:8300/apis/portalfhir as base URI.`
+### Provenance Resources
 
-_Example:_ `http://localhost:8300/apis/portalfhir/Patient` returns a resource of the patient.
+Provenance resources are requested by including `_revinclude=Provenance:target` in the search of a resource. Is currently supported for the following resources:
+  - AllergyIntolerance
+      ```sh
+      curl -X GET 'http://localhost:8300/apis/default/fhir/AllergyIntolerance?_revinclude=Provenance:target'
+      ```
+### BULK FHIR Exports
+An export operation that implements the [BULK FHIR Export ONC requirements](https://hl7.org/fhir/uv/bulkdata/export/index.html) can be requested by issuing a GET request to the following endpoints:
+ - System Export, requires the **system/\*.$export** scope.  Exports All supported FHIR resources
+    ```sh
+          curl -X GET 'https://localhost:9300/apis/default/fhir/$export'
+    ```
+ - Group Export, requires the **system/Group.$export** scope.  Exports all data in the [Patient Compartment](https://www.hl7.org/fhir/compartmentdefinition-patient.html) for the group.
+   There is only one group defined in the system currently.  If OpenEMR defines additional patient population groups you would change the Group ID in the API call.
+    ```sh
+          curl -X GET 'https://localhost:9300/apis/default/fhir/Group/1/$export'
+    ```
+ - Patient Export, requires the **system/Group.$export** scope.  Exports all data for all patients in the [Patient Compartment](https://www.hl7.org/fhir/compartmentdefinition-patient.html).
+    ```sh
+          curl -X GET 'https://localhost:9300/apis/default/fhir/Patient/$export'
+    ``` 
+You will get an empty body response with a **Content-Location** header with the URL you can query for status updates on the export. 
 
-#### POST /portalfhir/auth
+To query the status update operation you need the **system/\*.$bulkdata-status** scope.  An example query:
+ - Status Query
+    ```sh
+          curl -X GET 'https://localhost:9300/apis/default/fhir/$bulkdata-status?job=92a94c00-77d6-4dfc-ae3b-73550742536d'
+    ``` 
 
-The OpenEMR Patient Portal FHIR service utilizes the OAuth2 password credential flow for authentication. To obtain an API token, submit your login credentials and requested scope. The scope must match a site that has been setup in OpenEMR, in the /sites/ directory. If additional sites have not been created, set the scope
-to 'default'. If the patient portal is set to require email address on authenticate, then need to also include an `email` field in the request.
-
-Request:
-
-```sh
-curl -X POST -H 'Content-Type: application/json' 'http://localhost:8300/apis/portalfhir/auth' \
--d '{
-    "grant_type":"password",
-    "username": "ServiceUser",
-    "password": "password",
-    "scope":"site id"
-}'
+A status Query will return a result like the following:
 ```
-
-Response:
-
-```json
 {
-    "token_type": "Bearer",
-    "access_token": "eyJ0b2tlbiI6IjAwNmZ4TWpsNWhsZmNPelZicXBEdEZVUlNPQUY5KzdzR1Jjejc4WGZyeGFjUjY2QlhaaEs4eThkU3cxbTd5VXFBeTVyeEZpck9mVzBQNWc5dUlidERLZ0trUElCME5wRDVtTVk5bE9WaE5DTHF5RnRnT0Q0OHVuaHRvbXZ6OTEyNmZGUmVPUllSYVJORGoyZTkzTDA5OWZSb0ZRVGViTUtWUFd4ZW5cL1piSzhIWFpJZUxsV3VNcUdjQXR5dmlLQXRXNDAiLCJzaXRlX2lkIjoiZGVmYXVsdCIsImFwaSI6Im9lbXIifQ==",
-    "expires_in": "3600",
-    "user_data": {
-        "user_id": "1"
+  "transactionTime": {
+    "date": "2021-02-05 20:48:38.000000",
+    "timezone_type": 3,
+    "timezone": "UTC"
+  },
+  "request": "\/apis\/default\/fhir\/Group\/1\/%24export",
+  "requiresAccessToken": true,
+  "output": [
+    {
+      "url": "https:\/\/localhost:9300\/apis\/default\/fhir\/Document\/97552\/Binary",
+      "type": "Patient"
+    },
+    {
+      "url": "https:\/\/localhost:9300\/apis\/default\/fhir\/Document\/105232\/Binary",
+      "type": "Encounter"
     }
+  ],
+  "error": []
 }
 ```
 
-The Bearer token is required for each OpenEMR Patient Portal FHIR service request, and is conveyed using an Authorization header.
-
-Request:
-
-```sh
-curl -X GET 'http://localhost:8300/apis/portalfhir/Patient' \
-  -H 'Authorization: Bearer eyJ0b2tlbiI6IjAwNmZ4TWpsNWhsZmNPelZicXBEdEZVUlNPQUY5KzdzR1Jjejc4WGZyeGFjUjY2QlhaaEs4eThkU3cxbTd5VXFBeTVyeEZpck9mVzBQNWc5dUlidERLZ0trUElCME5wRDVtTVk5bE9WaE5DTHF5RnRnT0Q0OHVuaHRvbXZ6OTEyNmZGUmVPUllSYVJORGoyZTkzTDA5OWZSb0ZRVGViTUtWUFd4ZW5cL1piSzhIWFpJZUxsV3VNcUdjQXR5dmlLQXRXNDAiLCJzaXRlX2lkIjoiZGVmYXVsdCIsImFwaSI6Im9lbXIifQ=='
-```
-
-#### GET /portalfhir/Patient
-
-Request:
-
-```sh
-curl -X GET 'http://localhost:8300/apis/portalfhir/Patient'
-```
+You can download the exported documents which are formatted in Newline Delimited JSON (NDJSON) by making a call to:
+    ```sh
+          curl -X GET 'https://10.0.0.9:9300/apis/default/fhir/Document/105232/Binary'
+    ``` 

@@ -43,7 +43,7 @@ class FhirPractitionerRoleRestController
         $bundleEntries = array();
         foreach ($processingResult->getData() as $index => $searchResult) {
             $bundleEntry = [
-                'fullUrl' =>  \RestConfig::$REST_FULL_URL . '/' . $searchResult->getId(),
+                'fullUrl' =>  $GLOBALS['site_addr_oath'] . ($_SERVER['REDIRECT_URL'] ?? '') . '/' . $searchResult->getId(),
                 'resource' => $searchResult
             ];
             $fhirBundleEntry = new FHIRBundleEntry($bundleEntry);
@@ -63,6 +63,6 @@ class FhirPractitionerRoleRestController
     public function getOne($fhirId)
     {
         $processingResult = $this->fhirPractitionerRoleService->getOne($fhirId);
-        return RestControllerHelper::handleProcessingResult($processingResult, 200);
+        return RestControllerHelper::handleFhirProcessingResult($processingResult, 200);
     }
 }

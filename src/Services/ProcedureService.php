@@ -49,10 +49,11 @@ class ProcedureService extends BaseService
      *
      * @param  $search search array parameters
      * @param  $isAndCondition specifies if AND condition is used for multiple criteria. Defaults to true.
+     * @param $puuidBind - Optional variable to only allow visibility of the patient with this puuid.
      * @return ProcessingResult which contains validation messages, internal error messages, and the data
      * payload.
      */
-    public function getAll($search = array(), $isAndCondition = true)
+    public function getAll($search = array(), $isAndCondition = true, $puuidBind = null)
     {
         $sqlBindArray = array();
 
@@ -69,10 +70,24 @@ class ProcedureService extends BaseService
             $search['patient.uuid'] = UuidRegistry::uuidToBytes($search['patient.uuid']);
         }
 
+        if (!empty($puuidBind)) {
+            // code to support patient binding
+            $isValidPatient = BaseValidator::validateId(
+                'uuid',
+                self::PATIENT_TABLE,
+                $puuidBind,
+                true
+            );
+            if ($isValidPatient !== true) {
+                return $isValidPatient;
+            }
+        }
+
         $sql = "SELECT porder.*,
                 pcode.diagnoses,
                 pcode.procedure_order_title,
                 pcode.procedure_name,
+                pcode.procedure_code,
                 presult.result_status,
                 presult.result_code,
                 presult.result_text,
@@ -99,6 +114,10 @@ class ProcedureService extends BaseService
 
         if (!empty($search)) {
             $sql .= ' WHERE ';
+            if (!empty($puuidBind)) {
+                // code to support patient binding
+                $sql .= '(';
+            }
             $whereClauses = array();
             foreach ($search as $fieldName => $fieldValue) {
                 array_push($whereClauses, $fieldName . ' = ?');
@@ -106,6 +125,15 @@ class ProcedureService extends BaseService
             }
             $sqlCondition = ($isAndCondition == true) ? 'AND' : 'OR';
             $sql .= implode(' ' . $sqlCondition . ' ', $whereClauses);
+            if (!empty($puuidBind)) {
+                // code to support patient binding
+                $sql .= ") AND `patient`.`uuid` = ?";
+                $sqlBindArray[] = UuidRegistry::uuidToBytes($puuidBind);
+            }
+        } elseif (!empty($puuidBind)) {
+            // code to support patient binding
+            $sql .= " WHERE `patient`.`uuid` = ?";
+            $sqlBindArray[] = UuidRegistry::uuidToBytes($puuidBind);
         }
 
         $statementResults = sqlStatement($sql, $sqlBindArray);
@@ -131,10 +159,11 @@ class ProcedureService extends BaseService
     /**
      * Returns a single procedure record by id.
      * @param $uuid - The procedure uuid identifier in string format.
+     * @param $puuidBind - Optional variable to only allow visibility of the patient with this puuid.
      * @return ProcessingResult which contains validation messages, internal error messages, and the data
      * payload.
      */
-    public function getOne($uuid)
+    public function getOne($uuid, $puuidBind = null)
     {
         $processingResult = new ProcessingResult();
 
@@ -146,10 +175,24 @@ class ProcedureService extends BaseService
             $processingResult->setValidationMessages($validationMessages);
             return $processingResult;
         }
+
+        if (!empty($puuidBind)) {
+            // code to support patient binding
+            $isValid = BaseValidator::validateId("uuid", self::PATIENT_TABLE, $puuidBind, true);
+            if ($isValid !== true) {
+                $validationMessages = [
+                    'puuid' => ["invalid or nonexisting value" => " value " . $puuidBind]
+                ];
+                $processingResult->setValidationMessages($validationMessages);
+                return $processingResult;
+            }
+        }
+
         $sql = "SELECT porder.*,
                 pcode.diagnoses,
                 pcode.procedure_order_title,
                 pcode.procedure_name,
+                pcode.procedure_code,
                 presult.result_status,
                 presult.result_code,
                 presult.result_text,
@@ -176,18 +219,39 @@ class ProcedureService extends BaseService
                 WHERE porder.uuid = ?";
 
         $uuidBinary = UuidRegistry::uuidToBytes($uuid);
-        $sqlResult = sqlQuery($sql, [$uuidBinary]);
-        $sqlResult['uuid'] = UuidRegistry::uuidToString($sqlResult['uuid']);
-        $sqlResult['puuid'] = UuidRegistry::uuidToString($sqlResult['puuid']);
-        $sqlResult['euuid'] = UuidRegistry::uuidToString($sqlResult['euuid']);
-        $sqlResult['pruuid'] = UuidRegistry::uuidToString($sqlResult['pruuid']);
-        if ($sqlResult['order_diagnosis'] != "") {
-            $sqlResult['order_diagnosis'] = $this->addDiagnosis($sqlResult['order_diagnosis']);
+        $sqlBindArray = [$uuidBinary];
+
+        if (!empty($puuidBind)) {
+            // code to support patient binding
+            $sql .= " AND `patient`.`uuid` = ?";
+            $sqlBindArray[] = UuidRegistry::uuidToBytes($puuidBind);
         }
-        if ($sqlResult['diagnoses'] != "") {
-            $sqlResult['diagnoses'] = $this->addDiagnosis($sqlResult['diagnoses']);
+
+        $sqlResult = sqlQuery($sql, $sqlBindArray);
+        if (!empty($sqlResult)) {
+            $sqlResult['uuid'] = UuidRegistry::uuidToString($sqlResult['uuid']);
+            $sqlResult['puuid'] = UuidRegistry::uuidToString($sqlResult['puuid']);
+            $sqlResult['euuid'] = UuidRegistry::uuidToString($sqlResult['euuid']);
+            $sqlResult['pruuid'] = UuidRegistry::uuidToString($sqlResult['pruuid']);
+            if ($sqlResult['order_diagnosis'] != "") {
+                $sqlResult['order_diagnosis'] = $this->addDiagnosis($sqlResult['order_diagnosis']);
+            }
+            if ($sqlResult['diagnoses'] != "") {
+                $sqlResult['diagnoses'] = $this->addDiagnosis($sqlResult['diagnoses']);
+            }
+            $processingResult->addData($sqlResult);
         }
-        $processingResult->addData($sqlResult);
         return $processingResult;
+    }
+
+    public function addDiagnosis($data)
+    {
+        $diagnosisArray = array();
+        $dataArray = explode(";", $data);
+        foreach ($dataArray as $diagnosis) {
+            $diagnosisSplit = explode(":", $diagnosis);
+            array_push($diagnosisArray, $diagnosisSplit);
+        }
+        return $diagnosisArray;
     }
 }

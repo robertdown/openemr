@@ -321,7 +321,7 @@ while ($currdate <= $enddate) {
 /*********************************************************************
 $facilities = getFacilities();
 *********************************************************************/
-if ($_SESSION['authorizeduser'] == 1) {
+if (!empty($_SESSION['authorizeduser']) && ($_SESSION['authorizeduser'] == 1)) {
   $facilities = getFacilities();
 } else {
   $facilities = getUserFacilities($_SESSION['authUserID']); // from users_facility
@@ -687,7 +687,7 @@ foreach ($providers as $provider) {
             $commapos = strpos($event['patient_name'], ",");
             $lname = substr($event['patient_name'], 0, $commapos);
 	        $fname = substr($event['patient_name'], $commapos + 2);
-            $patient_dob = $event['patient_dob'];
+            $patient_dob = oeFormatShortDate($event['patient_dob']);
             $patient_age = $event['patient_age'];
             $catid = $event['catid'];
             $comment = $event['hometext'];
@@ -970,7 +970,6 @@ echo "</div>\n";
         });
 
         //$('div.providerheader').find('*').css('font-size', $('div.providerheader:first').css('font-size')).addClass(' mx-1 p-0 border-0 align-middle');
-        $('a.providerXbtn').addClass('mx-1 close');
         $('.providerXbtn').on('click', providerXclick);
 
     });
@@ -997,12 +996,12 @@ echo "</div>\n";
      */
     var ChangeDate = function(eObj) {
         baseURL = "[-php-]echo pnModURL(__POSTCALENDAR__,'user','view',
-                        array('tplview'=>$template_view,
+                        array('tplview'=>($template_view ?? ''),
                         'viewtype'=>$viewtype,
                         'Date'=> '~REPLACEME~',
-                        'pc_username'=>$pc_username,
-                        'pc_category'=>$category,
-                        'pc_topic'=>$topic));[-/php-]";
+                        'pc_username'=>($pc_username ?? ''),
+                        'pc_category'=>($category ?? ''),
+                        'pc_topic'=>($topic ?? '')));[-/php-]";
         newURL = baseURL.replace(/~REPLACEME~/, eObj.id);
         document.location.href=newURL;
     }
@@ -1011,13 +1010,13 @@ echo "</div>\n";
      */
     var PrintView = function (eventObject) {
         printURL = "[-php-]echo pnModURL(__POSTCALENDAR__,'user','view',
-                        array('tplview'=>$template_view,
+                        array('tplview'=>($template_view ?? ''),
                         'viewtype'=>$viewtype,
                         'Date'=> $Date,
                         'print'=> 1,
-                        'pc_username'=>$pc_username,
-                        'pc_category'=>$category,
-                        'pc_topic'=>$topic));[-/php-]";
+                        'pc_username'=>($pc_username ?? ''),
+                        'pc_category'=>($category ?? ''),
+                        'pc_topic'=>($topic ?? '')));[-/php-]";
         window.open(printURL,'printwindow','width=740,height=480,toolbar=no,location=no,directories=no,status=no,menubar=yes,scrollbars=yes,copyhistory=no,resizable=yes');
         return false;
     }

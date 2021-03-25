@@ -172,7 +172,8 @@ define_external_table($code_external_tables, 6, 'icd10_pcs_order_code', 'pcs_cod
  * 'external' attribute  for explanation of the option listings.
  * @var array
  */
-$cd_external_options = array(
+global $ct_external_options;
+$ct_external_options = array(
   '0' => xl('No'),
   '4' => xl('ICD9 Diagnosis'),
   '5' => xl('ICD9 Procedure/Service'),
@@ -475,7 +476,7 @@ function main_code_set_search($form_code_type, $search_term, $limit = null, $cat
  */
 function code_set_search($form_code_type, $search_term = "", $count = false, $active = true, $return_only_one = false, $start = null, $number = null, $filter_elements = array(), $limit = null, $mode = 'default', $return_query = false)
 {
-    global $code_types,$code_external_tables;
+    global $code_types, $code_external_tables;
 
   // Figure out the appropriate limit clause
     $limit_query = limit_query_string($limit, $start, $number, $return_only_one);
@@ -697,7 +698,7 @@ function lookup_code_descriptions($codes, $desc_detail = "code_text")
             }
 
             list($codetype, $code) = explode(':', $codestring);
-            $table_id = $code_types[$codetype]['external'];
+            $table_id = $code_types[$codetype]['external'] ?? '';
             if (isset($code_external_tables[$table_id])) {
                 $table_info = $code_external_tables[$table_id];
                 $table_name = $table_info[EXT_TABLE_NAME];

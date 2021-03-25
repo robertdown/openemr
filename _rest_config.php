@@ -7,57 +7,59 @@
  * @link      http://www.open-emr.org
  * @author    Jerry Padgett <sjpadgett@gmail.com>
  * @author    Brady Miller <brady.g.miller@gmail.com>
- * @copyright Copyright (c) 2018 Jerry Padgett <sjpadgett@gmail.com>
+ * @copyright Copyright (c) 2018-2020 Jerry Padgett <sjpadgett@gmail.com>
  * @copyright Copyright (c) 2019 Brady Miller <brady.g.miller@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
 
-require_once(dirname(__FILE__) . "/src/Common/Session/SessionUtil.php");
+require_once __DIR__ . '/vendor/autoload.php';
 
+use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
+use League\OAuth2\Server\Exception\OAuthServerException;
+use League\OAuth2\Server\ResourceServer;
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Nyholm\Psr7Server\ServerRequestCreator;
 use OpenEMR\Common\Acl\AclMain;
-use OpenEMR\Common\Crypto\CryptoGen;
-use OpenEMR\RestControllers\AuthRestController;
+use OpenEMR\Common\Auth\OpenIDConnect\Repositories\AccessTokenRepository;
+use OpenEMR\Common\Logging\EventAuditLogger;
+use OpenEMR\Common\Logging\SystemLogger;
+use OpenEMR\Common\Session\SessionUtil;
+use OpenEMR\Services\TrustedUserService;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
 
 // also a handy place to add utility methods
+// TODO before v6 release: refactor http_response_code(); for psr responses.
 //
 class RestConfig
 {
-    /** @var set to true to send debug info to the browser */
-    public static $DEBUG_MODE = false;
-
-    /** @var default action is the controller.method fired when no route is specified */
-    public static $DEFAULT_ACTION = "";
-
     /** @var routemap is an array of patterns and routes */
     public static $ROUTE_MAP;
 
-    /** @var fhir routemap is an array of patterns and routes */
+    /** @var fhir routemap is an  of patterns and routes */
     public static $FHIR_ROUTE_MAP;
 
-    /** @var portal routemap is an array of patterns and routes */
+    /** @var portal routemap is an  of patterns and routes */
     public static $PORTAL_ROUTE_MAP;
-
-    /** @var portal fhir routemap is an array of patterns and routes */
-    public static $PORTAL_FHIR_ROUTE_MAP;
 
     /** @var app root is the root directory of the application */
     public static $APP_ROOT;
 
     /** @var root url of the application */
     public static $ROOT_URL;
-    public static $REST_FULL_URL;
+    // you can guess what the rest are!
     public static $VENDOR_DIR;
+    public static $SITE;
+    public static $apisBaseFullUrl;
     public static $webserver_root;
     public static $web_root;
     public static $server_document_root;
-    public static $SITE;
-
+    public static $publicKey;
     private static $INSTANCE;
     private static $IS_INITIALIZED = false;
-
     /**  @var set to true if local api call */
     private static $localCall = false;
-
     /**  @var set to true if not rest call */
     private static $notRestCall = false;
 
@@ -66,30 +68,12 @@ class RestConfig
     {
     }
 
-    /** prevents external cloning */
-    private function __clone()
-    {
-    }
-
-    /**
-     * Initialize the RestConfig object
-     */
-    static function Init()
-    {
-        if (!self::$IS_INITIALIZED) {
-            self::setPaths();
-            self::$REST_FULL_URL = $_SERVER['REQUEST_SCHEME'] . "//" . $_SERVER['SERVER_NAME'] . $_SERVER['REDIRECT_URL']; // @todo unsure here!
-            self::$ROOT_URL = self::$web_root . "/apis";
-            self::$VENDOR_DIR = self::$webserver_root . "/vendor";
-            self::$IS_INITIALIZED = true;
-        }
-    }
-
     /**
      * Returns an instance of the RestConfig singleton
+     *
      * @return RestConfig
      */
-    static function GetInstance()
+    public static function GetInstance(): \RestConfig
     {
         if (!self::$IS_INITIALIZED) {
             self::Init();
@@ -102,15 +86,33 @@ class RestConfig
         return self::$INSTANCE;
     }
 
+    /**
+     * Initialize the RestConfig object
+     */
+    public static function Init(): void
+    {
+        if (self::$IS_INITIALIZED) {
+            return;
+        }
+        // The busy stuff.
+        self::setPaths();
+        self::setSiteFromEndpoint();
+        self::$ROOT_URL = self::$web_root . "/apis";
+        self::$VENDOR_DIR = self::$webserver_root . "/vendor";
+        self::$publicKey = self::$webserver_root . "/sites/" . self::$SITE . "/documents/certificates/oapublic.key";
+        self::$IS_INITIALIZED = true;
+    }
 
     /**
      * Basic paths when GLOBALS are not yet available.
-     * @return none
+     *
+     * @return void
      */
-    static function SetPaths()
+    private static function SetPaths(): void
     {
-        $isWindows = stripos(PHP_OS, 'WIN') === 0;
-        self::$webserver_root = dirname(__FILE__);
+        $isWindows = (stripos(PHP_OS_FAMILY, 'WIN') === 0);
+        // careful if moving this class to modify where's root.
+        self::$webserver_root = __DIR__;
         if ($isWindows) {
             //convert windows path separators
             self::$webserver_root = str_replace("\\", "/", self::$webserver_root);
@@ -126,34 +128,160 @@ class RestConfig
         if (preg_match("/^[^\/]/", self::$web_root)) {
             self::$web_root = "/" . self::$web_root;
         }
+        // Will need these occasionally. sql init comes to mind!
+        $GLOBALS['rootdir'] = self::$web_root . "/interface";
+        // Absolute path to the source code include and headers file directory (Full path):
+        $GLOBALS['srcdir'] = self::$webserver_root . "/library";
+        // Absolute path to the location of documentroot directory for use with include statements:
+        $GLOBALS['fileroot'] = self::$webserver_root;
+        // Absolute path to the location of interface directory for use with include statements:
+        $GLOBALS['incdir'] = self::$webserver_root . "/interface";
+        // Absolute path to the location of documentroot directory for use with include statements:
+        $GLOBALS['webroot'] = self::$web_root;
+        // Static assets directory, relative to the webserver root.
+        $GLOBALS['assets_static_relative'] = self::$web_root . "/public/assets";
+        // Relative themes directory, relative to the webserver root.
+        $GLOBALS['themes_static_relative'] = self::$web_root . "/public/themes";
+        // Relative images directory, relative to the webserver root.
+        $GLOBALS['images_static_relative'] = self::$web_root . "/public/images";
+        // Static images directory, absolute to the webserver root.
+        $GLOBALS['images_static_absolute'] = self::$webserver_root . "/public/images";
+        //Composer vendor directory, absolute to the webserver root.
+        $GLOBALS['vendor_dir'] = self::$webserver_root . "/vendor";
     }
 
-    static function destroySession()
+    private static function setSiteFromEndpoint(): void
     {
-        OpenEMR\Common\Session\SessionUtil::apiSessionCookieDestroy();
+        // Get site from endpoint if available. Unsure about this though!
+        // Will fail during sql init otherwise.
+        $endPointParts = self::parseEndPoint(self::getRequestEndPoint());
+        if (count($endPointParts) > 1) {
+            $site_id = $endPointParts[0] ?? '';
+            if ($site_id) {
+                self::$SITE = $site_id;
+            }
+        }
     }
 
-    static function getPostData($data)
+    public static function parseEndPoint($resource): array
     {
-        if (count($_POST)) {
-            return $_POST;
-        } elseif ($post_data = file_get_contents('php://input')) {
-            if ($post_json = json_decode($post_data, true)) {
-                return $post_json;
-            } else {
-                parse_str($post_data, $post_variables);
-                if (count($post_variables)) {
-                    return $post_variables;
+        if ($resource[0] === '/') {
+            $resource = substr($resource, 1);
+        }
+        return explode('/', $resource);
+    }
+
+    public static function getRequestEndPoint(): string
+    {
+        $resource = null;
+        if (!empty($_REQUEST['_REWRITE_COMMAND'])) {
+            $resource = "/" . $_REQUEST['_REWRITE_COMMAND'];
+        } elseif (!empty($_SERVER['REDIRECT_QUERY_STRING'])) {
+            $resource = str_replace('_REWRITE_COMMAND=', '/', $_SERVER['REDIRECT_QUERY_STRING']);
+        } else {
+            if (!empty($_SERVER['REQUEST_URI'])) {
+                if (strpos($_SERVER['REQUEST_URI'], '?') > 0) {
+                    $resource = strstr($_SERVER['REQUEST_URI'], '?', true);
+                } else {
+                    $resource = str_replace(self::$ROOT_URL, '', $_SERVER['REQUEST_URI']);
                 }
             }
         }
 
-        return false;
+        return $resource;
     }
 
-    static function authorization_check($section, $value)
+    public static function verifyAccessToken()
     {
-        $result = AclMain::aclCheckCore($section, $value);
+        $logger = new SystemLogger();
+        $response = self::createServerResponse();
+        $request = self::createServerRequest();
+        $server = new ResourceServer(
+            new AccessTokenRepository(),
+            self::$publicKey
+        );
+        try {
+            $raw = $server->validateAuthenticatedRequest($request);
+        } catch (OAuthServerException $exception) {
+            $logger->error("RestConfig->verifyAccessToken() OAuthServerException", ["message" => $exception->getMessage()]);
+            return $exception->generateHttpResponse($response);
+        } catch (\Exception $exception) {
+            $logger->error("RestConfig->verifyAccessToken() Exception", ["message" => $exception->getMessage()]);
+            return (new OAuthServerException($exception->getMessage(), 0, 'unknown_error', 500))
+                ->generateHttpResponse($response);
+        }
+
+        return $raw;
+    }
+
+    public static function isTrustedUser($clientId, $userId)
+    {
+        $trustedUserService = new TrustedUserService();
+        $response = self::createServerResponse();
+        try {
+            if (!$trustedUserService->isTrustedUser($clientId, $userId)) {
+                (new SystemLogger())->debug(
+                    "invalid Trusted User.  Refresh Token revoked or logged out",
+                    ['clientId' => $clientId, 'userId' => $userId]
+                );
+                throw new OAuthServerException('Refresh Token revoked or logged out', 0, 'invalid _request', 400);
+            }
+            return $trustedUserService->getTrustedUser($clientId, $userId);
+        } catch (OAuthServerException $exception) {
+            return $exception->generateHttpResponse($response);
+        } catch (\Exception $exception) {
+            return (new OAuthServerException($exception->getMessage(), 0, 'unknown_error', 500))
+                ->generateHttpResponse($response);
+        }
+    }
+
+    public static function createServerResponse(): ResponseInterface
+    {
+        $psr17Factory = new Psr17Factory();
+
+        return $psr17Factory->createResponse();
+    }
+
+    public static function createServerRequest(): ServerRequestInterface
+    {
+        $psr17Factory = new Psr17Factory();
+        $creator = new ServerRequestCreator(
+            $psr17Factory, // ServerRequestFactory
+            $psr17Factory, // UriFactory
+            $psr17Factory, // UploadedFileFactory
+            $psr17Factory  // StreamFactory
+        );
+
+        return $creator->fromGlobals();
+    }
+
+    public static function destroySession(): void
+    {
+        SessionUtil::apiSessionCookieDestroy();
+    }
+
+    public static function getPostData($data)
+    {
+        if (count($_POST)) {
+            return $_POST;
+        }
+
+        if ($post_data = file_get_contents('php://input')) {
+            if ($post_json = json_decode($post_data, true)) {
+                return $post_json;
+            }
+            parse_str($post_data, $post_variables);
+            if (count($post_variables)) {
+                return $post_variables;
+            }
+        }
+
+        return null;
+    }
+
+    public static function authorization_check($section, $value, $user = ''): void
+    {
+        $result = AclMain::aclCheckCore($section, $value, $user);
         if (!$result) {
             if (!self::$notRestCall) {
                 http_response_code(401);
@@ -162,148 +290,212 @@ class RestConfig
         }
     }
 
-    static function setLocalCall()
+    // Main function to check scope
+    //  Use cases:
+    //     Only sending $scopeType would be for something like 'openid'
+    //     For using all 3 parameters would be for something like 'user/Organization.write'
+    //       $scopeType = 'user', $resource = 'Organization', $permission = 'write'
+    public static function scope_check($scopeType, $resource = null, $permission = null): void
+    {
+        if (!empty($GLOBALS['oauth_scopes'])) {
+            // Need to ensure has scope
+            if (empty($resource)) {
+                // Simply check to see if $scopeType is an allowed scope
+                $scope = $scopeType;
+            } else {
+                // Resource scope check
+                $scope = $scopeType . '/' . $resource . '.' . $permission;
+            }
+            if (!in_array($scope, $GLOBALS['oauth_scopes'])) {
+                (new SystemLogger())->debug("RestConfig::scope_check scope not in access token", ['scope' => $scope]);
+                http_response_code(401);
+                exit;
+            }
+        } else {
+            (new SystemLogger())->error("RestConfig::scope_check global scope array is empty");
+            http_response_code(401);
+            exit;
+        }
+    }
+
+    public static function setLocalCall(): void
     {
         self::$localCall = true;
     }
 
-    static function setNotRestCall()
+    public static function setNotRestCall(): void
     {
         self::$notRestCall = true;
     }
 
-    static function is_authentication($resource)
+    public static function is_fhir_request($resource): bool
     {
-        return ($resource === "/api/auth" || $resource === "/fhir/auth" || $resource === "/portal/auth" || $resource === "/portalfhir/auth");
+        return stripos(strtolower($resource), "/fhir/") !== false;
     }
 
-    static function get_bearer_token()
+    public static function is_portal_request($resource): bool
     {
-        $parse = preg_split("/[\s,]+/", $_SERVER["HTTP_AUTHORIZATION"]);
-        if (strtoupper(trim($parse[0])) !== 'BEARER') {
-            return false;
+        return stripos(strtolower($resource), "/portal/") !== false;
+    }
+
+    public static function is_api_request($resource): bool
+    {
+        return stripos(strtolower($resource), "/api/") !== false;
+    }
+
+    public static function skipApiAuth($resource): bool
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            // we don't authenticate OPTIONS requests
+            return true;
         }
 
-        return trim($parse[1]);
-    }
-
-    static function is_api_request($resource)
-    {
-        return (stripos(strtolower($resource), "/api/") !== false) ? true : false;
-    }
-
-    static function is_fhir_request($resource)
-    {
-        return (stripos(strtolower($resource), "/fhir/") !== false) ? true : false;
-    }
-
-    static function is_portal_request($resource)
-    {
-        return (stripos(strtolower($resource), "/portal/") !== false) ? true : false;
-    }
-
-    static function is_portal_fhir_request($resource)
-    {
-        return (stripos(strtolower($resource), "/portalfhir/") !== false) ? true : false;
-    }
-
-    static function verify_api_request($resource, $api)
-    {
-        $api = strtolower(trim($api));
-        if (self::is_fhir_request($resource)) {
-            if ($api !== 'fhir') {
-                http_response_code(401);
-                exit();
-            }
-        } elseif (self::is_portal_request($resource)) {
-            if ($api !== 'port') {
-                http_response_code(401);
-                exit();
-            }
-        } elseif (self::is_portal_fhir_request($resource)) {
-            if ($api !== 'pofh') {
-                http_response_code(401);
-                exit();
-            }
-        } elseif (self::is_api_request($resource)) {
-            if ($api !== 'oemr') {
-                http_response_code(401);
-                exit();
-            }
-        } else {
-            // somebody is up to no good
-            http_response_code(401);
+        // ensure 1) sane site and 2) ensure the site exists on filesystem before even considering for skip api auth
+        if (empty(self::$SITE) || preg_match('/[^A-Za-z0-9\\-.]/', self::$SITE) || !file_exists(__DIR__ . '/sites/' . self::$SITE)) {
+            error_log("OpenEMR Error - api site error, so forced exit");
+            http_response_code(400);
             exit();
         }
-
-        return;
-    }
-
-    static function authentication_check($resource)
-    {
-        if (!self::is_authentication($resource)) {
-            $token = $_SERVER["HTTP_X_API_TOKEN"];
-            $authRestController = new AuthRestController();
-            if (!$authRestController->isValidToken($token)) {
-                self::destroySession();
-                http_response_code(401);
-                exit();
-            } else {
-                // Note the isValidToken() set the $_SESSION['authUser'] and $_SESSION['authUserId'] for core/fhir api
-                //  or $_SESSION['pid'] for patient portal api/fhir
-                $authRestController->optionallyAddMoreTokenTime($token);
-            }
+        // let the capability statement for FHIR or the SMART-on-FHIR through
+        if (
+            $resource === ("/" . self::$SITE . "/fhir/metadata") ||
+            $resource === ("/" . self::$SITE . "/fhir/.well-known/smart-configuration")
+        ) {
+            return true;
+        } else {
+            return false;
         }
     }
 
-    static function apiLog($response = '', $requestBody = '')
+    public static function apiLog($response = '', $requestBody = ''): void
     {
+        $logResponse = $response;
+
         // only log when using standard api calls (skip when using local api calls from within OpenEMR)
         //  and when api log option is set
-        if (!$GLOBALS['is_local_api'] && $GLOBALS['api_log_option']) {
+        if (!$GLOBALS['is_local_api'] && !self::$notRestCall && $GLOBALS['api_log_option']) {
             if ($GLOBALS['api_log_option'] == 1) {
                 // Do not log the response and requestBody
-                $response = '';
+                $logResponse = '';
                 $requestBody = '';
             }
-
-            // collect pertinent elements
-            $method = $_SERVER['REQUEST_METHOD'];
-            $url = $_SERVER['REQUEST_URI'];
+            if ($response instanceof ResponseInterface) {
+                if (self::shouldLogResponse($response)) {
+                    $body = $response->getBody();
+                    $logResponse = $body->getContents();
+                    $body->rewind();
+                } else {
+                    $logResponse = 'Content not application/json - Skip binary data';
+                }
+            } else {
+                $logResponse = (!empty($logResponse)) ? json_encode($response) : '';
+            }
 
             // convert pertinent elements to json
             $requestBody = (!empty($requestBody)) ? json_encode($requestBody) : '';
-            $response = (!empty($response)) ? json_encode($response) : '';
 
-            // encrypt pertinent elements if log encryption is turned on
-            $encrypted = 0;
-            if ($GLOBALS['enable_auditlog_encryption']) {
-                $encrypted = 1;
-                $cryptoGen = new CryptoGen();
-                $url = (!empty($url)) ? $cryptoGen->encryptStandard($url) : '';
-                $requestBody = (!empty($requestBody)) ? $cryptoGen->encryptStandard($requestBody) : '';
-                $response =  (!empty($response)) ? $cryptoGen->encryptStandard($response) : '';
+            // prepare values and call the log function
+            $event = 'api';
+            $category = 'api';
+            $method = $_SERVER['REQUEST_METHOD'];
+            $url = $_SERVER['REQUEST_URI'];
+            $patientId = (int)($_SESSION['pid'] ?? 0);
+            $userId = (int)($_SESSION['authUserID'] ?? 0);
+            $api = [
+                'user_id' => $userId,
+                'patient_id' => $patientId,
+                'method' => $method,
+                'request' => $GLOBALS['resource'],
+                'request_url' => $url,
+                'request_body' => $requestBody,
+                'response' => $logResponse
+            ];
+            if ($patientId === 0) {
+                $patientId = null; //entries in log table are blank for no patient_id, whereas in api_log are 0, which is why above $api value uses 0 when empty
             }
-
-            // log the api call
-            sqlStatementNoLog(
-                "INSERT INTO `api_log` (`user_id`, `patient_id`, `ip_address`, `method`, `request`, `request_url`, `request_body`, `response`, `encrypted`, `created_time`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
-                [
-                    ($_SESSION['authUserID'] ?? 0),
-                    ($_SESSION['pid'] ?? 0),
-                    collectIpAddresses()['ip_string'],
-                    $method,
-                    $GLOBALS['resource'],
-                    $url,
-                    $requestBody,
-                    $response,
-                    $encrypted
-                ]
-            );
+            EventAuditLogger::instance()->recordLogItem(1, $event, ($_SESSION['authUser'] ?? ''), ($_SESSION['authProvider'] ?? ''), 'api log', $patientId, $category, 'open-emr', null, null, '', $api);
         }
+    }
+
+    public static function emitResponse($response, $build = false): void
+    {
+        if (headers_sent()) {
+            throw new RuntimeException('Headers already sent.');
+        }
+        $statusLine = sprintf(
+            'HTTP/%s %s %s',
+            $response->getProtocolVersion(),
+            $response->getStatusCode(),
+            $response->getReasonPhrase()
+        );
+        header($statusLine, true);
+        foreach ($response->getHeaders() as $name => $values) {
+            $responseHeader = sprintf('%s: %s', $name, $response->getHeaderLine($name));
+            header($responseHeader, false);
+        }
+        echo $response->getBody();
+    }
+
+    /**
+     * If the FHIR System scopes enabled or not.  True if its turned on, false otherwise.
+     * @return bool
+     */
+    public static function areSystemScopesEnabled()
+    {
+        return $GLOBALS['rest_system_scopes_api'] === '1';
+    }
+
+    public function authenticateUserToken($tokenId, $clientId, $userId): bool
+    {
+        $ip = collectIpAddresses();
+
+        // check for token
+        $accessTokenRepo = new AccessTokenRepository();
+        $authTokenExpiration = $accessTokenRepo->getTokenExpiration($tokenId, $clientId, $userId);
+
+        if (empty($authTokenExpiration)) {
+            EventAuditLogger::instance()->newEvent('api', '', '', 0, "API failure: " . $ip['ip_string'] . ". Token not found for client[" . $clientId . "] and user " . $userId . ".");
+            return false;
+        }
+
+        // Ensure token not expired (note an expired token should have already been caught by oauth2, however will also check here)
+        $currentDateTime = date("Y-m-d H:i:s");
+        $expiryDateTime = date("Y-m-d H:i:s", strtotime($authTokenExpiration));
+        if ($expiryDateTime <= $currentDateTime) {
+            EventAuditLogger::instance()->newEvent('api', '', '', 0, "API failure: " . $ip['ip_string'] . ". Token expired for client[" . $clientId . "] and user " . $userId . ".");
+            return false;
+        }
+
+        // Token authentication passed
+        EventAuditLogger::instance()->newEvent('api', '', '', 1, "API success: " . $ip['ip_string'] . ". Token successfully used for client[" . $clientId . "] and user " . $userId . ".");
+        return true;
+    }
+
+    /**
+     * Checks if we should log the response interface (we don't want to log binary documents or anything like that)
+     * We only log requests with a content-type of any form of json fhir+application/json or application/json
+     * @param ResponseInterface $response
+     * @return bool If the request should be logged, false otherwise
+     */
+    private static function shouldLogResponse(ResponseInterface $response)
+    {
+        if ($response->hasHeader("Content-Type")) {
+            $contentType = $response->getHeaderLine("Content-Type");
+            if ($contentType === 'application/json') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    /** prevents external cloning */
+    private function __clone()
+    {
     }
 }
 
 // Include our routes and init routes global
 //
-require_once(dirname(__FILE__) . "/_rest_routes.inc.php");
+require_once(__DIR__ . "/_rest_routes.inc.php");

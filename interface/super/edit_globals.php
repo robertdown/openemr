@@ -113,6 +113,21 @@ function checkBackgroundServices()
     $phimail_active = empty($GLOBALS['phimail_enable']) ? '0' : '1';
     $phimail_interval = max(0, (int) $GLOBALS['phimail_interval']);
     updateBackgroundService('phimail', $phimail_active, $phimail_interval);
+
+    // When auto SFTP is enabled in globals, set up background task to run every minute
+    // to check for claims in the 'waiting' status.
+    // See library/billing_sftp_service.php for the entry point to this service.
+    // It is very lightweight if there is no work to do, so running every minute should
+    // be OK to provider users with the best experience.
+    $auto_sftp_x12 = empty($GLOBALS['auto_sftp_claims_to_x12_partner']) ? '0' : '1';
+    updateBackgroundService('X12_SFTP', $auto_sftp_x12, 1);
+
+    /**
+     * Setup background services for Weno when it is enabled
+     * this is to sync the prescription logs
+     */
+    $wenoservices = $GLOBALS['weno_rx_enable'] == 1 ? '1' : '0';
+    updateBackgroundService('WenoExchange', $wenoservices, 240);
 }
 ?>
 <!DOCTYPE html>
@@ -195,11 +210,6 @@ if (array_key_exists('form_save', $_POST) && $_POST['form_save'] && !$userMode) 
     foreach ($GLOBALS_METADATA as $grpname => $grparr) {
         foreach ($grparr as $fldid => $fldarr) {
             list($fldname, $fldtype, $flddef, $flddesc) = $fldarr;
-            if ($fldtype == 'pwd') {
-                $pass = sqlQuery("SELECT gl_value FROM globals WHERE gl_name = ?", array($fldid));
-                $fldvalueold = $pass['gl_value'];
-            }
-
             /* Multiple choice fields - do not compare , overwrite */
             if (!is_array($fldtype) && substr($fldtype, 0, 2) == 'm_') {
                 if (isset($_POST["form_$i"])) {
@@ -219,10 +229,6 @@ if (array_key_exists('form_save', $_POST) && $_POST['form_save'] && !$userMode) 
                     $fldvalue = trim($_POST["form_$i"]);
                 } else {
                     $fldvalue = "";
-                }
-
-                if ($fldtype == 'pwd') {
-                    $fldvalue = $fldvalue ? SHA1($fldvalue) : $fldvalueold; // TODO: salted passwords?
                 }
 
                 if ($fldtype == 'encrypted') {
@@ -301,24 +307,18 @@ if (array_key_exists('form_save', $_POST) && $_POST['form_save'] && !$userMode) 
 
 <style>
 #oe-nav-ul.tabNav {
-    display: flex !important;
-    flex-flow: column !important;
+    display: flex;
+    flex-flow: column;
+    max-width: 15%;
 }
-
-#oe-nav-ul.tabNav.tabWidthFull {
-    width: 10%;
-}
-
-#oe-nav-ul.tabNav.tabWidthUser {
-    width: 12%;
-}
-
-#oe-nav-ul.tabNav.tabWidthWide {
-    width: 15%;
-}
-
-#oe-nav-ul.tabNav.tabWidthVertical {
-    width: 25%;
+@media (max-width: 576px) {
+  #oe-nav-ul.tabNav {
+    max-width: inherit;
+    width: 100%;
+  }
+  #globals-div .tabContainer {
+    width: 100%;
+  }
 }
 </style>
 <?php
@@ -342,8 +342,9 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
 ?>
 </head>
 
-<body class="body_top m-0" <?php if ($userMode) {
-    echo 'style="min-width: 700px;"'; } ?>>
+<body <?php if ($userMode) {
+    echo 'style="min-width: 700px;"';
+      } ?>>
 
     <div id="container_div" class="<?php echo $oemr_ui->oeContainer();?>">
         <div class="row">
@@ -363,7 +364,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                     <input type="hidden" name="csrf_token_form" value="<?php echo attr(CsrfUtils::collectCsrfToken()); ?>" />
                     <div class="clearfix">
                         <div class="btn-group oe-margin-b-10">
-                            <button type='submit' class='btn btn-secondary btn-save oe-pull-toward' name='form_save' value='<?php echo xla('Save'); ?>'><?php echo xlt('Save'); ?></button>
+                            <button type='submit' class='btn btn-primary btn-save oe-pull-toward' name='form_save' value='<?php echo xla('Save'); ?>'><?php echo xlt('Save'); ?></button>
                         </div>
                         <div class="input-group col-sm-4 oe-pull-away">
                         <?php // mdsupport - Optional server based searching mechanism for large number of fields on this screen.
@@ -381,7 +382,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                     </div>
                     <br />
                     <div id="globals-div">
-                        <ul class="tabNav tabWidthWide" id="oe-nav-ul">
+                        <ul class="tabNav tabWidthWide sticky-top" id="oe-nav-ul">
                         <?php
                         $i = 0;
                         foreach ($GLOBALS_METADATA as $grpname => $grparr) {
@@ -543,12 +544,6 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                                                     }
                                                 }
                                                 $fldvalueDecrypted = '';
-                                            } elseif ($fldtype == 'pwd') {
-                                                if ($userMode) {
-                                                    $globalTitle = $globalValue;
-                                                }
-                                                echo "  <input type='password' class='form-control' name='form_$i' " .
-                                                "maxlength='255' value='' />\n";
                                             } elseif ($fldtype == 'pass') {
                                                 if ($userMode) {
                                                     $globalTitle = $globalValue;
@@ -721,9 +716,9 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                                                 echo "<div class='col-sm-2 text-danger'>" . text($globalTitle) . "</div>\n";
                                                 echo "<div class='col-sm-2 '><input type='checkbox' value='YES' name='toggle_" . $i . "' id='toggle_" . $i . "' " . $settingDefault . "/></div>\n";
                                                 if ($fldtype == 'encrypted') {
-                                                    echo "<input type='hidden' id='globaldefault_" . $i . "' value='" . attr($globalTitle) . "'>\n";
+                                                    echo "<input type='hidden' id='globaldefault_" . $i . "' value='" . attr($globalTitle) . "' />\n";
                                                 } else {
-                                                    echo "<input type='hidden' id='globaldefault_" . $i . "' value='" . attr($globalValue) . "'>\n";
+                                                    echo "<input type='hidden' id='globaldefault_" . $i . "' value='" . attr($globalValue) . "' />\n";
                                                 }
                                                 echo "</div>\n";
                                             } else {
@@ -734,7 +729,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                                     }
 
                                     echo "<div class='btn-group oe-margin-b-10'>" .
-                                        "<button type='submit' class='btn btn-secondary btn-save oe-pull-toward' name='form_save'" .
+                                        "<button type='submit' class='btn btn-primary btn-save oe-pull-toward' name='form_save'" .
                                         "value='" . xla('Save') . "'>" . xlt('Save') . "</button></div>";
                                     echo "<div class='oe-pull-away oe-margin-t-10' style=''>" . xlt($grpname) . " &nbsp;<a href='#' class='text-dark text-decoration-none fa fa-lg fa-arrow-circle-up oe-help-redirect scroll' aria-hidden='true'></a></div><div class='clearfix'></div></div>";
                                     echo " </div>\n";
@@ -750,7 +745,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
 <?php $oemr_ui->oeBelowContainerDiv();?>
 </div>
 <?php
-$post_srch_desc = $_POST['srch_desc'];
+$post_srch_desc = $_POST['srch_desc'] ?? '';
 if (!empty($post_srch_desc) && $srch_item == 0) {
     echo "<script>alert(" . js_escape($post_srch_desc . " - " . xl('search term was not found, please try another search')) . ");</script>";
 }

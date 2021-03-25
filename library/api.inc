@@ -1,9 +1,19 @@
 <?php
 
-//our api for 3rd party developers
+/**
+ * old api for 3rd parties
+ *
+ * @package   OpenEMR
+ * @link      https://www.open-emr.org
+ * @author    Brady Miller <brady.g.miller@gmail.com>
+ * @copyright Copyright (c) 2017-2021 Brady Miller <brady.g.miller@gmail.com>
+ * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
+ */
+
 require_once(dirname(__FILE__) . "/../interface/globals.php");
 
 use OpenEMR\Billing\BillingUtilities;
+use OpenEMR\Core\Header;
 
 $GLOBALS['form_exit_url'] = "javascript:parent.closeTab(window.name, false)";
 
@@ -12,7 +22,7 @@ function formHeader($title = "My Form")
     ?>
     <html>
     <head>
-    <link rel=stylesheet href="<?php echo $GLOBALS['css_header']?>">
+    <?php Header::setupHeader(); ?>
     <title><?php echo text($title); ?></title>
     </head>
     <body background="<?php echo $GLOBALS['backpic']?>" topmargin=0 rightmargin=0 leftmargin=2 bottommargin=0 marginwidth=2 marginheight=0>

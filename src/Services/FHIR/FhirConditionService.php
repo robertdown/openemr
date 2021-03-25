@@ -42,7 +42,8 @@ class FhirConditionService extends FhirServiceBase
     protected function loadSearchParameters()
     {
         return  [
-            'patient' => ['patient.uuid']
+            'patient' => ['lists.pid'],
+            '_id' => ['lists.id']
         ];
     }
 
@@ -67,43 +68,53 @@ class FhirConditionService extends FhirServiceBase
         $clinicalStatus = "inactive";
         $clinicalSysytem = "http://terminology.hl7.org/CodeSystem/condition-clinical";
         if (
-            (!isset($data['enddate']) && isset($data['begdate']))
-            || isset($data['enddate']) && strtotime($data['enddate']) >= strtotime("now")
+            (!isset($dataRecord['enddate']) && isset($dataRecord['begdate']))
+            || isset($dataRecord['enddate']) && strtotime($dataRecord['enddate']) >= strtotime("now")
         ) {
             // Active if Only Begin Date isset OR End Date isnot expired
             $clinicalStatus = "active";
-            if ($data['occurrence'] == 1 || $data['outcome'] == 1) {
+            if ($dataRecord['occurrence'] == 1 || $dataRecord['outcome'] == 1) {
                 $clinicalStatus = "resolved";
-            } elseif ($data['occurrence'] > 1) {
+            } elseif ($dataRecord['occurrence'] > 1) {
                 $clinicalStatus = "recurrence";
             }
-        } elseif (isset($data['enddate']) && strtotime($data['enddate']) < strtotime("now")) {
+        } elseif (isset($dataRecord['enddate']) && strtotime($dataRecord['enddate']) < strtotime("now")) {
             //Inactive if End Date is expired
             $clinicalStatus = "inactive";
         } else {
             $clinicalSysytem = "http://terminology.hl7.org/CodeSystem/data-absent-reason";
             $clinicalStatus = "unknown";
         }
-        $conditionResource->setClinicalStatus(
+        $clinical_Status = new FHIRCodeableConcept();
+        $clinical_Status->addCoding(
             array(
-                'sysytem' => $clinicalSysytem,
-                'code' => $clinicalStatus,
-                'display' => strtoupper($clinicalStatus),
+            'system' => $clinicalSysytem,
+            'code' => $clinicalStatus,
+            'display' => ucwords($clinicalStatus),
             )
         );
+        $conditionResource->setClinicalStatus($clinical_Status);
 
-        $conditionResource->addCategory(
+        $conditionCategory = new FHIRCodeableConcept();
+        $conditionCategory->addCoding(
             array(
-                'sysytem' => "http://terminology.hl7.org/CodeSystem/condition-category",
+                'system' => "http://terminology.hl7.org/CodeSystem/condition-category",
                 'code' => 'problem-list-item',
                 'display' => 'Problem List Item'
             )
         );
+        $conditionResource->addCategory($conditionCategory);
 
         if (isset($dataRecord['puuid'])) {
             $patient = new FHIRReference();
             $patient->setReference('Patient/' . $dataRecord['puuid']);
             $conditionResource->setSubject($patient);
+        }
+
+        if (isset($dataRecord['encounter_uuid'])) {
+            $encounter = new FHIRReference();
+            $encounter->setReference('Encounter/' . $dataRecord['encounter_uuid']);
+            $conditionResource->setEncounter($encounter);
         }
 
         if (!empty($dataRecord['diagnosis'])) {
@@ -117,19 +128,21 @@ class FhirConditionService extends FhirServiceBase
             $conditionResource->setCode($diagnosisCode);
         }
 
+        $verificationStatus = new FHIRCodeableConcept();
         $verificationCoding = array(
-            'sysytem' => "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+            'system' => "http://terminology.hl7.org/CodeSystem/condition-ver-status",
             'code' => 'unconfirmed',
             'display' => 'Unconfirmed',
         );
         if (!empty($dataRecord['verification'])) {
             $verificationCoding = array(
-                'sysytem' => "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                'system' => "http://terminology.hl7.org/CodeSystem/condition-ver-status",
                 'code' => $dataRecord['verification'],
                 'display' => $dataRecord['verification_title']
             );
         }
-        $conditionResource->setVerificationStatus($verificationCoding);
+        $verificationStatus->addCoding($verificationCoding);
+        $conditionResource->setVerificationStatus($verificationStatus);
 
         if ($encode) {
             return json_encode($conditionResource);
@@ -143,10 +156,11 @@ class FhirConditionService extends FhirServiceBase
      * Performs a FHIR Condition Resource lookup by FHIR Resource ID
      *
      * @param $fhirResourceId //The OpenEMR record's FHIR Condition Resource ID.
+     * @param $puuidBind - Optional variable to only allow visibility of the patient with this puuid.
      */
-    public function getOne($fhirResourceId)
+    public function getOne($fhirResourceId, $puuidBind = null)
     {
-        $processingResult = $this->conditionService->getOne($fhirResourceId);
+        $processingResult = $this->conditionService->getOne($fhirResourceId, $puuidBind);
         if (!$processingResult->hasErrors()) {
             if (count($processingResult->getData()) > 0) {
                 $openEmrRecord = $processingResult->getData()[0];
@@ -162,11 +176,12 @@ class FhirConditionService extends FhirServiceBase
      * Searches for OpenEMR records using OpenEMR search parameters
      *
      * @param  array openEMRSearchParameters OpenEMR search fields
+     * @param $puuidBind - Optional variable to only allow visibility of the patient with this puuid.
      * @return ProcessingResult
      */
-    public function searchForOpenEMRRecords($openEMRSearchParameters)
+    public function searchForOpenEMRRecords($openEMRSearchParameters, $puuidBind = null)
     {
-        return $this->conditionService->getAll($openEMRSearchParameters, false);
+        return $this->conditionService->getAll($openEMRSearchParameters, false, $puuidBind);
     }
 
     public function parseFhirResource($fhirResource = array())
@@ -180,6 +195,11 @@ class FhirConditionService extends FhirServiceBase
     }
 
     public function updateOpenEMRRecord($fhirResourceId, $updatedOpenEMRRecord)
+    {
+        // TODO: If Required in Future
+    }
+
+    public function createProvenanceResource($dataRecord = array(), $encode = false)
     {
         // TODO: If Required in Future
     }

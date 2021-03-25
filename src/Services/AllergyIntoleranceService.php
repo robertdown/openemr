@@ -21,6 +21,7 @@ class AllergyIntoleranceService extends BaseService
     private const ALLERGY_TABLE = "lists";
     private const PATIENT_TABLE = "patient_data";
     private const PRACTITIONER_TABLE = "users";
+    private const FACILITY_TABLE = "facility";
     private $uuidRegistry;
     private $allergyIntoleranceValidator;
 
@@ -34,6 +35,7 @@ class AllergyIntoleranceService extends BaseService
         $this->uuidRegistry->createMissingUuids();
         (new UuidRegistry(['table_name' => self::PATIENT_TABLE]))->createMissingUuids();
         (new UuidRegistry(['table_name' => self::PRACTITIONER_TABLE]))->createMissingUuids();
+        (new UuidRegistry(['table_name' => self::FACILITY_TABLE]))->createMissingUuids();
         $this->allergyIntoleranceValidator = new AllergyIntoleranceValidator();
     }
 
@@ -44,11 +46,13 @@ class AllergyIntoleranceService extends BaseService
      *
      * @param  $search search array parameters
      * @param  $isAndCondition specifies if AND condition is used for multiple criteria. Defaults to true.
+     * @param $puuidBind - Optional variable to only allow visibility of the patient with this puuid.
      * @return ProcessingResult which contains validation messages, internal error messages, and the data
      * payload.
      */
-    public function getAll($search = array(), $isAndCondition = true)
+    public function getAll($search = array(), $isAndCondition = true, $puuidBind = null)
     {
+
         // Validating and Converting Patient UUID to PID
         if (isset($search['lists.pid'])) {
             $isValidPatient = $this->allergyIntoleranceValidator->validateId(
@@ -79,21 +83,40 @@ class AllergyIntoleranceService extends BaseService
             $search['lists.id'] = $this->getIdByUuid($uuidBytes, self::ALLERGY_TABLE, "id");
         }
 
+        if (!empty($puuidBind)) {
+            // code to support patient binding
+            $isValidPatient = $this->allergyIntoleranceValidator->validateId(
+                'uuid',
+                self::PATIENT_TABLE,
+                $puuidBind,
+                true
+            );
+            if ($isValidPatient !== true) {
+                return $isValidPatient;
+            }
+        }
+
         $sqlBindArray = array();
         $sql = "SELECT lists.*,
-                        us.uuid as practitioner,
-                        patient.uuid as puuid,
-                        reaction.title as reaction_title,
-                        verification.title as verification_title
-                        FROM lists
-                        LEFT JOIN list_options as reaction ON reaction.option_id = lists.reaction
-                        LEFT JOIN list_options as verification ON verification.option_id = lists.verification
-                        LEFT JOIN users as us ON us.id = lists.referredby
-                        RIGHT JOIN patient_data as patient ON patient.pid = lists.pid
-                        WHERE type = 'allergy'";
+        users.uuid as practitioner,
+        facility.uuid as organization,
+        patient.uuid as puuid,
+        reaction.title as reaction_title,
+        verification.title as verification_title
+    FROM lists
+        LEFT JOIN list_options as reaction ON (reaction.option_id = lists.reaction and reaction.list_id = 'reaction')
+        LEFT JOIN list_options as verification ON verification.option_id = lists.verification and verification.list_id = 'allergyintolerance-verification'
+        RIGHT JOIN patient_data as patient ON patient.pid = lists.pid
+        LEFT JOIN users as users ON users.username = lists.user
+        LEFT JOIN facility as facility ON facility.name = users.facility
+    WHERE type = 'allergy'";
 
         if (!empty($search)) {
             $sql .= ' AND ';
+            if (!empty($puuidBind)) {
+                // code to support patient binding
+                $sql .= '(';
+            }
             $whereClauses = array();
             foreach ($search as $fieldName => $fieldValue) {
                 array_push($whereClauses, $fieldName . ' = ?');
@@ -101,6 +124,15 @@ class AllergyIntoleranceService extends BaseService
             }
             $sqlCondition = ($isAndCondition == true) ? 'AND' : 'OR';
             $sql .= implode(' ' . $sqlCondition . ' ', $whereClauses);
+            if (!empty($puuidBind)) {
+                // code to support patient binding
+                $sql .= ") AND `patient`.`uuid` = ?";
+                $sqlBindArray[] = UuidRegistry::uuidToBytes($puuidBind);
+            }
+        } elseif (!empty($puuidBind)) {
+            // code to support patient binding
+            $sql .= " AND `patient`.`uuid` = ?";
+            $sqlBindArray[] = UuidRegistry::uuidToBytes($puuidBind);
         }
 
         $statementResults = sqlStatement($sql, $sqlBindArray);
@@ -112,6 +144,9 @@ class AllergyIntoleranceService extends BaseService
             $row['practitioner'] = $row['practitioner'] ?
                 UuidRegistry::uuidToString($row['practitioner']) :
                 $row['practitioner'];
+            $row['organization'] = $row['organization'] ?
+                UuidRegistry::uuidToString($row['organization']) :
+            $row['organization'];
             if ($row['diagnosis'] != "") {
                 $row['diagnosis'] = $this->addCoding($row['diagnosis']);
             }
@@ -124,14 +159,14 @@ class AllergyIntoleranceService extends BaseService
      * Returns a single allergyIntolerance record by uuid.
      * @param $uuid - The allergyIntolerance uuid identifier in string format.
      * @return ProcessingResult which contains validation messages, internal error messages, and the data
+     * @param $puuidBind - Optional variable to only allow visibility of the patient with this puuid.
      * payload.
      */
-    public function getOne($uuid)
+    public function getOne($uuid, $puuidBind = null)
     {
         $processingResult = new ProcessingResult();
 
         $isValid = $this->allergyIntoleranceValidator->validateId("uuid", "lists", $uuid, true);
-
         if ($isValid !== true) {
             $validationMessages = [
                 'uuid' => ["invalid or nonexisting value" => " value " . $uuid]
@@ -140,29 +175,54 @@ class AllergyIntoleranceService extends BaseService
             return $processingResult;
         }
 
+        if (!empty($puuidBind)) {
+            $isValid = $this->allergyIntoleranceValidator->validateId("uuid", "patient_data", $puuidBind, true);
+            if ($isValid !== true) {
+                $validationMessages = [
+                    'puuid' => ["invalid or nonexisting value" => " value " . $puuidBind]
+                ];
+                $processingResult->setValidationMessages($validationMessages);
+                return $processingResult;
+            }
+        }
+
         $sql = "SELECT lists.*,
-                        us.uuid as practitioner,
-                        patient.uuid as puuid,
-                        reaction.title as reaction_title,
-                        verification.title as verification_title
-                        FROM lists
-                        LEFT JOIN list_options as reaction ON reaction.option_id = lists.reaction
-                        LEFT JOIN list_options as verification ON verification.option_id = lists.verification
-                        LEFT JOIN users as us ON us.id = lists.referredby
-                        RIGHT JOIN patient_data as patient ON patient.pid = lists.pid
-                        WHERE type = 'allergy' AND lists.uuid = ?";
+        users.uuid as practitioner,
+        facility.uuid as organization,
+        patient.uuid as puuid,
+        reaction.title as reaction_title,
+        verification.title as verification_title
+    FROM lists
+        LEFT JOIN list_options as reaction ON (reaction.option_id = lists.reaction and reaction.list_id = 'reaction')
+        LEFT JOIN list_options as verification ON verification.option_id = lists.verification and verification.list_id = 'allergyintolerance-verification'
+        RIGHT JOIN patient_data as patient ON patient.pid = lists.pid
+        LEFT JOIN users as users ON users.username = lists.user
+        LEFT JOIN facility as facility ON facility.name = users.facility
+    WHERE type = 'allergy' AND lists.uuid = ?";
 
         $uuidBinary = UuidRegistry::uuidToBytes($uuid);
-        $sqlResult = sqlQuery($sql, [$uuidBinary]);
-        $sqlResult['uuid'] = UuidRegistry::uuidToString($sqlResult['uuid']);
-        $sqlResult['puuid'] = UuidRegistry::uuidToString($sqlResult['puuid']);
-        $sqlResult['practitioner'] = $sqlResult['practitioner'] ?
-            UuidRegistry::uuidToString($sqlResult['practitioner']) :
-            $sqlResult['practitioner'];
-        if ($sqlResult['diagnosis'] != "") {
-            $row['diagnosis'] = $this->addCoding($sqlResult['diagnosis']);
+        $sqlBindArray = [$uuidBinary];
+
+        if (!empty($puuidBind)) {
+            $sql .= " AND `patient`.`uuid` = ?";
+            $sqlBindArray[] = UuidRegistry::uuidToBytes($puuidBind);
         }
-        $processingResult->addData($sqlResult);
+
+        $sqlResult = sqlQuery($sql, $sqlBindArray);
+        if (!empty($sqlResult)) {
+            $sqlResult['uuid'] = UuidRegistry::uuidToString($sqlResult['uuid']);
+            $sqlResult['puuid'] = UuidRegistry::uuidToString($sqlResult['puuid']);
+            $sqlResult['practitioner'] = $sqlResult['practitioner'] ?
+                UuidRegistry::uuidToString($sqlResult['practitioner']) :
+                $sqlResult['practitioner'];
+            $sqlResult['organization'] = $sqlResult['organization'] ?
+                UuidRegistry::uuidToString($sqlResult['organization']) :
+                $sqlResult['organization'];
+            if ($sqlResult['diagnosis'] != "") {
+                $row['diagnosis'] = $this->addCoding($sqlResult['diagnosis']);
+            }
+            $processingResult->addData($sqlResult);
+        }
         return $processingResult;
     }
 

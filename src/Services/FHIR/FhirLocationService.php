@@ -128,9 +128,10 @@ class FhirLocationService extends FhirServiceBase
      * Searches for OpenEMR records using OpenEMR search parameters
      *
      * @param  array openEMRSearchParameters OpenEMR search fields
+     * @param $puuidBind - NOT USED
      * @return ProcessingResult
      */
-    public function searchForOpenEMRRecords($openEMRSearchParameters)
+    public function searchForOpenEMRRecords($openEMRSearchParameters, $puuidBind = null)
     {
         return $this->locationService->getAll($openEMRSearchParameters, false);
     }
@@ -146,6 +147,10 @@ class FhirLocationService extends FhirServiceBase
     }
 
     public function updateOpenEMRRecord($fhirResourceId, $updatedOpenEMRRecord)
+    {
+        // TODO: If Required in Future
+    }
+    public function createProvenanceResource($dataRecord = array(), $encode = false)
     {
         // TODO: If Required in Future
     }

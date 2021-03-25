@@ -401,13 +401,16 @@ function getRecEmployerData($pid)
     //$return["lname"][0..n]["value"]
     $res = sqlStatement("select * from employer_data where pid=? order by date", array($pid));
 
+    $retar = [];
     while ($result = sqlFetchArray($res)) {
         foreach ($result as $key => $val) {
             if ($key == "pid" || $key == "date" || $key == "id") {
                 continue;
             } else {
                 $curdate = $result["date"];
-                if (($retar[$key][$arcount[$key]]["value"] != $val)) {
+
+                $arcount[$key] = $arcount[$key] ?? null;
+                if (empty($retar[$key][$arcount[$key]]["value"]) || ($retar[$key][$arcount[$key]]["value"] != $val)) {
                     $arcount[$key]++;
                     $retar[$key][$arcount[$key]]["value"] = $val;
                     $retar[$key][$arcount[$key]]["date"] = $curdate;
@@ -427,15 +430,18 @@ function getRecPatientData($pid)
     //$return["lname"][0..n]["value"]
     $res = sqlStatement("select * from patient_data where pid=? order by date", array($pid));
 
+    $retar = [];
+    $arcount = [];
     while ($result = sqlFetchArray($res)) {
         foreach ($result as $key => $val) {
-            if ($key == "pid" || $key == "date" || $key == "id") {
+            if ($key == "pid" || $key == "date" || $key == "id" || $key == "uuid") {
                 continue;
             } else {
                 $curdate = $result["date"];
-                if (($retar[$key][$arcount[$key]]["value"] != $val)) {
-                    $arcount[$key]++;
-                    $retar[$key][$arcount[$key]]["value"] = $val;
+                $arcount[$key] = $arcount[$key] ?? null;
+                if (($retar[$key][$arcount[$key]]["value"] ?? '') != $val) {
+                    $arcount[$key] = (!empty($arcount[$key])) ? ($arcount[$key] + 1) : 1;
+                    $retar[$key][$arcount[$key]]["value"] = $val ?? '';
                     $retar[$key][$arcount[$key]]["date"] = $curdate;
                 }
             }
@@ -453,15 +459,18 @@ function getRecInsuranceData($pid, $ins_type)
     //$return["lname"][0..n]["value"]
     $res = sqlStatement("select *, ic.name as provider_name from insurance_data left join insurance_companies as ic on ic.id = provider where pid=? and type=? order by date", array($pid,$ins_type));
 
+    $retar = [];
+    $arcount = [];
     while ($result = sqlFetchArray($res)) {
         foreach ($result as $key => $val) {
-            if ($key == "pid" || $key == "date" || $key == "id") {
+            if ($key == "pid" || $key == "date" || $key == "id" || $key == "uuid") {
                 continue;
             } else {
                 $curdate = $result["date"];
-                if (($retar[$key][$arcount[$key]]["value"] != $val)) {
-                    $arcount[$key]++;
-                    $retar[$key][$arcount[$key]]["value"] = $val;
+                $arcount[$key] = $arcount[$key] ?? null;
+                if (($retar[$key][$arcount[$key]]["value"] ?? '') != $val) {
+                    $arcount[$key] = (!empty($arcount[$key])) ? ($arcount[$key] + 1) : 1;
+                    $retar[$key][$arcount[$key]]["value"] = $val ?? '';
                     $retar[$key][$arcount[$key]]["date"] = $curdate;
                 }
             }

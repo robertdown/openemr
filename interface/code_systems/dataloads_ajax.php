@@ -63,27 +63,10 @@ $activeAccordionSection = isset($_GET['aas']) ? $_GET['aas'] : '0';
         padding: 20px;
         background-color: var(--gray200);
     }
-    .inst_dets {
-        font-size: 0.8rem;
-        font-weight: normal;
-        border-style: solid;
-        border-width: 2px;
-        padding: 25px;
-        margin: 20px;
-        outline-color: var(--gray200);
-        outline-style: solid;
-        outline-width: 20px;
+    <!-- Keeping empty classes for jquery hooks -->    
+    .inst_dets {               
     }
-    .stg_dets {
-        padding-left: 20px;
-        font-size: 0.8rem;
-        font-weight: normal;
-        border-style: solid;
-        border-width: 2px;
-        padding: 25px;
-        margin: 20px;
-        outline: 20px solid var(--gray200);
-        background-color: var(--gray200);
+    .stg_dets {        
     }
     .stg {
         font-size: 0.8rem;
@@ -165,11 +148,11 @@ $activeAccordionSection = isset($_GET['aas']) ? $_GET['aas'] : '0';
                     <div class="row px-5">
                     <div class="left_wrpr col-md-2 col-sm-4">
                         <div class="inst_dets">
-                            <div class="inst_hdr"><?php echo xlt("Installed Release"); ?>
+                            <div class="card-text"><?php echo xlt("Installed Release"); ?>
                             </div>
                             <hr>
                             <div id="<?php echo attr($db); ?>_install_details">
-                                <div id='<?php echo attr($db); ?>_inst_loading' class='m-2 d-none'>
+                                <div id='<?php echo attr($db); ?>_inst_loading' class='m-2'>
                                     <img src='../pic/ajax-loader.gif'/>
                                 </div>
                             </div>
@@ -177,14 +160,14 @@ $activeAccordionSection = isset($_GET['aas']) ? $_GET['aas'] : '0';
                         <div >
                         </div>
                     </div>
-                    <div class="wrpr col-md-4 col-sm-7 offset-sm-1">
+                    <div class="wrpr col-md-auto col-sm-7 offset-sm-1">
                         <div class="stg_dets">
-                            <div class="stg_hdr" id="<?php echo attr($db); ?>_stg_hdr"><?php echo xlt("Staged Releases"); ?>
+                            <div class="card-text" id="<?php echo attr($db); ?>_stg_hdr"><?php echo xlt("Staged Releases"); ?>
                             </div>
                             <hr>
                             <div id="<?php echo attr($db); ?>_stage_details">
                             </div>
-                            <div id='<?php echo attr($db); ?>_stg_loading' class='m-2 d-none'>
+                            <div id='<?php echo attr($db); ?>_stg_loading' class='m-2'>
                                 <img src='../pic/ajax-loader.gif'/>
                             </div>
                         </div>
@@ -251,7 +234,7 @@ $activeAccordionSection = isset($_GET['aas']) ? $_GET['aas'] : '0';
                         const stg_load_id = `#${dbName}_stg_loading`;
                         $(stg_load_id).show();
                         let thisInterval;
-                        const parm = `db=${dbName}&newInstall=` + (($(this).val() === 'INSTALL') ? 1 : 0) + '&file_checksum=' + $(this).prop('file_checksum') + '&file_revision_date=' + $(this).prop('file_revision_date') + '&version=' + $(this).prop('version') + '&rf=' + $(this).prop('rf');
+                        const parm = `db=${dbName}&newInstall=` + (($(this).val() === 'INSTALL') ? 1 : 0) + '&file_checksum=' + $(this).attr('file_checksum') + '&file_revision_date=' + $(this).attr('file_revision_date') + '&version=' + $(this).attr('version') + '&rf=' + $(this).attr('rf');
                         const stg_dets_id = `#${dbName}_stage_details`;
 
                         $.ajax({

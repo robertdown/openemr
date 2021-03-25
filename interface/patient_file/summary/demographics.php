@@ -33,6 +33,8 @@ use OpenEMR\Common\Csrf\CsrfUtils;
 use OpenEMR\Common\Session\SessionUtil;
 use OpenEMR\Core\Header;
 use OpenEMR\Events\PatientDemographics\ViewEvent;
+use OpenEMR\Events\PatientDemographics\RenderEvent;
+use OpenEMR\FHIR\SMART\SmartLaunchController;
 use OpenEMR\Menu\PatientMenuRole;
 use OpenEMR\OeUI\OemrUI;
 use OpenEMR\Reminder\BirthdayReminder;
@@ -46,6 +48,12 @@ if (isset($_GET['set_pid'])) {
         SessionUtil::setSession('encounter', $encounter);
     }
 }
+
+// Note: it would eventually be a good idea to move this into
+// it's own module that people can remove / add if they don't
+// want smart support in their system.
+$smartLaunchController = new SMARTLaunchController($GLOBALS["kernel"]->getEventDispatcher());
+$smartLaunchController->registerContextEvents();
 
 $active_reminders = false;
 $all_allergy_alerts = false;
@@ -106,7 +114,7 @@ function pic_array($pid, $picture_directory)
     $sql_query = "select documents.id from documents join categories_to_documents " .
     "on documents.id = categories_to_documents.document_id " .
     "join categories on categories.id = categories_to_documents.category_id " .
-    "where categories.name like ? and documents.foreign_id = ?";
+    "where categories.name like ? and documents.foreign_id = ? and documents.deleted = 0";
     if ($query = sqlStatement($sql_query, array($picture_directory, $pid))) {
         while ($results = sqlFetchArray($query)) {
             array_push($pics, $results['id']);
@@ -132,7 +140,7 @@ function get_document_by_catg($pid, $doc_catg)
         "ORDER BY d.date DESC LIMIT 1", array($pid, $doc_catg));
     }
 
-    return ($result['id']);
+    return ($result['id'] ?? false);
 }
 
 // Display image in 'widget style'
@@ -141,8 +149,9 @@ function image_widget($doc_id, $doc_catg)
     global $pid, $web_root;
     $docobj = new Document($doc_id);
     $image_file = $docobj->get_url_file();
+    $image_file_name = $docobj->get_name();
     $image_width = $GLOBALS['generate_doc_thumb'] == 1 ? '' : 'width=100';
-    $extension = substr($image_file, strrpos($image_file, "."));
+    $extension = substr($image_file_name, strrpos($image_file_name, "."));
     $viewable_types = array('.png', '.jpg', '.jpeg', '.png', '.bmp', '.PNG', '.JPG', '.JPEG', '.PNG', '.BMP');
     if (in_array($extension, $viewable_types)) { // extension matches list
         $to_url = "<td> <a href = '$web_root" .
@@ -229,6 +238,10 @@ require_once("$srcdir/options.js.php");
         return false;
     }
 
+    function getWeno() {
+        top.restoreSession();
+        location.href = '../../weno/indexrx.php'
+    }
 </script>
 
 <script>
@@ -297,21 +310,6 @@ require_once("$srcdir/options.js.php");
             allowResize: true,
             allowDrag: true,
             dialogId: 'editscripts',
-            type: 'iframe'
-        });
-    }
-
-    function doPublish() {
-        let title = <?php echo xlj('Publish Patient to FHIR Server'); ?>;
-        let url = top.webroot_url + '/phpfhir/providerPublishUI.php?patient_id=' + <?php echo js_url($pid); ?>;
-
-        dlgopen(url, 'publish', 'modal-mlg', 750, '', '', {
-            buttons: [
-                {text: <?php echo xlj('Done'); ?>, close: true, style: 'secondary btn-sm'}
-            ],
-            allowResize: true,
-            allowDrag: true,
-            dialogId: '',
             type: 'iframe'
         });
     }
@@ -608,7 +606,11 @@ require_once("$srcdir/options.js.php");
     function setMyPatient() {
         <?php
         if (isset($_GET['set_pid'])) {
-            $date_of_death = is_patient_deceased($pid)['date_deceased']; ?>
+            $date_of_death = is_patient_deceased($pid);
+            if (!empty($date_of_death)) {
+                $date_of_death = $date_of_death['date_deceased'];
+            }
+            ?>
         parent.left_nav.setPatient(<?php echo js_escape($result['fname'] . " " . $result['lname']) .
                 "," . js_escape($pid) . "," . js_escape($result['pubpid']) . ",'',";
         if (empty($date_of_death)) {
@@ -831,7 +833,10 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
 
                                   </table>
         </div>
-        <?php } ?>
+        <?php  }
+        // if anyone wants to render anything before the patient demographic list
+                            $GLOBALS["kernel"]->getEventDispatcher()->dispatch(RenderEvent::EVENT_SECTION_LIST_RENDER_BEFORE, new RenderEvent($pid), 10);
+                            ?>
         <?php if (AclMain::aclCheckCore('patients', 'demo')) { ?>
           <section>
               <?php
@@ -1322,6 +1327,8 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
 <?php } // end if ($vitals_is_registered && AclMain::aclCheckCore('patients', 'med')) ?>
 
 <?php
+// if anyone wants to render anything after the patient demographic list
+$GLOBALS["kernel"]->getEventDispatcher()->dispatch(RenderEvent::EVENT_SECTION_LIST_RENDER_AFTER, new RenderEvent($pid), 10);
 // This generates a section similar to Vitals for each LBF form that
 // supports charting.  The form ID is used as the "widget label".
 //
@@ -1449,7 +1456,7 @@ while ($gfrow = sqlFetchArray($gfres)) {
                                 "INNER JOIN categories_to_documents " .
                                 "ON categories_to_documents.document_id=documents.id " .
                                 "WHERE categories_to_documents.category_id=? " .
-                                "AND documents.foreign_id=? " .
+                                "AND documents.foreign_id=? AND documents.deleted = 0 " .
                                 "ORDER BY documents.date DESC";
                                 $resNew2 = sqlStatement($query, array($categoryId, $pid));
                                 $limitCounter = 0; // limit to one entry per category
@@ -1559,7 +1566,7 @@ while ($gfrow = sqlFetchArray($gfres)) {
 
                             //
                             $limitApptIndx = $apptNum2 - 1;
-                            $limitApptDate = $events[$limitApptIndx]['pc_eventDate'];
+                            $limitApptDate = $events[$limitApptIndx]['pc_eventDate'] ?? '';
                             //
                             switch ($selectNum) {
                                 //
@@ -1703,7 +1710,7 @@ while ($gfrow = sqlFetchArray($gfres)) {
                                 $count2++;
                             }
                             //if there is no appt and no recall
-                            if (($count < 1) && ($count2 < 1)) {
+                            if (($count < 1) && empty($count2)) {
                                 echo "<br /><br />&nbsp;&nbsp;<a onclick=\"top.left_nav.loadFrame('1', 'rcb', '../interface/main/messages/messages.php?go=addRecall');\">" . xlt('No Recall') . "</a>";
                             }
                             $count = 0;
@@ -1897,11 +1904,11 @@ if ($track_is_registered) {
 <script>
     // Array of skip conditions for the checkSkipConditions() function.
     var skipArray = [
-        <?php echo $condition_str; ?>
+        <?php echo ($condition_str ?? ''); ?>
     ];
     checkSkipConditions();
 
-    var isPost = <?php echo js_escape($showEligibility); ?>;
+    var isPost = <?php echo js_escape($showEligibility ?? false); ?>;
     var listId = '#' + <?php echo js_escape($list_id); ?>;
     $(function () {
         $(listId).addClass("active");

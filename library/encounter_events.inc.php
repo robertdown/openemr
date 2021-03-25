@@ -53,7 +53,7 @@ function calendar_arrived($form_pid)
     $appts = fetchAppointments($today, $today, $form_pid);
     $appt_count = count($appts); //
     if ($appt_count == 0) {
-        echo "<br /><br /><br /><h2 style='text-align:center;'>" . htmlspecialchars(xl('Sorry No Appointment is Fixed'), ENT_QUOTES) . ". " . htmlspecialchars(xl('No Encounter could be created'), ENT_QUOTES) . ".</h2>";
+        echo "<br /><br /><br /><h2 class='text-center'>" . htmlspecialchars(xl('Sorry No Appointment is Fixed'), ENT_QUOTES) . ". " . htmlspecialchars(xl('No Encounter could be created'), ENT_QUOTES) . ".</h2>";
         exit;
     } elseif ($appt_count == 1) {
         $enc = todaysEncounterCheck($form_pid);
@@ -63,7 +63,7 @@ function calendar_arrived($form_pid)
             update_event($appts[0]['pc_eid']);
         }
     } elseif ($appt_count > 1) {
-        echo "<br /><br /><br /><h2 style='text-align:center;'>" . htmlspecialchars(xl('More than one appointment was found'), ENT_QUOTES) . ". " . htmlspecialchars(xl('No Encounter could be created'), ENT_QUOTES) . ".</h2>";
+        echo "<br /><br /><br /><h2 class='text-center'>" . htmlspecialchars(xl('More than one appointment was found'), ENT_QUOTES) . ". " . htmlspecialchars(xl('No Encounter could be created'), ENT_QUOTES) . ".</h2>";
         exit;
     }
     return $enc;
@@ -356,7 +356,7 @@ function check_event_exist($eid)
 function InsertEvent($args, $from = 'general')
 {
     $pc_recurrtype = '0';
-    if ($args['form_repeat'] || $args['days_every_week']) {
+    if (!empty($args['form_repeat']) || !empty($args['days_every_week'])) {
         if ($args['recurrspec']['event_repeat_freq_type'] == "6") {
             $pc_recurrtype = 3;
         } else {

@@ -2,6 +2,7 @@
 
 namespace OpenEMR\Services\FHIR;
 
+use OpenEMR\FHIR\FhirSearchParameterType;
 use OpenEMR\Validators\ProcessingResult;
 
 /**
@@ -38,6 +39,7 @@ abstract class FhirServiceBase
      * Returns an array mapping FHIR Resource search parameters to OpenEMR search parameters
      */
     abstract protected function loadSearchParameters();
+
 
     /**
      * Parses an OpenEMR data record, returning the equivalent FHIR Resource
@@ -115,23 +117,35 @@ abstract class FhirServiceBase
 
     /**
      * Executes a FHIR Resource search given a set of parameters.
+     * TODO: This whole search needs to be revisited with the different search types (token for exact match, string fuzzy match, etc)
      * @param $fhirSearchParameters The FHIR resource search parameters
+     * @param $puuidBind - Optional variable to only allow visibility of the patient with this puuid.
      * @return processing result
      */
-    public function getAll($fhirSearchParameters)
+    public function getAll($fhirSearchParameters, $puuidBind = null): ProcessingResult
     {
         $oeSearchParameters = array();
-
+        $provenanceRequest = false;
+        //Checking for provenance reqest
+        if (isset($fhirSearchParameters['_revinclude'])) {
+            if ($fhirSearchParameters['_revinclude'] == 'Provenance:target') {
+                $provenanceRequest = true;
+            }
+        }
         foreach ($fhirSearchParameters as $fhirSearchField => $searchValue) {
             if (isset($this->resourceSearchParameters[$fhirSearchField])) {
                 $oeSearchFields = $this->resourceSearchParameters[$fhirSearchField];
+                // backwards compatability
+                // use our string matching like before
+                $searchType = $oeSearchFields['type'] ?? FhirSearchParameterType::STRING;
+                $oeSearchFields = $oeSearchFields['fields'] ?? $oeSearchFields;
                 foreach ($oeSearchFields as $index => $oeSearchField) {
                     $oeSearchParameters[$oeSearchField] = $searchValue;
                 }
             }
         }
 
-        $oeSearchResult = $this->searchForOpenEMRRecords($oeSearchParameters);
+        $oeSearchResult = $this->searchForOpenEMRRecords($oeSearchParameters, $puuidBind);
 
         $fhirSearchResult = new ProcessingResult();
         $fhirSearchResult->setInternalErrors($oeSearchResult->getInternalErrors());
@@ -141,6 +155,12 @@ abstract class FhirServiceBase
             foreach ($oeSearchResult->getData() as $index => $oeRecord) {
                 $fhirResource = $this->parseOpenEMRRecord($oeRecord);
                 $fhirSearchResult->addData($fhirResource);
+                if ($provenanceRequest) {
+                    $provenanceResource = $this->createProvenanceResource($oeRecord);
+                    if ($provenanceResource) {
+                        $fhirSearchResult->addData($provenanceResource);
+                    }
+                }
             }
         }
         return $fhirSearchResult;
@@ -149,7 +169,25 @@ abstract class FhirServiceBase
     /**
      * Searches for OpenEMR records using OpenEMR search parameters
      * @param openEMRSearchParameters OpenEMR search fields
+     * @param $puuidBind - Optional variable to only allow visibility of the patient with this puuid.
      * @return OpenEMR records
      */
-    abstract protected function searchForOpenEMRRecords($openEMRSearchParameters);
+    abstract protected function searchForOpenEMRRecords($openEMRSearchParameters, $puuidBind = null);
+
+    /**
+     * Creates the Provenance resource  for the equivalent FHIR Resource
+     *
+     * @param $dataRecord The source OpenEMR data record
+     * @param $encode Indicates if the returned resource is encoded into a string. Defaults to True.
+     * @return the FHIR Resource. Returned format is defined using $encode parameter.
+     */
+    abstract public function createProvenanceResource($dataRecord = array(), $encode = false);
+
+    /*
+    * public function to return search params
+    */
+    public function getSearchParams()
+    {
+        return $this->loadSearchParameters();
+    }
 }

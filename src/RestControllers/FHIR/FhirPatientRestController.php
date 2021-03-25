@@ -50,7 +50,7 @@ class FhirPatientRestController
         }
 
         $processingResult = $this->fhirPatientService->insert($fhirJson);
-        return RestControllerHelper::handleProcessingResult($processingResult, 201);
+        return RestControllerHelper::handleFhirProcessingResult($processingResult, 201);
     }
 
     /**
@@ -67,7 +67,7 @@ class FhirPatientRestController
         }
 
         $processingResult = $this->fhirPatientService->update($fhirId, $fhirJson);
-        return RestControllerHelper::handleProcessingResult($processingResult, 200);
+        return RestControllerHelper::handleFhirProcessingResult($processingResult, 200);
     }
 
     /**
@@ -77,8 +77,8 @@ class FhirPatientRestController
      */
     public function getOne($fhirId)
     {
-        $processingResult = $this->fhirPatientService->getOne($fhirId, true);
-        return RestControllerHelper::handleProcessingResult($processingResult, 200);
+        $processingResult = $this->fhirPatientService->getOne($fhirId);
+        return RestControllerHelper::handleFhirProcessingResult($processingResult, 200);
     }
 
     /**
@@ -96,15 +96,16 @@ class FhirPatientRestController
      * - name (title, first name, middle name, last name)
      * - phone (home, business, cell)
      * - telecom (email, phone)
+     * @param $puuidBind - Optional variable to only allow visibility of the patient with this puuid.
      * @return FHIR bundle with query results, if found
      */
-    public function getAll($searchParams)
+    public function getAll($searchParams, $puuidBind = null)
     {
-        $processingResult = $this->fhirPatientService->getAll($searchParams);
+        $processingResult = $this->fhirPatientService->getAll($searchParams, $puuidBind);
         $bundleEntries = array();
         foreach ($processingResult->getData() as $index => $searchResult) {
             $bundleEntry = [
-                'fullUrl' =>  \RestConfig::$REST_FULL_URL . '/' . $searchResult->getId(),
+                'fullUrl' =>  $GLOBALS['site_addr_oath'] . ($_SERVER['REDIRECT_URL'] ?? '') . '/' . $searchResult->getId(),
                 'resource' => $searchResult
             ];
             $fhirBundleEntry = new FHIRBundleEntry($bundleEntry);

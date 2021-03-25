@@ -13,12 +13,13 @@
 
 namespace Carecoordination\Model;
 
-use Laminas\Db\TableGateway\AbstractTableGateway;
 use Application\Model\ApplicationTable;
-use Laminas\Db\Adapter\Driver\Pdo\Result;
 use Carecoordination\Model\CarecoordinationTable;
 use CouchDB;
+use Laminas\Db\Adapter\Driver\Pdo\Result;
+use Laminas\Db\TableGateway\AbstractTableGateway;
 use OpenEMR\Common\Crypto\CryptoGen;
+use OpenEMR\Common\Uuid\UuidRegistry;
 
 require_once(dirname(__FILE__) . "/../../../../../../../../custom/code_types.inc.php");
 require_once(dirname(__FILE__) . "/../../../../../../../forms/vitals/report.php");
@@ -117,7 +118,7 @@ class EncounterccdadispatchTable extends AbstractTableGateway
             $provider_details = "<encounter_provider>
                     <facility_id>" . $result['id'] . "</facility_id>
                     <facility_npi>" . htmlspecialchars($result['facility_npi'], ENT_QUOTES) . "</facility_npi>
-                    <facility_oid>" . htmlspecialchars($result['facility_code'], ENT_QUOTES) . "</facility_oid>
+                    <facility_oid>" . htmlspecialchars($result['oid'], ENT_QUOTES) . "</facility_oid>
                     <facility_name>" . htmlspecialchars($result['name'], ENT_QUOTES) . "</facility_name>
                     <facility_phone>" . htmlspecialchars(($result['phone'] ? $result['phone'] : 0), ENT_QUOTES) . "</facility_phone>
                     <facility_fax>" . htmlspecialchars($result['fax'], ENT_QUOTES) . "</facility_fax>
@@ -529,9 +530,9 @@ class EncounterccdadispatchTable extends AbstractTableGateway
     {
         $problem_lists = '';
         $query = "select l.*, lo.title as observation, lo.codes as observation_code, l.diagnosis AS code
-											from lists AS l
-											left join list_options as lo on lo.option_id = l.outcome AND lo.list_id = ?
-											where l.type = ? and l.pid = ? AND l.outcome <> ? AND l.id NOT IN(SELECT list_id FROM issue_encounter WHERE pid = ?)";
+    from lists AS l
+    left join list_options as lo on lo.option_id = l.outcome AND lo.list_id = ?
+    where l.type = ? and l.pid = ? AND l.outcome != ? AND l.id NOT IN(SELECT list_id FROM issue_encounter WHERE pid = ?)";
         $appTable = new ApplicationTable();
         $res = $appTable->zQuery($query, array('outcome', 'medical_problem', $pid, 1, $pid));
 
@@ -856,7 +857,7 @@ class EncounterccdadispatchTable extends AbstractTableGateway
             $results .= "
 	    <encounter>
 		<extension>" . htmlspecialchars(base64_encode($_SESSION['site_id'] . $row['encounter']), ENT_QUOTES) . "</extension>
-		<sha_extension>" . htmlspecialchars(sha1($_SESSION['site_id'] . $row['encounter']), ENT_QUOTES) . "</sha_extension>
+		<sha_extension>" . $this->formatUid($_SESSION['site_id'] . $row['encounter']) . "</sha_extension>
 		<encounter_id>" . htmlspecialchars($row['encounter'], ENT_QUOTES) . "</encounter_id>
 		<visit_category>" . htmlspecialchars($row['pc_catname'], ENT_QUOTES) . "</visit_category>
 		<performer>" . htmlspecialchars($row['fname'] . " " . $row['mname'] . " " . $row['lname'], ENT_QUOTES) . "</performer>
@@ -876,7 +877,7 @@ class EncounterccdadispatchTable extends AbstractTableGateway
 		<date>" . htmlspecialchars($this->date_format(substr($row['date'], 0, 10)), ENT_QUOTES) . "</date>
 		<date_formatted>" . htmlspecialchars(preg_replace('/-/', '', substr($row['date'], 0, 10)), ENT_QUOTES) . "</date_formatted>
 		<facility_extension>" . htmlspecialchars(base64_encode($_SESSION['site_id'] . $row['fid']), ENT_QUOTES) . "</facility_extension>
-		<facility_sha_extension>" . htmlspecialchars(sha1($_SESSION['site_id'] . $row['fid']), ENT_QUOTES) . "</facility_sha_extension>
+		<facility_sha_extension>" . $this->formatUid($_SESSION['site_id'] . $row['fid']) . "</facility_sha_extension>
 		<facility_npi>" . htmlspecialchars($row['fnpi'], ENT_QUOTES) . "</facility_npi>
 		<facility_oid>" . htmlspecialchars($row['foid'], ENT_QUOTES) . "</facility_oid>
 		<facility_name>" . htmlspecialchars($row['name'], ENT_QUOTES) . "</facility_name>
@@ -1974,6 +1975,7 @@ class EncounterccdadispatchTable extends AbstractTableGateway
         if ($GLOBALS['document_storage_method'] == 1) {
             $couch = new CouchDB();
             $docid = $couch->createDocId('ccda');
+            $binaryUuid = UuidRegistry::uuidToBytes($docid);
             if ($GLOBALS['couchdb_encryption']) {
                 $encrypted = 1;
                 $cryptoGen = new CryptoGen();
@@ -1985,10 +1987,13 @@ class EncounterccdadispatchTable extends AbstractTableGateway
             $docid = $resp->id;
             $revid = $resp->rev;
         } else {
+            $binaryUuid = (new UuidRegistry(['table_name' => 'ccda']))->createUuid();
+            $file_name = UuidRegistry::uuidToString($binaryUuid);
             $file_path = $GLOBALS['OE_SITE_DIR'] . '/documents/' . $pid . '/CCDA';
-            $file_name = $pid . "_" . $encounter . "_" . $time . ".xml";
             if (!is_dir($file_path)) {
-                mkdir($file_path, 0777, true);
+                if (!mkdir($file_path, 0777, true) && !is_dir($file_path)) {
+                    throw new \RuntimeException(sprintf('Directory "%s" was not created', $file_path));
+                }
             }
 
             $fccda = fopen($file_path . "/" . $file_name, "w");
@@ -2004,9 +2009,10 @@ class EncounterccdadispatchTable extends AbstractTableGateway
             $file_path = $file_path . "/" . $file_name;
         }
 
-        $query = "insert into ccda (pid, encounter, ccda_data, time, status, user_id, couch_docid, couch_revid, view, transfer,emr_transfer, encrypted) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?)";
+        $query = "insert into ccda (`uuid`, `pid`, `encounter`, `ccda_data`, `time`, `status`, `user_id`, `couch_docid`, `couch_revid`, `hash`, `view`, `transfer`, `emr_transfer`, `encrypted`) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $hash = hash('sha3-512', $content);
         $appTable = new ApplicationTable();
-        $result = $appTable->zQuery($query, array($pid, $encounter, $file_path, $time, $status, $user_id, $docid, $revid, $view, $transfer, $emr_transfer, $encrypted));
+        $result = $appTable->zQuery($query, array($binaryUuid, $pid, $encounter, $file_path, $time, $status, $user_id, $docid, $revid, $hash, $view, $transfer, $emr_transfer, $encrypted));
         return $moduleInsertId = $result->getGeneratedValue();
     }
 
@@ -2062,14 +2068,14 @@ class EncounterccdadispatchTable extends AbstractTableGateway
     {
         $encrypted = sha1($code_text);
         $code = '';
-        for ($i = 0; $i <= strlen($encrypted);) {
+        for ($i = 0, $iMax = strlen($encrypted); $i <= $iMax;) {
             $code .= $encrypted[$i];
             $i = $i + 2;
         }
 
         $encrypted = $code;
         $code = '';
-        for ($i = 0; $i <= strlen($encrypted);) {
+        for ($i = 0, $iMax = strlen($encrypted); $i <= $iMax;) {
             $code .= $encrypted[$i];
             $i = $i + 2;
         }
@@ -2174,7 +2180,7 @@ class EncounterccdadispatchTable extends AbstractTableGateway
         $res = $appTable->zQuery($query, $care_plan_query_data);
         $status = 'Pending';
         $status_entry = 'active';
-        $planofcare .= '<planofcare>';
+        $planofcare = '<planofcare>';
         foreach ($res as $row) {
             //$date_formatted = \Application\Model\ApplicationTable::fixDate($row['date'],$GLOBALS['date_display_format'],'yyyy-mm-dd');
             $code_type = '';
@@ -2315,6 +2321,12 @@ class EncounterccdadispatchTable extends AbstractTableGateway
         }
 
         return $encounter;
+    }
+
+    public function formatUid($str)
+    {
+        $sha = sha1($str);
+        return text(substr(preg_replace('/^.{8}|.{4}/', '\0-', $sha, 4), 0, 36));
     }
 }
 

@@ -1,13 +1,16 @@
 <?php
 
-/************************************************************************
-            InsuranceCompany.php - Copyright duhlman
-
-
-
-This file was generated on %date% at %time%
-The original location of this file is /home/duhlman/uml-generated-code/prescription.php
-**************************************************************************/
+/**
+ * insurance company class for smarty templates
+ *
+ * @package   OpenEMR
+ * @link      https://www.open-emr.org
+ * @author    duhlman
+ * @author    Stephen Waite <stephen.waite@cmsvt.com>
+ * @copyright Copyright (c) duhlman
+ * @copyright Copyright (c) 2021 Stephen Waite <stephen.waite@cmsvt.com>
+ * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
+ */
 
 define("INS_TYPE_OTHER_HCFA", 1);
 define("INS_TYPE_MEDICARE", 2);
@@ -56,6 +59,7 @@ class InsuranceCompany extends ORDataObject
     var $x12_receiver_id;
     var $x12_default_partner_id;
     var $x12_default_eligibility_id;
+    var $inactive;
     /*
     *   OpenEMR used this value to determine special formatting for the specified type of payer.
     *   This value is a mutually exclusive choice answering the FB.Payer.isX API calls
@@ -158,7 +162,7 @@ class InsuranceCompany extends ORDataObject
         return $this->id;
     }
 
-    //special function the the html forms use to prepopulate which allows for partial edits and wizard functionality
+    // special function that the html forms use to prepopulate which allows for partial edits and wizard functionality
     function set_form_id($id = "")
     {
         if (!empty($id)) {
@@ -319,7 +323,7 @@ class InsuranceCompany extends ORDataObject
     function get_x12_default_partner_name()
     {
         $xa = $this->_utility_array($this->X12Partner->x12_partner_factory());
-        return $xa[$this->get_x12_default_partner_id()];
+        return ($xa[$this->get_x12_default_partner_id()] ?? null);
     }
 
     function set_x12_default_eligibility_id($id)
@@ -357,7 +361,7 @@ class InsuranceCompany extends ORDataObject
     function utility_insurance_companies_array()
     {
         $pharmacy_array = array();
-        $sql = "SELECT p.id, p.name, a.city, a.state FROM " . escape_table_name($this->_table) . " AS p INNER JOIN addresses AS a ON  p.id = a.foreign_id";
+        $sql = "SELECT p.id, p.name, a.line1, a.line2, a.city, a.state FROM " . escape_table_name($this->_table) . " AS p INNER JOIN addresses AS a ON  p.id = a.foreign_id";
         $res = sqlQ($sql);
         while ($row = sqlFetchArray($res)) {
                 $d_string = $row['city'];

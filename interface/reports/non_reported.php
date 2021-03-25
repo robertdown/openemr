@@ -75,21 +75,6 @@ $from_date = (!empty($_POST['form_from_date'])) ? DateToYYYYMMDD($_POST['form_fr
 $to_date = (!empty($_POST['form_to_date'])) ? DateToYYYYMMDD($_POST['form_to_date']) : '';
 
 //
-$form_code = isset($_POST['form_code']) ? $_POST['form_code'] : array();
-//
-if (empty($form_code)) {
-    $query_codes = '';
-} else {
-    $query_codes = 'c.id in (';
-    foreach ($form_code as $code) {
-        $query_codes .= add_escape_custom($code) . ",";
-    }
-
-      $query_codes = substr($query_codes, 0, -1);
-      $query_codes .= ') and ';
-}
-
-//
 function tr($a)
 {
     return (str_replace(' ', '^', $a));
@@ -101,7 +86,7 @@ function tr($a)
   "l.pid as patientid, " .
   "p.language, " .
   "l.diagnosis , " ;
-if ($_POST['form_get_hl7'] === 'true') {
+if (!empty($_POST['form_get_hl7']) && ($_POST['form_get_hl7'] === 'true')) {
     $query .=
     "DATE_FORMAT(p.DOB,'%Y%m%d') as DOB, " .
     "concat(p.street, '^',p.postal_code,'^', p.city, '^', p.state) as address, " .
@@ -145,6 +130,19 @@ if (!empty($from_date) || !empty($to_date)) {
     $query .= " and " ;
 }
 
+$form_code = isset($_POST['form_code']) ? $_POST['form_code'] : array();
+if (empty($form_code)) {
+    $query_codes = '';
+} else {
+    $query_codes = 'c.id in (';
+    foreach ($form_code as $code) {
+        $query_codes .= '?,';
+        array_push($sqlBindArray, $code);
+    }
+    $query_codes = substr($query_codes, 0, -1);
+    $query_codes .= ') and ';
+}
+
   $query .= "l.pid=p.pid and " .
   $query_codes .
   "l.diagnosis LIKE 'ICD9:%' and " .
@@ -163,7 +161,7 @@ $filename = "syn_sur_" . $now . ".hl7";
 $facility_info = getLoggedInUserFacility();
 
 // GENERATE HL7 FILE
-if ($_POST['form_get_hl7'] === 'true') {
+if (!empty($_POST['form_get_hl7']) && ($_POST['form_get_hl7'] === 'true')) {
     $content = '';
 
     $res = sqlStatement($query, $sqlBindArray);
@@ -416,7 +414,7 @@ while ($crow = sqlFetchArray($cres)) {
                 '>
                 <?php echo xlt('Refresh'); ?>
               </a>
-                <?php if ($_POST['form_refresh']) { ?>
+                <?php if (!empty($_POST['form_refresh'])) { ?>
                 <a href='#' class='btn btn-secondary btn-print' id='printbutton'>
                     <?php echo xlt('Print'); ?>
                 </a>
@@ -440,7 +438,7 @@ while ($crow = sqlFetchArray($cres)) {
 
 
 <?php
-if ($_POST['form_refresh']) {
+if (!empty($_POST['form_refresh'])) {
     ?>
 <div id="report_results">
 <table class='table'>

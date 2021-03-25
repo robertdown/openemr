@@ -39,7 +39,7 @@ if (file_exists($GLOBALS['OE_SITE_DIR'] . "/documents/certificates/mysql-ca")) {
     }
 }
 $database->port = $port;
-if (!empty($GLOBALS["enable_database_connection_pooling"]) && empty($GLOBALS['connection_pooling_off'])) {
+if ((!empty($GLOBALS["enable_database_connection_pooling"]) || !empty($_SESSION["enable_database_connection_pooling"])) && empty($GLOBALS['connection_pooling_off'])) {
     $database->PConnect($host, $login, $pass, $dbase);
 } else {
     $database->connect($host, $login, $pass, $dbase);
@@ -119,6 +119,48 @@ function sqlStatement($statement, $binds = false)
     }
 
     return $recordset;
+}
+
+/**
+ * Standard sql query in OpenEMR.
+ *
+ * Function that will allow use of the adodb binding
+ * feature to prevent sql-injection. Will continue to
+ * be compatible with previous function calls that do
+ * not use binding.
+ * It will return a recordset object.
+ * The sqlFetchArray() function should be used to
+ * utilize the return object.
+ *
+ * @param  string  $statement  query
+ * @param  array   $binds      binded variables array (optional)
+ * @return recordset
+ */
+function sqlStatementThrowException($statement, $binds = false)
+{
+    // Below line is to avoid a nasty bug in windows.
+    if (empty($binds)) {
+        $binds = false;
+    }
+
+    //Run a adodb execute
+    // Note the auditSQLEvent function is embedded in the
+    //   Execute function.
+    $recordset = $GLOBALS['adodb']['db']->Execute($statement, $binds, true);
+    if ($recordset === false) {
+        throw new \OpenEMR\Common\Database\SqlQueryException($statement, "Failed to execute statement. Error: " . getSqlLastError());
+    }
+}
+
+/**
+ * Return the last inserted sql id for a query.
+ * @return int
+ */
+function sqlGetLastInsertId()
+{
+    // Return the correct last id generated using function
+    //   that is safe with the audit engine.
+    return $GLOBALS['lastidado'] > 0 ? $GLOBALS['lastidado'] : $GLOBALS['adodb']['db']->Insert_ID();
 }
 
 /**
@@ -308,9 +350,11 @@ function sqlQuery($statement, $binds = false)
 * audit engine. This function should only be used
 * in very special situations.
 *
+* Note: If you do an INSERT or UPDATE statement you will get an empty string ("") as a response
+*
 * @param  string  $statement  query
 * @param  array   $binds      binded variables array (optional)
-* @return array
+* @return array|false|""
 */
 function sqlQueryNoLog($statement, $binds = false)
 {
@@ -408,10 +452,14 @@ function sqlQueryCdrEngine($statement, $binds = false)
 *
 * @param  string  $statement  query
 */
-function sqlInsertClean_audit($statement)
+function sqlInsertClean_audit($statement, $binds = false)
 {
+    // Below line is to avoid a nasty bug in windows.
+    if (empty($binds)) {
+        $binds = false;
+    }
 
-    $ret = $GLOBALS['adodb']['db']->ExecuteNoLog($statement);
+    $ret = $GLOBALS['adodb']['db']->ExecuteNoLog($statement, $binds);
     if ($ret === false) {
         HelpfulDie("insert failed: $statement", getSqlLastError());
     }
@@ -451,7 +499,7 @@ function getSqlLastErrorNo()
 function sqlListFields($table)
 {
     $sql = "SHOW COLUMNS FROM " . add_escape_custom($table);
-    $resource = sqlQ($sql);
+    $resource = sqlStatementNoLog($sql);
     $field_list = array();
     while ($row = sqlFetchArray($resource)) {
         $field_list[] = $row['Field'];
@@ -689,7 +737,7 @@ function getPrivDB()
                 }
             }
             $GLOBALS['PRIV_DB']->port = $port;
-            if (!empty($GLOBALS["enable_database_connection_pooling"]) && empty($GLOBALS['connection_pooling_off'])) {
+            if ((!empty($GLOBALS["enable_database_connection_pooling"]) || !empty($_SESSION["enable_database_connection_pooling"])) && empty($GLOBALS['connection_pooling_off'])) {
                 $GLOBALS['PRIV_DB']->PConnect($secure_host, $secure_login, $secure_pass, $secure_dbase);
             } else {
                 $GLOBALS['PRIV_DB']->connect($secure_host, $secure_login, $secure_pass, $secure_dbase);

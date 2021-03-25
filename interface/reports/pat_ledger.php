@@ -42,7 +42,7 @@ $enc_bal = $total_bal = 0;
 $bgcolor = "#FFFFDD";
 $orow = 0;
 
-$pat_pid = $_GET['patient_id'];
+$pat_pid = $_GET['patient_id'] ?? null;
 $type_form = $_GET['form'];
 
 if (! AclMain::aclCheckCore('acct', 'rep')) {
@@ -262,7 +262,7 @@ function PrintCreditDetail($detail, $pat, $unassigned = false)
         }
 
         $print_adj = '';
-        if ($adj_amt != 0) {
+        if (!empty($adj_amt)) {
             $print_adj = oeFormatMoney($adj_amt);
         }
 
@@ -275,7 +275,7 @@ function PrintCreditDetail($detail, $pat, $unassigned = false)
         $print .= "<td class='detail text-right'>" . text($print_bal) . "&nbsp;</td>";
         $print .= "</tr>\n";
         echo $print;
-        if ($pmt['follow_up_note'] != '') {
+        if (!empty($pmt['follow_up_note'])) {
             $bgcolor = (($bgcolor == "#FFFFDD") ? "#FFDDDD" : "#FFFFDD");
             $print = "<tr style='background-color:" . attr($bgcolor) . ";'>";
             $print .= "<td class='detail' colspan='2'>&nbsp;</td>";
@@ -348,7 +348,7 @@ if (substr($GLOBALS['ledger_begin_date'], 0, 1) == 'Y') {
 }
 
 $form_from_date = date('Y-m-d', $last_year);
-if ($_REQUEST['form_from_date']) {
+if (!empty($_REQUEST['form_from_date'])) {
     $form_from_date = DateToYYYYMMDD($_POST['form_from_date']);
 }
 
@@ -357,7 +357,7 @@ $form_facility  = $_REQUEST['form_facility'];
 $form_provider  = $_REQUEST['form_provider'];
 $form_patient   = $_REQUEST['form_patient'];
 $form_pid       = $_REQUEST['form_pid'];
-$form_dob       = $_REQUEST['form_dob'];
+$form_dob       = $_REQUEST['form_dob'] ?? null;
 
 if ($_REQUEST['form_csvexport']) {
     header("Pragma: public");
@@ -671,8 +671,8 @@ if ($_REQUEST['form_refresh'] || $_REQUEST['form_csvexport']) {
 
         $facility = $facilityService->getById($form_facility);
         $patient = sqlQuery("SELECT * from patient_data WHERE pid=?", array($form_patient));
-        $pat_dob = $patient['DOB'];
-        $pat_name = $patient['fname'] . ' ' . $patient['lname'];
+        $pat_dob = $patient['DOB'] ?? null;
+        $pat_name = ($patient['fname'] ?? '') . ' ' . ($patient['lname'] ?? '');
         ?>
         <div id="report_header">
             <div class="table-responsive">
@@ -902,12 +902,12 @@ if ($_REQUEST['form_refresh'] || $_REQUEST['form_csvexport']) {
         # add one day to date so it will not get todays appointment
             $current_date2 = date('Y-m-d', $next_day);
             $events = fetchNextXAppts($current_date2, $form_pid);
-            $next_appoint_date = oeFormatShortDate($events[0]['pc_eventDate']);
-            $next_appoint_time = substr($events[0]['pc_startTime'], 0, 5);
-            if (strlen($events[0]['umname']) != 0) {
+            $next_appoint_date = oeFormatShortDate($events[0]['pc_eventDate'] ?? null);
+            $next_appoint_time = substr(($events[0]['pc_startTime'] ?? ''), 0, 5);
+            if (strlen($events[0]['umname'] ?? '') != 0) {
                 $next_appoint_provider = $events[0]['ufname'] . ' ' . $events[0]['umname'] . ' ' .  $events[0]['ulname'];
             } else {
-                $next_appoint_provider = $events[0]['ufname'] . ' ' .  $events[0]['ulname'];
+                $next_appoint_provider = ($events[0]['ufname'] ?? '') . ' ' .  ($events[0]['ulname'] ?? '');
             }
 
             if (strlen($next_appoint_time) != 0) { ?>
@@ -940,7 +940,7 @@ if (! $_REQUEST['form_csvexport']) {
     </div><!--end of container div-->
     <?php $oemr_ui->oeBelowContainerDiv();?>
     <script>
-        var listId = '#' + <?php echo js_escape($list_id); ?>;
+        var listId = '#' + <?php echo js_escape($list_id ?? null); ?>;
         $(function () {
             $(listId).addClass("active");
         });

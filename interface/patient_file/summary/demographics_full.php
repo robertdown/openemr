@@ -24,7 +24,7 @@ use OpenEMR\Events\PatientDemographics\UpdateEvent;
 
 // Session pid must be right or bad things can happen when demographics are saved!
 //
-$set_pid = $_GET["set_pid"] ? $_GET["set_pid"] : $_GET["pid"];
+$set_pid = isset($_GET["set_pid"]) ? $_GET["set_pid"] : ($_GET["pid"] ?? null);
 if ($set_pid && $set_pid != $_SESSION["pid"]) {
     setpid($set_pid);
 }
@@ -80,15 +80,6 @@ $fres = sqlStatement("SELECT * FROM layout_options " .
     require_once("$srcdir/erx_javascript.inc.php");
 ?>
 <title><?php echo xlt('Edit Current Patient'); ?></title>
-
-<style>
-    /* TODO: Find a way to remove this stylesheet */
-    .form-control {
-        width: auto;
-        display: inline;
-        height: auto;
-    }
-</style>
 
 <?php include_once($GLOBALS['srcdir'] . "/options.js.php"); ?>
 
@@ -437,30 +428,6 @@ if(dateVal > currentDate)
  } // end for
 
  return errMsgs.length < 1;
-}
-
-
-
-// Onkeyup handler for policy number.  Allows only A-Z and 0-9.
-function policykeyup(e) {
- var v = e.value.toUpperCase();
- var filteredString="";
- for (var i = 0; i < v.length; ++i) {
-  var c = v.charAt(i);
-  if ((c >= '0' && c <= '9') ||
-     (c >= 'A' && c <= 'Z') ||
-     (c == '*') ||
-     (c == '-') ||
-     (c == '_') ||
-     (c == '(') ||
-     (c == ')') ||
-     (c == '#'))
-     {
-         filteredString+=c;
-     }
- }
- e.value = filteredString;
- return;
 }
 
 // Added 06/2009 by BM to make compatible with list_options table and functions - using jquery
@@ -1040,7 +1007,7 @@ $use_validate_js = $GLOBALS['new_validate'];
 
     $(function () {
         //When document is ready collect all the values Marked with D (check duplicate) stored in the db into array duplicateFieldsArray.
-        var flds = new Array(<?php echo $mflist; ?>);
+        var flds = new Array(<?php echo ($mflist ?? ''); ?>);
         for (var i = 0; i < flds.length; ++i) {
             var fval = $('#form_' + flds[i]).val();
             duplicateFieldsArray['#form_' + flds[i]] = fval;

@@ -13,6 +13,8 @@
 
 /* @TODO add language selection. needs RTL testing */
 
+$GLOBALS['ongoing_sql_upgrade'] = true;
+
 if (php_sapi_name() === 'cli') {
     // setting for when running as command line script
     // need this for output to be readable when running as command line
@@ -106,7 +108,8 @@ header('Content-type: text/html; charset=utf-8');
     let serverPaused = 0;
     // recursive long polling where ending is based
     // on global doPoll true or false.
-    async function serverStatus(version = '', start = 0) {
+    // added a forcePollOff parameter to avoid polling from staying on indefinitely when updating from patch.sql
+    async function serverStatus(version = '', start = 0, forcePollOff = 0) {
         let updateMsg = "";
         let endMsg = "<li class='text-success bg-light'>" +
             <?php echo  xlj("End watching server processes for upgrade version"); ?>  + " " + currentVersion + "</li>";
@@ -119,7 +122,7 @@ header('Content-type: text/html; charset=utf-8');
         // start polling
         let url = "library/ajax/sql_server_status.php?poll=" + encodeURIComponent(currentVersion);
         let data = new FormData;
-        data.append("csrf_token_form", <?php echo js_escape(CsrfUtils::collectCsrfToken()); ?>);
+        data.append("csrf_token_form", <?php echo js_escape(CsrfUtils::collectCsrfToken('sqlupgrade')); ?>);
         data.append("poll", currentVersion);
 
         let response = await fetch(url, {
@@ -162,6 +165,9 @@ header('Content-type: text/html; charset=utf-8');
             }
             if (start === 1) {
                 doPoll = 1;
+            }
+            if (forcePollOff === 1) {
+                doPoll = 0;
             }
             // display to screen div
             if (status > "") {
@@ -307,6 +313,7 @@ function pausePoll(othis) {
                 flush_echo("<script>serverStatus(" . js_escape($version) . ", 1);</script>");
                 upgradeFromSqlFile($filename);
                 // end polling
+                sleep(2); // fixes odd bug, where if the sql upgrade goes to fast, then the polling does not stop
                 flush_echo("<script>processProgress = 100;doPoll = 0;</script>");
             }
 
@@ -317,7 +324,7 @@ function pausePoll(othis) {
 
             if ((!empty($v_realpatch)) && ($v_realpatch != "") && ($v_realpatch > 0)) {
                 // This release contains a patch file, so process it.
-                echo "<script>serverStatus('Patch');</script>";
+                echo "<script>serverStatus('Patch', 0, 1);</script>";
                 upgradeFromSqlFile('patch.sql');
             }
             flush();

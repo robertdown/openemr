@@ -43,8 +43,8 @@ if (!isset($ignoreAuth)) {
 }
 
 // Same for onsite
-if (!isset($ignoreAuth_onsite_portal_two)) {
-    $ignoreAuth_onsite_portal_two = false;
+if (!isset($ignoreAuth_onsite_portal)) {
+    $ignoreAuth_onsite_portal = false;
 }
 
 // Is this windows or non-windows? Create a boolean definition.
@@ -99,7 +99,7 @@ $GLOBALS['OE_SITES_BASE'] = "$webserver_root/sites";
 
 /*
 * If a session does not yet exist, then will start the core OpenEMR session.
-* If a session already exists, then this means portal is being used, which
+* If a session already exists, then this means portal or oauth2 or api is being used, which
 *   has already created a portal session/cookie, so will bypass setting of
 *   the core OpenEMR session/cookie.
 * $sessionAllowWrite = 1 | true | string then normal operation
@@ -123,7 +123,7 @@ if (empty($_SESSION['site_id']) || !empty($_GET['site'])) {
     if (!empty($_GET['site'])) {
         $tmp = $_GET['site'];
     } else {
-        if (empty($ignoreAuth)) {
+        if (empty($ignoreAuth) && empty($ignoreAuth_onsite_portal)) {
             // mdsupport - Don't die if logout menu link is called from expired session.
             // Eliminate this code when close method is available for session management.
             if ((isset($_GET['auth'])) && ($_GET['auth'] == "logout")) {
@@ -174,8 +174,6 @@ $GLOBALS['OE_SITE_DIR'] = $GLOBALS['OE_SITES_BASE'] . "/" . $_SESSION['site_id']
 
 // Set a site-specific uri root path.
 $GLOBALS['OE_SITE_WEBROOT'] = $web_root . "/sites/" . $_SESSION['site_id'];
-
-require_once($GLOBALS['OE_SITE_DIR'] . "/config.php");
 
 // Collecting the utf8 disable flag from the sqlconf.php file in order
 // to set the correct html encoding. utf8 vs iso-8859-1. If flag is set
@@ -361,6 +359,8 @@ if (!empty($glrow)) {
         } elseif ($gl_name == 'css_header') {
             //Escape css file name using 'attr' for security (prevent XSS).
             $GLOBALS[$gl_name] = $web_root . '/public/themes/' . attr($gl_value) . '?v=' . $v_js_includes;
+            $GLOBALS['compact_header'] = $web_root . '/public/themes/compact_' . attr($gl_value) . '?v=' . $v_js_includes;
+            $compact_header = $GLOBALS['compact_header'];
             $css_header = $GLOBALS[$gl_name];
             $temp_css_theme_name = $gl_value;
         } elseif ($gl_name == 'weekend_days') {
@@ -448,6 +448,8 @@ if (!empty($glrow)) {
             //Escape css file name using 'attr' for security (prevent XSS).
             $GLOBALS['css_header'] = $web_root . '/public/themes/' . attr($new_theme) . '?v=' . $v_js_includes;
             $css_header = $GLOBALS['css_header'];
+            $GLOBALS['compact_header'] = $web_root . '/public/themes/rtl_compact_' . attr($temp_css_theme_name) . '?v=' . $v_js_includes;
+            $compact_header = $GLOBALS['compact_header'];
         } else {
             // throw a warning if rtl'ed file does not exist.
             error_log("Missing theme file " . errorLogEscape($webserver_root) . '/public/themes/' . errorLogEscape($new_theme));
@@ -477,6 +479,8 @@ if (!empty($glrow)) {
     $openemr_name = 'OpenEMR';
     $css_header = "$web_root/public/themes/style_default.css";
     $GLOBALS['css_header'] = $css_header;
+    $compact_header = "$web_root/public/themes/style_default.css";
+    $GLOBALS['compact_header'] = $compact_header;
     $GLOBALS['schedule_start'] = 8;
     $GLOBALS['schedule_end'] = 17;
     $GLOBALS['calendar_interval'] = 15;
@@ -484,6 +488,18 @@ if (!empty($glrow)) {
     $GLOBALS['disable_non_default_groups'] = true;
     $GLOBALS['ippf_specific'] = false;
 }
+
+// Migrated this to populate after the standard globals in order to support globals that require
+//  more security.
+require_once($GLOBALS['OE_SITE_DIR'] . "/config.php");
+
+// Need to utilize a session since library/sql.inc is established before there are any globals established yet.
+//  This means that the first time, it will be skipped even if the global is turned on. However,
+//  after that it will then be turned on via the session.
+// Also important to note that changes to this global setting will not take effect during the same
+//  session (ie. user needs to logout) since not worth it to use resources to open session and write to it
+//  for every call to interface/globals.php .
+$_SESSION["enable_database_connection_pooling"] = $GLOBALS["enable_database_connection_pooling"];
 
 // If >0 this will enforce a separate PHP session for each top-level
 // browser window.  You must log in separately for each.  This is not
@@ -553,7 +569,7 @@ $GLOBALS['include_de_identification'] = 0;
 // don't include the authentication module - we do this to avoid
 // include loops.
 
-if (($ignoreAuth_onsite_portal_two === true) && ($GLOBALS['portal_onsite_two_enable'] == 1)) {
+if (($ignoreAuth_onsite_portal === true) && ($GLOBALS['portal_onsite_two_enable'] == 1)) {
     $ignoreAuth = true;
 }
 
@@ -565,29 +581,35 @@ if (!$ignoreAuth) {
 // Currently it is applicable only to the "Search or Add Patient" form.
 $GLOBALS['layout_search_color'] = '#ff9919';
 
-//EMAIL SETTINGS
+// EMAIL SETTINGS
 $SMTP_Auth = !empty($GLOBALS['SMTP_USER']);
 
-//module configurations
-$GLOBALS['baseModDir'] = "interface/modules/"; //default path of modules
-$GLOBALS['customModDir'] = "custom_modules"; //non zend modules
-$GLOBALS['zendModDir'] = "zend_modules"; //zend modules
+// module configurations
+// upgrade fails for versions prior to 4.2.0 since no modules table
+// so perform this check to avoid sql error
+if (!file_exists($webserver_root . "/interface/modules/")) {
+    error_log("The modules directory does not exist thus not loading modules.");
+} else {
+    $GLOBALS['baseModDir'] = "interface/modules/"; //default path of modules
+    $GLOBALS['customModDir'] = "custom_modules"; //non zend modules
+    $GLOBALS['zendModDir'] = "zend_modules"; //zend modules
 
-try {
-    // load up the modules system and bootstrap them.
-    // This has to be fast, so any modules that tie into the bootstrap must be kept lightweight
-    // registering event listeners, etc.
-    // TODO: why do we have 3 different directories we need to pass in for the zend dir path. shouldn't zendModDir already have all the paths set up?
-    /** @var ModulesApplication */
-    $GLOBALS['modules_application'] = new ModulesApplication(
-        $GLOBALS["kernel"],
-        $GLOBALS['fileroot'],
-        $GLOBALS['baseModDir'],
-        $GLOBALS['zendModDir']
-    );
-} catch (\Exception $ex) {
-    error_log(errorLogEscape($ex->getMessage() . $ex->getTraceAsString()));
-    die();
+    try {
+        // load up the modules system and bootstrap them.
+        // This has to be fast, so any modules that tie into the bootstrap must be kept lightweight
+        // registering event listeners, etc.
+        // TODO: why do we have 3 different directories we need to pass in for the zend dir path. shouldn't zendModDir already have all the paths set up?
+        /** @var ModulesApplication */
+        $GLOBALS['modules_application'] = new ModulesApplication(
+            $GLOBALS["kernel"],
+            $GLOBALS['fileroot'],
+            $GLOBALS['baseModDir'],
+            $GLOBALS['zendModDir']
+        );
+    } catch (\Exception $ex) {
+        error_log(errorLogEscape($ex->getMessage() . $ex->getTraceAsString()));
+        die();
+    }
 }
 
 // Don't change anything below this line. ////////////////////////////
@@ -595,9 +617,9 @@ try {
 $encounter = empty($_SESSION['encounter']) ? 0 : $_SESSION['encounter'];
 
 if (!empty($_GET['pid']) && empty($_SESSION['pid'])) {
-    $_SESSION['pid'] = $_GET['pid'];
+    OpenEMR\Common\Session\SessionUtil::setSession('pid', $_GET['pid']);
 } elseif (!empty($_POST['pid']) && empty($_SESSION['pid'])) {
-    $_SESSION['pid'] = $_POST['pid'];
+    OpenEMR\Common\Session\SessionUtil::setSession('pid', $_POST['pid']);
 }
 
 $pid = empty($_SESSION['pid']) ? 0 : $_SESSION['pid'];

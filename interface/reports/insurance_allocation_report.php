@@ -27,7 +27,7 @@ if (!empty($_POST)) {
 $form_from_date = (!empty($_POST['form_from_date'])) ?  DateToYYYYMMDD($_POST['form_from_date']) : '';
 $form_to_date   = (!empty($_POST['form_to_date'])) ? DateToYYYYMMDD($_POST['form_to_date']) : date('Y-m-d');
 
-if ($_POST['form_csvexport']) {
+if (!empty($_POST['form_csvexport'])) {
     header("Pragma: public");
     header("Expires: 0");
     header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
@@ -146,7 +146,7 @@ if ($_POST['form_csvexport']) {
                       <a href='#' class='btn btn-secondary btn-save' onclick='$("#form_refresh").attr("value","true"); $("#form_csvexport").val(""); $("#theform").submit();'>
                             <?php echo xlt('Submit'); ?>
                       </a>
-                        <?php if ($_POST['form_refresh']) { ?>
+                        <?php if (!empty($_POST['form_refresh'])) { ?>
                         <a href='#' class='btn btn-secondary btn-print' id='printbutton'>
                                 <?php echo xlt('Print'); ?>
                         </a>
@@ -179,7 +179,7 @@ if ($_POST['form_csvexport']) {
  <tbody>
     <?php
 } // end not export
-if ($_POST['form_refresh'] || $_POST['form_csvexport']) {
+if (!empty($_POST['form_refresh']) || !empty($_POST['form_csvexport'])) {
     $query = "SELECT b.pid, b.encounter, SUM(b.fee) AS charges, " .
     "MAX(fe.date) AS date " .
     "FROM form_encounter AS fe, billing AS b " .
@@ -203,13 +203,16 @@ if ($_POST['form_refresh'] || $_POST['form_csvexport']) {
         "(insurance_data.date <= ? OR insurance_data.date IS NULL) AND " .
         "insurance_companies.id = insurance_data.provider " .
         "ORDER BY insurance_data.date DESC LIMIT 1", array($patient_id, $encounter_date));
-        $plan = $irow['name'] ? $irow['name'] : '-- No Insurance --';
+        $plan = (!empty($irow['name'])) ? $irow['name'] : '-- No Insurance --';
+        $insarr[$plan]['visits'] = $insarr[$plan]['visits'] ?? null;
         $insarr[$plan]['visits'] += 1;
+        $insarr[$plan]['charges'] = $insarr[$plan]['charges'] ?? null;
         $insarr[$plan]['charges'] += sprintf('%0.2f', $row['charges']);
         if ($patient_id != $prev_pid) {
-              ++$patcount;
-              $insarr[$plan]['patients'] += 1;
-              $prev_pid = $patient_id;
+            ++$patcount;
+            $insarr[$plan]['patients'] =  $insarr[$plan]['patients'] ?? null;
+            $insarr[$plan]['patients'] += 1;
+            $prev_pid = $patient_id;
         }
     }
 
@@ -246,7 +249,7 @@ if ($_POST['form_refresh'] || $_POST['form_csvexport']) {
     } // end while
 } // end if
 
-if (! $_POST['form_csvexport']) {
+if (empty($_POST['form_csvexport'])) {
     ?>
 
 </tbody>

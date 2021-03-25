@@ -9,6 +9,8 @@ use OpenEMR\FHIR\R4\FHIRElement\FHIRId;
 use OpenEMR\FHIR\R4\FHIRElement\FHIRReference;
 use OpenEMR\Services\FHIR\FhirServiceBase;
 use OpenEMR\Services\ProcedureService;
+use OpenEMR\Validators\ProcessingResult;
+use OpenEMR\Services\SurgeryService;
 
 /**
  * FHIR Procedure Service
@@ -31,6 +33,7 @@ class FhirProcedureService extends FhirServiceBase
     {
         parent::__construct();
         $this->procedureService = new ProcedureService();
+        $this->surgeryService = new SurgeryService();
     }
 
     /**
@@ -86,18 +89,27 @@ class FhirProcedureService extends FhirServiceBase
         }
 
         if (!empty($dataRecord['diagnoses'])) {
-            $diagnosisCoding = new FHIRCoding();
-            $diagnosisCode = new FHIRCodeableConcept();
-            foreach ($dataRecord['diagnoses'] as $code => $display) {
-                $diagnosisCoding->setCode($code);
-                $diagnosisCoding->setDisplay($display);
-                $diagnosisCode->addCoding($diagnosisCoding);
+            foreach ($dataRecord['diagnoses'] as $code) {
+                $diagnosisCoding = new FHIRCoding();
+                $diagnosisCode = new FHIRCodeableConcept();
+                if ($code[0] == "ICD10") {
+                    $diagnosisCoding->setSystem("http://hl7.org/fhir/sid/icd-10");
+                    $diagnosisCoding->setCode($code[1]);
+                    $diagnosisCode->addCoding($diagnosisCoding);
+                    $procedureResource->addReasonCode($diagnosisCode);
+                }
             }
-            $procedureResource->setCode($diagnosisCode);
+        }
+        if (!empty($dataRecord['procedure_code'])) {
+            $procedureCoding = new FHIRCoding();
+            $procedureCode = new FHIRCodeableConcept();
+            $procedureCoding->setCode($dataRecord['procedure_code']);
+            $procedureCode->addCoding($procedureCoding);
+            $procedureResource->setCode($procedureCode);
         }
 
         if (!empty($dataRecord['date_collected'])) {
-            $procedureResource->setPerformedDateTime($dataRecord['date_collected']);
+            $procedureResource->setPerformedDateTime(gmdate('c', strtotime($dataRecord['date_collected'])));
         }
 
         if (!empty($dataRecord['notes'])) {
@@ -115,10 +127,13 @@ class FhirProcedureService extends FhirServiceBase
      * Performs a FHIR Procedure Resource lookup by FHIR Resource ID
      *
      * @param $fhirResourceId //The OpenEMR record's FHIR Procedure Resource ID.
+     * @param $puuidBind - Optional variable to only allow visibility of the patient with this puuid.
      */
-    public function getOne($fhirResourceId)
+    public function getOne($fhirResourceId, $puuidBind = null)
     {
-        $processingResult = $this->procedureService->getOne($fhirResourceId);
+        $procedureResult = $this->procedureService->getOne($fhirResourceId, $puuidBind);
+        $surgeryResult = $this->surgeryService->getOne($fhirResourceId, $puuidBind);
+        $processingResult = $this->processResults($procedureResult, $surgeryResult);
         if (!$processingResult->hasErrors()) {
             if (count($processingResult->getData()) > 0) {
                 $openEmrRecord = $processingResult->getData()[0];
@@ -134,11 +149,14 @@ class FhirProcedureService extends FhirServiceBase
      * Searches for OpenEMR records using OpenEMR search parameters
      *
      * @param  array openEMRSearchParameters OpenEMR search fields
+     * @param $puuidBind - Optional variable to only allow visibility of the patient with this puuid.
      * @return ProcessingResult
      */
-    public function searchForOpenEMRRecords($openEMRSearchParameters)
+    public function searchForOpenEMRRecords($openEMRSearchParameters, $puuidBind = null)
     {
-        return $this->procedureService->getAll($openEMRSearchParameters, false);
+        $procedureResult = $this->procedureService->getAll($openEMRSearchParameters, false, $puuidBind);
+        $surgeryResult = $this->surgeryService->getAll($openEMRSearchParameters, false, $puuidBind);
+        return $this->processResults($procedureResult, $surgeryResult);
     }
 
     public function parseFhirResource($fhirResource = array())
@@ -154,5 +172,23 @@ class FhirProcedureService extends FhirServiceBase
     public function updateOpenEMRRecord($fhirResourceId, $updatedOpenEMRRecord)
     {
         // TODO: If Required in Future
+    }
+    public function createProvenanceResource($dataRecord = array(), $encode = false)
+    {
+        // TODO: If Required in Future
+    }
+    private function processResults($procedureResult, $surgeryResult)
+    {
+        $processingResult = new ProcessingResult();
+        $surgeryprocedureRecords = array_merge($procedureResult->getData(), $surgeryResult->getData());
+        if (count($surgeryprocedureRecords) > 0) {
+            $processingResult->setData($surgeryprocedureRecords);
+        } else {
+            $processingResult->setValidationMessages(array_merge($surgeryResult->getValidationMessages(), $procedureResult->getValidationMessages()));
+            $processingResult->setInternalErrors(array_merge($surgeryResult->getInternalErrors(), $procedureResult->getInternalErrors()));
+        }
+
+
+        return $processingResult;
     }
 }

@@ -16,6 +16,7 @@ class C_Pharmacy extends Controller
 
     var $template_mod;
     var $pharmacies;
+    public $totalpages;
 
     function __construct($template_mod = "general")
     {
@@ -26,6 +27,8 @@ class C_Pharmacy extends Controller
         $this->assign("CURRENT_ACTION", $GLOBALS['webroot'] . "/controller.php?" . "practice_settings&pharmacy&");
         $this->assign("STYLE", $GLOBALS['style']);
         $this->Pharmacy = new Pharmacy();
+        $this->totalpages = $this->Pharmacy->totalPages();
+        $this->pageno = $this->Pharmacy->getPageno();
     }
 
     function default_action()
@@ -37,7 +40,7 @@ class C_Pharmacy extends Controller
     {
         if ($p_obj != null && get_class($p_obj) == "pharmacy") {
             $this->pharmacies[0] = $p_obj;
-        } elseif (!is_object($this->pharmacies[0]) || get_class($this->pharmacies[0]) != "pharmacy") {
+        } elseif (empty($this->pharmacies[0]) || !is_object($this->pharmacies[0]) || get_class($this->pharmacies[0]) != "pharmacy") {
             $this->pharmacies[0] = new Pharmacy($id);
         }
 

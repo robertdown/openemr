@@ -31,27 +31,29 @@ class FhirConditionRestController
     /**
      * Queries for a single FHIR condition resource by FHIR id
      * @param $fhirId The FHIR condition resource id (uuid)
+     * @param $puuidBind - Optional variable to only allow visibility of the patient with this puuid.
      * @returns 200 if the operation completes successfully
      */
-    public function getOne($fhirId)
+    public function getOne($fhirId, $puuidBind = null)
     {
-        $processingResult = $this->fhirConditionService->getOne($fhirId);
-        return RestControllerHelper::handleProcessingResult($processingResult, 200);
+        $processingResult = $this->fhirConditionService->getOne($fhirId, $puuidBind);
+        return RestControllerHelper::handleFhirProcessingResult($processingResult, 200);
     }
 
     /**
      * Queries for FHIR condition resources using various search parameters.
      * Search parameters include:
      * - patient (puuid)
+     * @param $puuidBind - Optional variable to only allow visibility of the patient with this puuid.
      * @return FHIR bundle with query results, if found
      */
-    public function getAll($searchParams)
+    public function getAll($searchParams, $puuidBind = null)
     {
-        $processingResult = $this->fhirConditionService->getAll($searchParams);
+        $processingResult = $this->fhirConditionService->getAll($searchParams, $puuidBind);
         $bundleEntries = array();
         foreach ($processingResult->getData() as $index => $searchResult) {
             $bundleEntry = [
-                'fullUrl' =>  \RestConfig::$REST_FULL_URL . '/' . $searchResult->getId(),
+                'fullUrl' =>  $GLOBALS['site_addr_oath'] . ($_SERVER['REDIRECT_URL'] ?? '') . '/' . $searchResult->getId(),
                 'resource' => $searchResult
             ];
             $fhirBundleEntry = new FHIRBundleEntry($bundleEntry);
